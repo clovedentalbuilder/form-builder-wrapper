@@ -1,16 +1,45 @@
 {
-  "name": "fx-form-builder-wrapper",
+
+  "name": "@clovedentalbuilder/fx-form-builder-wrapper",
+
   "version": "2.0.107",
+
+  "publishConfig": {
+
+    "registry": "https://npm.pkg.github.com/"
+
+  },
+
+  "repository": {
+
+    "type": "git",
+
+    "url": "https://github.com/clovedentalbuilder/form-builder-wrapper.git"
+
+  },
+
   "peerDependencies": {
+
     "@angular/common": "^18.2.0",
+
     "@angular/core": "^18.2.0",
+
     "@instantsys-labs/fx": "2.1.1",
+
     "uuid": "^11.0.5",
+
     "primeng": "^17.18.10",
+
     "tailwindcss-primeui": "^0.4.0"
+
   },
+
   "dependencies": {
+
     "tslib": "^2.3.0"
-  },
-  "sideEffects": false
+
+  }
+
 }
+
+ 
