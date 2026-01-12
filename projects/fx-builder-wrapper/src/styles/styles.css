@@ -1,0 +1,23 @@
+@import "../node_modules/ckeditor5/dist/ckeditor5.css";
+/* @import "../../../../node_modules/primeng/resources/primeng.min.css"; */
+@import "../../../../node_modules/@instantsys-labs/fx/css/styles-fx.css";
+@import "../../../../node_modules/@instantsys-labs/icons/fonts/css/all.css";
+
+
+
+@layer base{
+  :root {
+    --color-primary: 21 83 165;
+    --color-secondary: 245 150 14;
+  }
+
+  .card {
+    @apply p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100;
+  }
+
+  .ck-powered-by-balloon{
+    display: none !important;
+  }
+
+}
+

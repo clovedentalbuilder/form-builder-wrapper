@@ -1,0 +1,82 @@
+name: Fx Package Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      # ✅ Checkout repo
+      - uses: actions/checkout@v4
+
+      # ✅ Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com/
+
+      # ✅ Inject token into BOTH home and workspace .npmrc
+      - name: Configure npm authentication
+        run: |
+          echo "@instantsys-labs:registry=https://npm.pkg.github.com" > ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.THIRD_PARTY_TOKEN }}" >> ~/.npmrc
+          cp ~/.npmrc .npmrc
+
+      # ✅ Verify npm authentication
+      - name: Verify npm auth
+        run: npm whoami --registry=https://npm.pkg.github.com/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.THIRD_PARTY_TOKEN }}
+
+      # ✅ Clean install dependencies
+      - name: Clean install (avoid rollup cache issue)
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install --force
+
+      # ✅ Force install rollup (workaround for npm 10 bug)
+      - name: Force install rollup
+        run: npm install rollup @rollup/rollup-linux-x64-gnu --save-dev --force
+
+      # ✅ Install Angular CLI globally
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+
+      # ✅ Bump patch version inside fx-builder-wrapper
+      - name: Bump version (patch)
+        run: |
+          cd projects/fx-builder-wrapper
+          current_version=$(node -p "require('./package.json').version")
+          new_version=$(npm version patch --no-git-tag-version | tail -n 1)
+          echo "Version bumped from $current_version to $new_version"
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+
+      # ✅ Build Angular library (uses updated version)
+      - name: Build library
+        run: ng build fx-builder-wrapper
+
+      # ✅ Publish built package
+      - name: Publish package
+        run: |
+          cd dist/fx-builder-wrapper
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ✅ Commit bumped version back to repo
+      - name: Commit bumped version
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add projects/fx-builder-wrapper/package.json
+          git commit -m "ci: bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit"
+          git push

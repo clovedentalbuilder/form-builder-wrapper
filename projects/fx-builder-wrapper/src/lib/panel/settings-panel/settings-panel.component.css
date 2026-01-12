@@ -1,0 +1,30 @@
+    .fx-element {
+        position: relative;
+    }
+
+  .fx-element .fx-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.1); /* Light gray with 0.5 transparency */
+      z-index: -1; /* Place it below the content by default */
+      pointer-events: none; /* Allow interaction with the underlying content */
+      opacity: 0; /* Initially hidden */
+  }
+
+  .fx-element:hover .fx-overlay {
+    z-index: 1; /* Bring the overlay above content */
+    opacity: 1; /* Make the overlay visible */
+    pointer-events: auto; /* Allow interaction with the overlay */
+  }
+
+  .fx-element:hover .fx-overlay .fx-actions{
+    position: absolute;
+    margin-top: -26px;
+    height: 25px;
+    border-top-right-radius: 10px;
+    width: 100%;
+    border-top-left-radius: 10px;
+  }

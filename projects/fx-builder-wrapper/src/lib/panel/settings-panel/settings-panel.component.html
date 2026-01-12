@@ -1,0 +1,28 @@
+<fx-configuration-panel [visible]="visible" (isVisible)="visible = $event" [tableConfigData]="tableConfig" (configuration)="configuration.emit($event)"></fx-configuration-panel>
+
+<div class="fx-element">
+    <ng-content></ng-content>
+    <ng-container *ngIf="fxData.$fxForm?.$mode !== FxMode.VIEW">
+        <div class="fx-overlay border-gray-400 border rounded cursor-pointer" (click)="onElementSelect(fxData)"
+            (dblclick)="openSettingDialog()">
+        <div class="fx-actions flex justify-between">
+
+            <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+            <div>#{{ fxData.name }}-<span class="text-xs italic">{{ fxData.id }}</span></div>
+            </div>
+
+            <div class="flex justify-around items-end mr-2">
+            <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+                (click)="fxSettingService.openSetting(fxData)">
+                <i class="fa fa-cog text-xs"></i>
+            </div>
+            <div (click)="deleteElement(fxData)"
+                class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete">
+                <i class="fa fa-times  text-xs"></i>
+            </div>
+            </div>
+        </div>
+        </div>
+        <ng-container #dynamicComponentContainer></ng-container>
+  </ng-container>
+</div>

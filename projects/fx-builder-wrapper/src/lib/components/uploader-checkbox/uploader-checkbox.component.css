@@ -1,0 +1,36 @@
+.custom-upload {
+    border: 1px solid #ccc;
+  }
+  .custom-upload a{
+    color: black;
+  }
+  
+  .custom-upload .file-list .file-thumbnail {
+    width: 120px;
+    height: 62px;
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 4px;
+  }
+  
+  .custom-upload .separator {
+    height: 56px;
+    width: 2px;
+    background-color: #ccc;
+    margin: 10px;
+  }
+  .close_icon{
+    position: absolute;
+    top: -8px;
+    right: -8px;
+  }
+
+  [type='checkbox'] {
+    padding: 12px;
+  }
+  
+  [type='checkbox']:checked {
+    background-color: #f3a041 !important;
+    padding: 12px;
+    background-size: 1em 1em !important;
+  }

@@ -1,0 +1,18 @@
+<fx-component [fxData]="fxData" #fxComponent>
+  <div class="custom-summary relative">
+    <form [formGroup]="summaryForm">
+
+        <label class="summary-label">{{ setting('summaryLabel') }}</label>
+        <div class="relative">
+        <textarea formControlName="summary" readonly class="w-full" rows="2"></textarea>
+        </div>
+    <!-- <div>
+      <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['required']"
+        class="text-red-500">
+      {{ setting('datePickerErrorMessage') }}
+      </small>
+    </div> -->
+    </form>
+  </div>
+
+</fx-component>

@@ -1,0 +1,101 @@
+<fx-component [fxData]="fxData" #fxComponent>
+  <div class="flex justify-center custom-dropdown"  [ngClass]="setting('customClass')" *ngIf="false">
+  <form [formGroup]="dropDownForm" class="flex flex-row gap-4 items-start">
+    
+    <!-- Dropdown -->
+    <div class="flex flex-col w-1/2">
+      <div class="relative">
+
+      <!-- <label class="mb-1 font-semibold text-sm"></label> -->
+      <span  class="input-label dark:text-gray-300">{{ setting('select-label') }}</span>
+      <select formControlName="selectedOption" class="border p-2 rounded w-full">
+        <option value="">Select</option>
+        <option *ngFor="let option of options" [value]="option.value">
+          {{ option?.label }}
+        </option>
+      </select>
+       <small *ngIf="dropDownForm.get('selectedOption')?.touched && dropDownForm.get('selectedOption')?.errors?.['required']"
+        class="text-red-500">
+       {{ setting('errorMessage')}}
+      </small>
+      </div>
+    </div>
+
+    <!-- Other input (only if 'Other' selected) -->
+    <div class="flex flex-col w-1/2">
+      <div class="relative">
+      <label class="input-label dark:text-gray-300">{{ setting('other-label') }}</label>
+      <div class="relative">
+      <textarea
+        formControlName="otherInput"
+        placeholder="{{setting('other-placeholder')}}"
+        class="border p-2 rounded w-full"
+        rows="2"
+      ></textarea>
+      </div>
+      <small *ngIf="dropDownForm.get('otherInput')?.touched && dropDownForm.get('otherInput')?.errors?.['required']"
+        class="text-red-500">
+        Other is required.
+      </small>
+      </div>
+    </div>
+
+    
+  </form>
+</div>
+
+<div class="custom-dropdown" [ngClass]="setting('customClass')">
+  <form [formGroup]="dropDownForm" class="flex gap-4 w-full">
+    
+    <!-- Dropdown -->
+    <div class="flex-1 relative">
+      <label class="input-label dark:text-gray-300">
+        {{ setting('select-label') }} <span class="field-required" *ngIf="isRequired">*</span>
+      </label>
+      <select
+        formControlName="selectedOption"
+        class="border p-2 rounded w-full"
+      >
+        <option value="">Select</option>
+        <option *ngFor="let option of options" [value]="option.value">
+          {{ option?.label }}
+        </option>
+      </select>
+      <small *ngIf="dropDownForm.get('selectedOption')?.touched && dropDownForm.get('selectedOption')?.errors?.['required']"
+        class="text-red-500">
+       {{ setting('errorMessage')}}
+      </small>
+    </div>
+
+    <!-- Other input -->
+    <div class="flex-1 relative">
+      <label class="input-label dark:text-gray-300">
+        {{ setting('other-label') }} <span class="field-required" *ngIf="isChildRequired">*</span>
+      </label>
+      <textarea
+        formControlName="otherInput"
+        placeholder="{{ setting('other-placeholder') }}"
+        class="border p-2 rounded w-full"
+        rows="2"
+        [maxlength]="otherMaxLength"
+      ></textarea>
+
+      <small
+        *ngIf="dropDownForm.get('otherInput')?.touched && dropDownForm.get('otherInput')?.errors?.['required']"
+        class="text-red-500"
+      >
+        {{ setting('errorMessageOther')}}
+      </small>
+    </div>
+
+  </form>
+</div>
+
+
+
+</fx-component>
+
+      <!-- <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['required']"
+        class="text-red-500">
+        Date is required.
+      </small> -->

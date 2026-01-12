@@ -1,0 +1,106 @@
+<fx-component [fxData]="fxData" #fxComponent>
+  <div class="container">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="relative">
+      <!-- Header -->
+      <label for="findings" class="input-label">
+        {{ setting('findingLabel') }}
+        <span *ngIf="isRequired" class="field-required">*</span>
+      </label>
+      <div #dropdownWrapper class="relative">
+        <button
+          type="button"
+          class="w-full border border-gray-300 pl-3 pr-2 py-2 flex justify-between items-center bg-white text-gray-700 hover:border-blue-400"
+          (click)="toggleDropdown()"
+        >
+          <span *ngIf="hasSelectedFindings; else placeholder">
+            {{ selectedFindingsLabel }}
+          </span>
+          <ng-template #placeholder>
+            {{ setting('placeholderLabel') }}
+          </ng-template>
+          <svg width="22" height="20" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0.5" width="24.766" height="24" rx="3" fill="#FF7900" fill-opacity="0.1" />
+            <path
+              d="M12.8918 16.5019C12.7255 16.5019 12.5695 16.4736 12.4239 16.4169C12.2783 16.3602 12.1431 16.2628 12.0183 16.1248L6.27803 9.8162C6.04925 9.56477 5.92946 9.25025 5.91864 8.87265C5.90783 8.49505 6.02762 8.16956 6.27803 7.89619C6.50681 7.64476 6.79799 7.51905 7.15155 7.51905C7.50512 7.51905 7.7963 7.64476 8.02508 7.89619L12.8918 13.2105L17.7586 7.89619C17.9874 7.64476 18.2736 7.51356 18.6172 7.50259C18.9607 7.49162 19.2569 7.62282 19.5056 7.89619C19.7344 8.14762 19.8488 8.46762 19.8488 8.85619C19.8488 9.24477 19.7344 9.56477 19.5056 9.8162L13.7654 16.1248C13.6406 16.2619 13.5054 16.3593 13.3598 16.4169C13.2142 16.4745 13.0582 16.5028 12.8918 16.5019Z"
+              fill="#FAA762" />
+          </svg>
+        </button>
+
+        <!-- Panel -->
+        <div
+          *ngIf="dropdownOpen"
+          class="absolute mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-64 overflow-y-auto z-10"
+        >
+          <div
+            *ngFor="let option of findingsOptions"
+            class="border-b border-gray-100 last:border-none p-2 hover:bg-gray-50 cursor-pointer"
+            (click)="$event.stopPropagation()"
+          >
+            <!-- Checkbox + Label -->
+            <div class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                class="w-4 h-4 text-blue-500 border-gray-300 rounded cursor-pointer"
+                [(ngModel)]="option.selected"
+                [ngModelOptions]="{ standalone: true }"
+                (click)="toggleOption(option, $event)"
+              />
+              <label
+                class="text-gray-800 font-medium cursor-pointer select-none"
+                (click)="toggleOption(option, $event)"
+              >
+                {{ option.label }}
+              </label>
+
+              <span
+                *ngIf="option.info"
+                class="ml-auto text-blue-500 text-sm cursor-pointer"
+                title="{{ option.info }}"
+              >
+                ⓘ
+              </span>
+            </div>
+
+            <!-- Radios -->
+            <div
+              class="flex items-center flex-wrap gap-4 ml-6 mt-2 text-sm"
+              *ngIf="option.selected && option.subOptions"
+            >
+              <ng-container *ngFor="let s of option.subOptions">
+  <label
+    class="flex items-center space-x-1 cursor-pointer"
+    (click)="selectSubOption(option, s)"
+  >
+    <input
+      type="radio"
+      [name]="option.value"
+      [value]="s.value"
+      [(ngModel)]="option.subSelection"
+      [ngModelOptions]="{ standalone: true }"
+      class="text-blue-600 cursor-pointer"
+    />
+    <span>{{ s.label }}</span>
+  </label>
+</ng-container>
+
+              <!-- Validation Message -->
+              <div
+                *ngIf="option.selected && option.subOptions && !option.subSelection"
+                class="text-red-500 text-xs mt-1 w-full ml-1"
+              >
+                Please select one option
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+       <div>
+      <small *ngIf="form.get('findings')?.touched && form.get('findings')?.errors?.['required']"
+        class="text-red-500">
+      {{ setting('errorFindingMessage') }}
+      </small>
+    </div>
+      
+    </form>
+  </div>
+</fx-component>

@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/fx-builder-wrapper",
+  "lib": {
+    "entryFile": "src/public-api.ts",
+    "styleIncludePaths": ["src/styles"]  
+  },
+  "assets": ["src/styles"]
+}

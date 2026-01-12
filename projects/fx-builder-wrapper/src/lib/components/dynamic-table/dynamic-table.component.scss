@@ -1,0 +1,160 @@
+/* @import url("https://unpkg.com/primeng@17.18.10/resources/themes/lara-light-blue/theme.css");
+@import url("https://unpkg.com/primeng@17.18.10/resources/primeng.min.css");
+@import url("https://unpkg.com/primeicons@6.0.0/primeicons.css");
+
+
+.formBuilder_dynamic_table{
+    border: 0.6px solid #ccc;
+}
+.formBuilder_dynamic_table>thead>tr {
+    background-color: #4682b4;
+    color: #fff;
+}
+
+.formBuilder_dynamic_table>thead>tr>th {
+    font-weight: 400 !important;
+    padding: .25rem .55rem;
+    font-size: .875rem;
+    text-align: left;
+}
+
+.formBuilder_dynamic_table>tbody>tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+.formBuilder_dynamic_table>tbody>tr:nth-child(even) {
+    background-color: #f6f6f6;
+}
+
+.formBuilder_dynamic_table>tbody>tr>td {
+    text-align: left;
+    padding: 0.25rem 0.55rem;
+} */
+
+@import url("https://unpkg.com/primeng@17.18.10/resources/themes/lara-light-blue/theme.css");
+@import url("https://unpkg.com/primeng@17.18.10/resources/primeng.min.css");
+@import url("https://unpkg.com/primeicons@6.0.0/primeicons.css");
+
+
+.formBuilder_dynamic_table {
+    border: 0.6px solid #ccc;
+}
+
+.formBuilder_dynamic_table>thead>tr {
+    background-color: #4682b4;
+    color: #fff;
+}
+
+.formBuilder_dynamic_table>thead>tr>th {
+    font-weight: 400 !important;
+    padding: .25rem .55rem;
+    font-size: .875rem;
+    text-align: left;
+}
+
+.formBuilder_dynamic_table>tbody>tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+.formBuilder_dynamic_table>tbody>tr:nth-child(even) {
+    background-color: #f6f6f6;
+}
+
+.formBuilder_dynamic_table>tbody>tr>td {
+    text-align: left;
+    padding: 0.25rem 0.55rem;
+}
+
+[type='text'],
+[type='email'],
+[type='url'],
+[type='password'],
+[type='number'],
+[type='date'],
+[type='datetime-local'],
+[type='month'],
+[type='search'],
+[type='tel'],
+[type='time'],
+[type='week'],
+[multiple],
+textarea,
+select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+select:not([size]) {
+    background: url("../../../assets/icons/dropdown.svg") right .4rem center no-repeat white;
+    border: 1px solid #cdcdcd;
+    padding: 6px 30px 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100% !important;
+}
+
+.dd_down_icon {
+    background: #f3a04126;
+    border-radius: 3px !important;
+    padding: 2px;
+}
+
+[type='checkbox'] {
+    padding: 12px;
+}
+
+[type='checkbox']:checked {
+    background-color: #f3a041 !important;
+    padding: 12px;
+    background-size: 1em 1em !important;
+}
+
+[type='radio'] {
+    width: 20px;
+    height: 20px;
+}
+
+[type='radio']:checked {
+    background-color: #f3a041 !important;
+    background-size: 1.5em 1.5em;
+}
+[type=checkbox]:focus, [type=radio]:focus {
+    --tw-ring-color: #f3a041 !important;
+}
+
+:host::ng-deep {
+    .p-multiselect {
+        height: 37.6px !important;
+        border: 1px solid #cdcdcd;
+
+        .p-multiselect-label {
+            padding: 0.5rem 0.75rem;
+
+            .p-placeholder {
+                color: #454545;
+            }
+        }
+
+        .p-multiselect-trigger {
+            width: 2.5rem !important;
+        }
+    }
+}
+
+.dd_down_icon span {
+    color: #f3a041;
+}
+
+.orientation {
+    height: 82% !important;
+}
+
+.confirmation-dialog .p-dialog-content {
+    text-align: center;
+  }

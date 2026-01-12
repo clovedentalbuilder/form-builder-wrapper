@@ -1,0 +1,78 @@
+<fx-component [fxData]="fxData">
+    <section
+        class="justify-content-around lg:justify-content-between w-full white-color border-1 border-solid stroke_light_grey p-3 mb-3 mt-3">
+        <form [formGroup]="dispatchForm">
+            <div class="grid">
+                <!-- Courier Name -->
+                <div class="col-12 sm:col-6 md:col-3 input-container">
+                    <label for="courierName" class="input-title">Courier Name</label>
+                    <input autocomplete="off" formControlName="courierName" type="text" id="courierName"
+                        name="courierName" class="p-inputtext p-component p-element input-field border-1 w-full"
+                        placeholder="enter courier name" />
+
+                    <!-- validation -->
+                    <small *ngIf="dispatchForm.get('courierName')?.invalid && dispatchForm.get('courierName')?.touched"
+                        class="text-danger-color block mt-1">
+                        Courier Name is required.
+                    </small>
+                    <!-- validation -->
+                </div>
+                <!-- Courier Name -->
+
+                <!-- Tracking Number -->
+                <div class="col-12 sm:col-6 md:col-3 input-container">
+                    <label for="trackingNumber" class="input-title">Tracking Number</label>
+                    <input autocomplete="off" formControlName="trackingNumber" type="text" id="trackingNumber"
+                        name="trackingNumber" class="p-inputtext p-component p-element input-field border-1 w-full"
+                        placeholder="enter tracking number" />
+                    <small
+                        *ngIf="dispatchForm.get('trackingNumber')?.invalid && dispatchForm.get('trackingNumber')?.touched"
+                        class="text-danger-color block mt-1">
+                        Tracking Number is required.
+                    </small>
+                </div>
+                <!-- Tracking Number -->
+
+                <!-- Tracking URL -->
+                <div class="col-12 sm:col-6 md:col-3 input-container">
+                    <label for="trackingUrl" class="input-title">Tracking URL</label>
+                    <input autocomplete="off" formControlName="trackingUrl" type="text" id="trackingUrl"
+                        name="trackingUrl" class="p-inputtext p-component p-element input-field border-1 w-full"
+                        placeholder="enter tracking url" />
+                    <small *ngIf="dispatchForm.get('trackingUrl')?.invalid && dispatchForm.get('trackingUrl')?.touched"
+                        class="text-danger-color block mt-1">
+                        <span *ngIf="dispatchForm.get('trackingUrl')?.errors?.['required']">Tracking URL is
+                            required.</span>
+                        <span *ngIf="dispatchForm.get('trackingUrl')?.errors?.['pattern']">Invalid URL format.</span>
+                    </small>
+                </div>
+                <!-- Tracking URL -->
+
+                <!-- Notes -->
+                <div class="col-12 md:col-6 input-container">
+                    <label for="notes" class="input-title">Notes</label>
+                    <textarea autocomplete="off" formControlName="notes" rows="5" id="notes" name="notes"
+                        class="p-inputtext p-component p-element input-field border-1 w-full"
+                        placeholder="enter notes"></textarea>
+                    <small *ngIf="dispatchForm.get('notes')?.invalid && dispatchForm.get('notes')?.touched"
+                        class="text-danger-color block mt-1">
+                        Notes are required.
+                    </small>
+                </div>
+                <!-- Notes -->
+
+                <!-- Address with Copy Icon -->
+                <div class="col-12 md:col-6 pt-0">
+                    <div class="mb-1">Address</div>
+                    <ng-container *ngIf="(clinicAddress$ | async) as address">
+                        <address #completeAddress>{{address?.street}}, {{address?.state}}, {{address?.postalCode}}
+                            <i class="pi pi-copy cursor-pointer text-xl text-secondary-color"
+                                (click)="copyToClipboard(completeAddress.textContent)"></i>
+                        </address>
+                    </ng-container>
+                </div>
+                <!-- Address with Copy Icon -->
+            </div>
+        </form>
+    </section>
+</fx-component>

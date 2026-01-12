@@ -1,0 +1,12 @@
+<fx-component [fxData]="fxData">
+    <div style="display: flex;">
+        <label>
+            <input [formControl]="toggleControl" type="radio" name="radio_grp" class="form-radio mr-3" value="true">
+            <span class="mt-1">{{setting('accept')}}</span>
+        </label>
+        <label>
+            <input [formControl]="toggleControl" type="radio" name="radio_grp" class="form-radio mr-3" value="false">
+            <span class="mt-1">{{setting('reject')}}</span>
+        </label>
+    </div>
+</fx-component>

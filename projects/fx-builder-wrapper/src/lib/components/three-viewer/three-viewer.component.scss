@@ -1,0 +1,41 @@
+.viewer-container {
+  position: relative;
+  width: 100%;
+  max-height: 500px; // Adjust height as needed
+  overflow: hidden;
+}
+
+button {
+  position: absolute;
+  top: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+button:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+::ng-deep {
+  canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 450px !important;
+    min-width: 986px !important;
+  }
+}
+
+@media (min-width: 1600px) {
+  .viewer-container {
+    width: 100%;
+    max-height: 650px;
+  }
+  canvas { 
+    min-width: 1326px !important; 
+  }
+}

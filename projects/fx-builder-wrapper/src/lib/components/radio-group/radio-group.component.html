@@ -1,0 +1,83 @@
+<fx-component [fxData]="fxData" #fxComponent>
+  <div  [ngClass]="setting('customClasss')">
+<form [formGroup]="confirmationForm" class="flex gap-4 w-full">
+  <div class="flex-1 w-full">
+    <!-- Title -->
+  <label class="font-semibold text-gray-800">
+    {{ setting('select-label') }} <span class="field-required" *ngIf="isRequired">*</span>
+  </label>
+
+  <!-- TWO COLUMN LAYOUT -->
+  
+
+    <!-- LEFT COLUMN (RADIO GROUP) -->
+    <div class="flex-1">
+
+      <div class="flex gap-3 my-2"> 
+        <!-- stack vertically so height is correct -->
+        <label
+          *ngFor="let opt of options"
+          class="flex items-center gap-2 cursor-pointer text-gray-700"
+        >
+          <input
+            type="radio"
+            formControlName="confirmation"
+            [value]="opt.value"
+            (change)="onSelectionChange(opt.value)"
+            class="w-4 h-4 accent-blue-600 cursor-pointer"
+          />
+          <span>{{ opt.option }}</span>
+        </label>
+      </div>
+
+      <!-- Radio error -->
+      <small
+        *ngIf="
+          confirmationForm.get('confirmation')?.touched &&
+          confirmationForm.get('confirmation')?.errors?.['required']
+        "
+        class="text-red-500 mt-1"
+      >
+        {{ setting('error-msg') }}
+      </small>
+
+    </div>
+
+  </div>
+  
+    <!-- RIGHT COLUMN (TEXTAREA) -->
+    <div *ngIf="showTextArea" class="flex-1 relative mt-2 md:mt-1">
+
+      <label class="input-label font-medium text-gray-700">
+        {{ setting('additional-field-label') }} <span class="field-required" *ngIf="isChildRequired">*</span>
+      </label>
+
+      <textarea
+        formControlName="remarks"
+        rows="3"
+        placeholder="{{ setting('remark-placeholder') }}"
+        class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm
+               focus:outline-none focus:ring-2 focus:ring-blue-500"
+        [maxlength]="remarkMaxLength"       
+      ></textarea>
+
+      <!-- Textarea error -->
+      <small
+        *ngIf="
+          confirmationForm.get('remarks')?.touched &&
+          confirmationForm.get('remarks')?.errors?.['required']
+        "
+        class="text-red-500 mt-1"
+      >
+        {{ setting('additional-field-error-msg') }}
+      </small>
+
+    </div>
+
+
+
+</form>
+</div>
+
+
+</fx-component>

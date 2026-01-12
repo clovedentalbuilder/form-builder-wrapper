@@ -1,0 +1,38 @@
+@import url("https://unpkg.com/primeng@17.18.10/resources/themes/lara-light-blue/theme.css");
+@import url("https://unpkg.com/primeng@17.18.10/resources/primeng.min.css");
+@import url("https://unpkg.com/primeicons@6.0.0/primeicons.css");
+/* :host::ng-deep {
+    .p-multiselect {
+        height: 37.6px !important;
+        border: 1px solid #cdcdcd;
+
+        .p-multiselect-label {
+            padding: 0.5rem 0.75rem;
+
+            .p-placeholder {
+                color: #454545;
+            }
+        }
+
+        .p-multiselect-trigger {
+            width: 2.5rem !important;
+        }
+    }
+} */
+
+::ng-deep .p-multiselect.p-component.p-inputwrapper {
+    height: 37.6px !important;
+    border: 1px solid #cdcdcd !important;
+    width: 100% !important;
+}
+
+.dd_down_icon span {
+    color: #f3a041;
+}
+
+  .field-required {
+  color: red;
+  font-size: 1.1em;  /* Adjust size if needed */
+  /* vertical-align: super;   */
+  /* margin-left: 5px; */
+}

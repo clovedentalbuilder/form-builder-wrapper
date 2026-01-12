@@ -1,0 +1,6 @@
+.form_builder_component fx-component .fx-element .p-3 label.summary-label{
+    color: #4682B4 !important;
+    font-weight: 600 !important;
+    margin-bottom: 10px !important;
+    font-size: 14px !important;
+}

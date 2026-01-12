@@ -1,0 +1,22 @@
+.custom-toggle-btn {
+    padding: 11px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #ccc;
+    transition: background-color 0.3s;
+  }
+
+  .custom-toggle-btn.active {
+    background-color: #4caf50;
+  }
+
+  .custom-toggle-btn:hover {
+    opacity: 0.9;
+  }
+
+
+  

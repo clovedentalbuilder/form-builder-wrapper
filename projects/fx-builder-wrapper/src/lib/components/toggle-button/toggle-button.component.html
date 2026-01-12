@@ -1,0 +1,11 @@
+<fx-component [fxData]="fxData">
+    <button
+        class="custom-toggle-btn"
+        [class]="setting('classes') ? setting('classes'): ''"
+        [class.active]="toggleBtnControl.value"
+        (click)="toggle()"
+        >
+        {{ toggleBtnControl.value ? setting('active-text') : setting('inactive-text') }}
+    </button>
+    <img src="assets/icons/cross.svg" /> 
+</fx-component>

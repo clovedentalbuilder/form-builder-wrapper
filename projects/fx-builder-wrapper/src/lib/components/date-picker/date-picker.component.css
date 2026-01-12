@@ -1,0 +1,50 @@
+.cursor-pointer{
+    cursor:pointer !important;
+}
+
+/* Base input styling */
+input[type="date"] {
+    border-color: #ccc;
+    width: 100%;
+    height: 38px !important;
+    padding: .5rem .75rem !important;
+    border-radius: 4px !important;
+}
+
+/* Placeholder text style */
+input[type="date"]::placeholder {
+  color: #aaa;
+}
+
+/* Focus effect */
+input[type="date"]:focus {
+  border-color: #f59e0b; /* amber */
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* Calendar icon inside input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23f59e0b' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 16H5V9h14v11z'/%3E%3C/svg%3E") no-repeat center;
+  background-size: 20px 20px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+input[type="date"]:not(:focus):invalid + .placeholder {
+  color: gray;
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  pointer-events: none;
+}
+
+.field-required{
+  color: red;
+  font-size: 1.1em;  
+  /* vertical-align: super; */
+  /* margin-left: 5px; */
+}

@@ -1,0 +1,70 @@
+<fx-component [fxData]="fxData" #fxComponent>
+<div class="custom-dropdown" [ngClass]="setting('customClassMultiChild')">
+  <form [formGroup]="multiChildDropDownForm" class="flex gap-4 w-full">
+    
+    <!-- Dropdown -->
+   <div class="flex-1 relative">
+        <label class="input-label dark:text-gray-300">
+          {{ setting('select-label-multi-child') }} <span class="field-required" *ngIf="isRequired">*</span>
+        </label>
+        <p-multiSelect [options]="options" formControlName="multipleChildSelectedOption" [optionLabel]="setting('label-key-child')"
+          [placeholder]="setting('placeholderMultiChild')" class="multiselect">
+
+          <!-- Custom Dropdown Icon -->
+          <ng-template pTemplate="dropdownicon">
+            <div class="flex align-items-center dd_down_icon">
+              <span class="pi pi-angle-down text-xl"></span>
+            </div>
+          </ng-template>
+        </p-multiSelect>
+        <small
+          *ngIf="multiChildDropDownForm.get('multipleChildSelectedOption')?.touched && multiChildDropDownForm.get('multipleChildSelectedOption')?.errors?.['required']"
+          class="text-red-500">
+          {{ setting('multiChildErrorMessage')}}
+        </small>
+      </div>
+
+    <!-- Other input -->
+    <div class="flex-1 relative">
+      <label class="input-label dark:text-gray-300">
+        {{ setting('child-1-label') }} <sup class="field-required" *ngIf="isChild1Required">*</sup>
+      </label>
+      <input
+        type="text"
+        formControlName="child1"
+        placeholder="{{ setting('child-1-placeholder') }}"
+        class="border p-2 rounded w-full"
+        rows="2"
+      >
+
+      <small
+        *ngIf="multiChildDropDownForm.get('child1')?.touched && multiChildDropDownForm.get('child1')?.errors?.['required']"
+        class="text-red-500"
+      >
+        {{ setting('child1ErrorMessage')}}
+      </small>
+    </div>
+
+    <div class="flex-1 relative">
+      <label class="input-label dark:text-gray-300">
+        {{ setting('child-2-label') }} <sup class="field-required" *ngIf="isChild2Required">*</sup>
+      </label>
+      <input
+        type="text"
+        formControlName="child2"
+        placeholder="{{ setting('child-2-placeholder') }}"
+        class="border p-2 rounded w-full"
+        rows="2"
+      >
+
+      <small
+        *ngIf="multiChildDropDownForm.get('child2')?.touched && multiChildDropDownForm.get('child2')?.errors?.['required']"
+        class="text-red-500"
+      >
+        {{ setting('child2ErrorMessage')}}
+      </small>
+    </div>
+
+  </form>
+</div>
+</fx-component>
