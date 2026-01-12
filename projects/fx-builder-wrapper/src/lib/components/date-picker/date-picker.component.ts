@@ -23,7 +23,7 @@ maxDate!: string;
    @ViewChild('fxComponent') fxComponent!: FxComponent;
    private destroy$ = new Subject<Boolean>();
     datePickerMap = new Map<string, any>();
-   
+   trtStartDatePatch!: string;
 
 
     public datePickerForm: FormGroup = this.fb.group({
@@ -62,6 +62,12 @@ maxDate!: string;
   ) {
     this.datePickerMap.set(key, value);
   }
+
+  if (key === 'trtStartDatePatch' && typeof value === 'string') {
+  const formattedDate = value.split('T')[0];
+  this.trtStartDatePatch = formattedDate;
+}
+
 }
   });
 
@@ -84,8 +90,8 @@ min.setDate(today.getDate() - 30);
 const max = new Date();
 max.setDate(today.getDate());
 
-this.minDate = this.formatDate(min);
-this.maxDate = this.formatDate(max);
+// this.minDate = this.formatDate(min);
+// this.maxDate = this.formatDate(max);
 
     // this.getRangeValues();
 
@@ -96,20 +102,32 @@ this.maxDate = this.formatDate(max);
     return this.datePickerForm.get('date');
   }
 
-   ngAfterViewInit(): void {
+  ngAfterViewInit(): void {
     const key = this.fxComponent?.fxData?.name;
-    if(key){
-        const datePatch = this.datePickerMap.get(key)
-        const finalDate = datePatch || this.formatDate(new Date())
-        if(datePatch){
-            this.minDate = datePatch
-        }
-        else{
-         this.minDate = this.formatDate(new Date(this.today.setDate(new Date().getDate() - 30)));
-        }
-        
+    if (key) {
+      const datePatch = this.datePickerMap.get(key)
+      const finalDate = datePatch || this.formatDate(new Date())
+      if (this.trtStartDatePatch) {
+        this.minDate = this.trtStartDatePatch;
+        const today = new Date();
+        const max = new Date();
+        max.setDate(today.getDate());
+        this.maxDate = this.formatDate(max);
 
-      this.datePickerForm.patchValue({date:finalDate});
+      }
+      else {
+        this.minDate = this.formatDate(new Date(this.today.setDate(new Date().getDate() - 30)));
+
+        this.minDate = this.trtStartDatePatch;
+        const today = new Date();
+        const max = new Date();
+        max.setDate(today.getDate());
+        this.maxDate = this.formatDate(max);
+
+      }
+
+
+      this.datePickerForm.patchValue({ date: finalDate });
     }
     this.getContextBaseId();
   }
