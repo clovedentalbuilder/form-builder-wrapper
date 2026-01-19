@@ -93,19 +93,7 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit, Afte
       });
 
 
-this.datePickerForm.get('date')?.valueChanges.subscribe(value => {
-  if (!value) return;
 
-  const selectedTs = this.toTimestamp(value);
-  const minTs = this.toTimestamp(this.minDate);
-  const maxTs = this.maxDate ? this.toTimestamp(this.maxDate) : null;
-
-  if (selectedTs < minTs) {
-    this.datePickerForm.get('date')?.setValue(this.minDate, { emitEvent: false });
-  } else if (maxTs !== null && selectedTs > maxTs) {
-    this.datePickerForm.get('date')?.setValue(this.maxDate, { emitEvent: false });
-  }
-});
 
        
 

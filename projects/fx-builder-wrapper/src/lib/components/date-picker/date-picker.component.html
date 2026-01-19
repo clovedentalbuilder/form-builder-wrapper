@@ -26,7 +26,9 @@
         placeholder="{{ setting('placeHolder') }}"> -->
         <label for="date" class="input-label">{{ setting('label') }}<span class="field-required">*</span></label>
         <div class="relative">
-        <input type="date" id="date" name="date" formControlName="date" [min]="minDate" [max]="maxDate">
+        <input type="date" id="date" name="date" formControlName="date" [min]="minDate" [max]="maxDate" (keydown)="$event.preventDefault()"
+  (paste)="$event.preventDefault()"  (keypress)="$event.preventDefault()"
+  (keyup)="$event.preventDefault()">
         </div>
         <!-- <label for="date" class="placeholder">Select Date</label> -->
         <!-- <ng-template pTemplate="inputicon">
