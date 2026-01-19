@@ -26,7 +26,7 @@
         placeholder="{{ setting('placeHolder') }}"> -->
         <label for="date" class="input-label">{{ setting('label') }}<span class="field-required">*</span></label>
         <div class="relative">
-        <input type="date" id="date" name="date" formControlName="date"  [min]="minDate" [max]="maxDate">
+        <input type="date" id="date" name="date" formControlName="date"  [min]="minDate" [max]="maxDate" (blur)="onDateBlur()">
         </div>
         <!-- <label for="date" class="placeholder">Select Date</label> -->
         <!-- <ng-template pTemplate="inputicon">
@@ -50,6 +50,14 @@
       <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['required']"
         class="text-red-500">
       {{ setting('datePickerErrorMessage') }}
+      </small>
+      <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['minDate']"
+        class="text-red-500">
+      Date cannot be before {{ formatDisplayDate(minDate) }}
+      </small>
+      <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['maxDate']"
+        class="text-red-500">
+      Date cannot be after {{ formatDisplayDate(maxDate) }}
       </small>
     </div>
     </form>
