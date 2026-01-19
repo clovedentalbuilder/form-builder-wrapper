@@ -93,14 +93,20 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit, Afte
       });
 
 
-      this.datePickerForm.get('date')?.valueChanges.subscribe(value => {
-        if (!value) return;
-        if (value < this.minDate) {
-          this.datePickerForm.get('date')?.setValue(this.minDate);
-        } else if (value > this.maxDate) {
-          this.datePickerForm.get('date')?.setValue(this.maxDate);
-        }
-      });
+this.datePickerForm.get('date')?.valueChanges.subscribe(value => {
+  if (!value) return;
+
+  const selectedTs = this.toTimestamp(value);
+  const minTs = this.toTimestamp(this.minDate);
+  const maxTs = this.maxDate ? this.toTimestamp(this.maxDate) : null;
+
+  if (selectedTs < minTs) {
+    this.datePickerForm.get('date')?.setValue(this.minDate, { emitEvent: false });
+  } else if (maxTs !== null && selectedTs > maxTs) {
+    this.datePickerForm.get('date')?.setValue(this.maxDate, { emitEvent: false });
+  }
+});
+
        
 
     // const today = new Date();
@@ -132,6 +138,11 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit, Afte
   get dateControl() {
     return this.datePickerForm.get('date');
   }
+
+  toTimestamp(dateStr: string): number {
+  // Ensures YYYY-MM-DD → UTC timestamp
+  return new Date(dateStr + 'T00:00:00').getTime();
+}
 
   ngAfterViewInit(): void {
     const key = this.fxComponent?.fxData?.name;
