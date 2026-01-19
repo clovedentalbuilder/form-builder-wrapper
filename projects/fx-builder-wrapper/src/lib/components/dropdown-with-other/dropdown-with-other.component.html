@@ -37,6 +37,10 @@
         class="text-red-500">
         Other is required.
       </small>
+      <small *ngIf="dropDownForm.get('otherInput')?.touched && dropDownForm.get('otherInput')?.errors?.['pattern']"
+        class="text-red-500">
+        Special characters are not allowed.
+      </small>
       </div>
     </div>
 
@@ -85,6 +89,12 @@
         class="text-red-500"
       >
         {{ setting('errorMessageOther')}}
+      </small>
+      <small
+        *ngIf="dropDownForm.get('otherInput')?.touched && dropDownForm.get('otherInput')?.errors?.['pattern']"
+        class="text-red-500"
+      >
+        Special characters are not allowed.
       </small>
     </div>
 

@@ -111,7 +111,10 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
       if (value === 'other') {
         otherControl?.enable();
         this.isChildRequired = true;
-        otherControl?.setValidators([Validators.required]);
+        otherControl?.setValidators([
+          Validators.required,
+          Validators.pattern(/^[\x09\x0A\x0D\x20-\x7E]*$/)
+        ]);
       } else {
         this.isChildRequired = false;
         otherControl?.disable();
