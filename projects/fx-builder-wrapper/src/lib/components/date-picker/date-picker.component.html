@@ -53,14 +53,6 @@
         class="text-red-500">
       {{ setting('datePickerErrorMessage') }}
       </small>
-      <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['minDate']"
-        class="text-red-500">
-      Date cannot be before {{ formatDisplayDate(minDate) }}
-      </small>
-      <small *ngIf="datePickerForm.get('date')?.touched && datePickerForm.get('date')?.errors?.['maxDate']"
-        class="text-red-500">
-      Date cannot be after {{ formatDisplayDate(maxDate) }}
-      </small>
     </div>
     </form>
   </div>
