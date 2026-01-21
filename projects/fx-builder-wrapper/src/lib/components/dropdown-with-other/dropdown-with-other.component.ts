@@ -33,6 +33,7 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
   isRequired: boolean = false;
   isChildRequired: boolean = false;
   otherMaxLength: number = 768;
+  remainingChars: number = 768;
 
   public dropDownForm: FormGroup = this.fb.group({
     selectedOption: [''],
@@ -69,6 +70,8 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
   }
 
   ngOnInit(): void {
+    //  this.options.push({ value: 'other', label: 'Other' });
+     this.otherMaxLength = Number(this.setting('other-maxLength')) || 768;
     this.fxBuilderWrapperService.variables$
       .pipe(takeUntil(this.destroy$))
       .subscribe((variables: any) => {
@@ -125,6 +128,14 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
       otherControl?.updateValueAndValidity();
       otherControl?.markAsTouched();
     });
+
+    const control = this.dropDownForm.get('otherInput');
+
+  this.remainingChars = this.otherMaxLength - (control?.value?.length || 0);
+
+  control?.valueChanges.subscribe(value => {
+    this.remainingChars = this.otherMaxLength - (value?.length || 0);
+  });
 
   }
 

@@ -82,7 +82,15 @@
         class="border p-2 rounded w-full"
         rows="2"
         [maxlength]="otherMaxLength"
+        [ngClass]="{
+    'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed':
+      dropDownForm.get('otherInput')?.disabled
+  }"
       ></textarea>
+
+      <!-- <small class="text-gray-500 block mt-1">
+        {{ remainingChars }} character(s) left
+      </small>
 
       <small
         *ngIf="dropDownForm.get('otherInput')?.touched && dropDownForm.get('otherInput')?.errors?.['required']"
@@ -95,7 +103,34 @@
         class="text-red-500"
       >
         Special characters are not allowed.
+      </small> -->
+       <div class="flex justify-between items-center mt-1">
+    <div>
+      <small
+        *ngIf="
+          dropDownForm.get('otherInput')?.touched &&
+          dropDownForm.get('otherInput')?.errors?.['required']
+        "
+        class="text-red-500"
+      >
+        {{ setting('errorMessageOther') }}
       </small>
+
+      <small
+        *ngIf="
+          dropDownForm.get('otherInput')?.touched &&
+          dropDownForm.get('otherInput')?.errors?.['pattern']
+        "
+        class="text-red-500"
+      >
+        Special characters are not allowed.
+      </small>
+    </div>
+
+    <small class="text-gray-500 whitespace-nowrap" *ngIf="!dropDownForm.get('otherInput')?.disabled">
+      {{ remainingChars }} character(s) left
+    </small>
+  </div>
     </div>
 
   </form>
