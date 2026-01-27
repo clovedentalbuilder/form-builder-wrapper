@@ -216,7 +216,7 @@
                 <label class="font-semibold text-sm input-title m-0 -mt-1">Title</label>
                 <input [(ngModel)]="file.title" name="title{{i}}" (ngModelChange)="onMetaChange()"
                   placeholder="Enter title" class=" rounded px-3 py-2 mb-3 w-full outline-none focus:ring" required
-                  #titleCtrl="ngModel" />
+                  #titleCtrl="ngModel" maxlength="26"/>
                 <div *ngIf="(titleCtrl.touched || uploadFileControl.touched) && titleCtrl.invalid" class="text-red-500 text-xs mb-2">
                   Title is required
                 </div>
