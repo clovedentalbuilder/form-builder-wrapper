@@ -1,0 +1,56 @@
+.field-required {
+  color: red;
+  font-size: 1.1em;
+}
+
+/* ── Reset the hidden native input inside p-checkbox ──────────────────────
+   Global CSS sets [type='checkbox'] { appearance: none; height: 1rem; width: 1rem; ... }
+   which makes the hidden input render on top of the PrimeNG box.
+   We force it back to truly invisible. */
+:host ::ng-deep .p-checkbox input[type='checkbox'] {
+  appearance: none !important;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  pointer-events: none !important;
+}
+
+/* ── Restore the visual PrimeNG checkbox box ───────────────────────────── */
+:host ::ng-deep .p-checkbox .p-checkbox-box {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  border: 2px solid #6B7280 !important;
+  border-radius: 4px !important;
+  background-color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s, background-color 0.2s !important;
+  flex-shrink: 0 !important;
+}
+
+:host ::ng-deep .p-checkbox .p-checkbox-box:hover {
+  border-color: #3B82F6 !important;
+}
+
+/* Checked state */
+:host ::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
+  background-color: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+}
+
+:host ::ng-deep .p-checkbox .p-checkbox-box .p-checkbox-icon {
+  color: #ffffff !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+}

@@ -18,6 +18,7 @@ import { AccordianComponent } from './components/accordian/accordian.component';
 import { SummaryComponent } from './components/summary/summary.component';
 import { CustomizeDropdownComponent } from './components/customize-dropdown/customize-dropdown.component';
 import { HeadingComponent } from './components/heading/heading.component';
+import { CheckboxComponent } from './components/checkbox/checkbox.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -98,6 +99,9 @@ export class FxBuilderWrapperComponent implements OnInit {
     }
          if (!Boolean(this.fxWrapperService.getComponent('lib-heading'))) {
       this.fxWrapperService.registerCustomComponent('Header', 'lib-heading', HeadingComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-checkbox'))) {
+      this.fxWrapperService.registerCustomComponent('Checkbox', 'lib-checkbox', CheckboxComponent);
     }
   };
 

@@ -104,8 +104,7 @@
       >
         Special characters are not allowed.
       </small> -->
-       <div class="flex justify-between items-center mt-1">
-    <div>
+       <div class="flex justify-between items-center">
       <small
         *ngIf="
           dropDownForm.get('otherInput')?.touched &&
@@ -125,7 +124,6 @@
       >
         Special characters are not allowed.
       </small>
-    </div>
 
     <small class="text-gray-500 whitespace-nowrap" *ngIf="!dropDownForm.get('otherInput')?.disabled">
       {{ remainingChars }} character(s) left
