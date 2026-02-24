@@ -1,0 +1,291 @@
+/* ── Overlay wrapper (scoped to host selector) ─────────────────── */
+lib-checkbox-settings-panel .fx-element {
+  position: relative;
+}
+lib-checkbox-settings-panel .fx-element .fx-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.08);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+}
+lib-checkbox-settings-panel .fx-element:hover .fx-overlay {
+  z-index: 1;
+  opacity: 1;
+  pointer-events: auto;
+}
+lib-checkbox-settings-panel .fx-element:hover .fx-overlay .fx-actions {
+  position: absolute;
+  margin-top: -26px;
+  height: 25px;
+  width: 100%;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* ── Dialog container ──────────────────────────────────────────── */
+.chk-settings-dialog.p-dialog {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+}
+.chk-settings-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  padding: 0.9rem 1.25rem;
+  border-bottom: none;
+}
+.chk-settings-dialog .p-dialog-title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.chk-settings-dialog .p-dialog-header-icon {
+  color: rgba(255, 255, 255, 0.75);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.chk-settings-dialog .p-dialog-header-icon:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+.chk-settings-dialog .p-dialog-content {
+  padding: 1.125rem;
+  background: #f1f5f9;
+}
+.chk-settings-dialog .p-dialog-footer {
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.75rem 1.125rem;
+}
+
+/* ── Dialog header content ─────────────────────────────────────── */
+.chk-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.chk-header-icon {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+.chk-dialog-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ── Body ──────────────────────────────────────────────────────── */
+.chk-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ── Section card ──────────────────────────────────────────────── */
+.chk-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.chk-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: #eff6ff;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #dbeafe;
+}
+.chk-section-header i {
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+.chk-section-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ── Two-column grid ───────────────────────────────────────────── */
+.chk-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+
+/* ── Field ─────────────────────────────────────────────────────── */
+.chk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.chk-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+/* ── Inputs ────────────────────────────────────────────────────── */
+.chk-input.p-inputtext,
+.chk-input {
+  font-size: 0.85rem;
+  border-radius: 7px;
+  border: 1px solid #d1d5db;
+  padding: 0.45rem 0.7rem;
+  width: 100%;
+  color: #111827;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+.chk-input.p-inputtext:focus,
+.chk-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+.chk-input.p-inputtext:disabled,
+.chk-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ── Radio group ───────────────────────────────────────────────── */
+.chk-radio-group {
+  display: flex;
+  gap: 0.625rem;
+}
+.chk-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+.chk-radio-option input[type='radio'] {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  width: 14px !important;
+  height: 14px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid #9ca3af !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+.chk-radio-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.chk-radio-yes { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+.chk-radio-no  { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+
+/* ── Dimmed field (error msg when not required) ────────────────── */
+.chk-dimmed {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── Disabled mapping fields ───────────────────────────────────── */
+.chk-disabled-field {
+  opacity: 0.5;
+}
+.chk-disabled-field .chk-input {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
+
+/* ── Badges ────────────────────────────────────────────────────── */
+.chk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 20px;
+}
+.chk-badge-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.chk-badge-lock { background: #fefce8; color: #92400e; border: 1px solid #fde68a; }
+
+/* ── Hint text ─────────────────────────────────────────────────── */
+.chk-hint {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ── Footer ────────────────────────────────────────────────────── */
+.chk-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+/* ── Footer buttons (reach PrimeNG portal via ViewEncapsulation.None) ── */
+.chk-settings-dialog .p-dialog-footer .p-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, border-color 0.18s, transform 0.1s;
+  border: 1.5px solid transparent;
+}
+.chk-settings-dialog .p-dialog-footer .p-button:active {
+  transform: scale(0.97);
+}
+
+/* Cancel — outlined slate */
+.chk-settings-dialog .p-dialog-footer .p-button.p-button-outlined,
+.chk-settings-dialog .p-dialog-footer .p-button.p-button-secondary {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.chk-settings-dialog .p-dialog-footer .p-button.p-button-outlined:hover,
+.chk-settings-dialog .p-dialog-footer .p-button.p-button-secondary:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #334155;
+}
+
+/* Save — blue gradient primary */
+.chk-settings-dialog .p-dialog-footer .p-button.p-button-primary {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+.chk-settings-dialog .p-dialog-footer .p-button.p-button-primary:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45);
+}

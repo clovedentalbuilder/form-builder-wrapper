@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { BuilderComponent } from './component/builder/builder.component';
 import { FormComponent } from './component/form/form.component';
 import { TableComponent } from './component/table/table.component';
+import { FormTestComponent } from './component/form-test/form-test.component';
 
 export const routes: Routes = [
     {
@@ -15,5 +16,9 @@ export const routes: Routes = [
     {
         path: 'dynamic-table',
         component: TableComponent
+    },
+    {
+        path: 'form-test',
+        component: FormTestComponent
     },
 ];

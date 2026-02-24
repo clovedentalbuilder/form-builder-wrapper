@@ -1,5 +1,5 @@
-<fx-component [fxData]="fxData" #fxComponent>
-  <div [ngClass]="setting('customClass')">
+<lib-checkbox-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
+  <div [ngClass]="checkboxConfig.customClass">
     <form [formGroup]="checkboxForm">
 
       <div class="flex items-center gap-2">
@@ -12,7 +12,7 @@
           for="lib-chk-{{ fxData?.name }}"
           class="cursor-pointer text-gray-700"
         >
-          {{ setting('label') }}<span *ngIf="isRequired" class="field-required"> *</span>
+          {{ checkboxConfig.label }}<span *ngIf="isRequired" class="field-required"> *</span>
         </label>
       </div>
 
@@ -20,9 +20,9 @@
         *ngIf="checkboxForm.get('checked')?.touched && checkboxForm.get('checked')?.errors?.['required']"
         class="text-red-500 mt-1 block"
       >
-        {{ setting('error-msg') }}
+        {{ checkboxConfig.errorMsg }}
       </small>
 
     </form>
   </div>
-</fx-component>
+</lib-checkbox-settings-panel>

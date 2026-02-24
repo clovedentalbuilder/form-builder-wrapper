@@ -1,0 +1,219 @@
+<!-- ── Settings Dialog ─────────────────────────────────────────── -->
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '520px' }"
+  styleClass="chk-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <!-- ── Header ── -->
+  <ng-template pTemplate="header">
+    <div class="chk-dialog-header">
+      <i class="pi pi-cog chk-header-icon"></i>
+      <span class="chk-dialog-title">Checkbox Settings</span>
+    </div>
+  </ng-template>
+
+  <!-- ── Body ── -->
+  <form [formGroup]="settingsForm" class="chk-settings-body">
+
+    <!-- ── Section 1 : Basic Configuration ── -->
+    <div class="chk-section">
+      <div class="chk-section-header">
+        <i class="pi pi-sliders-h"></i>
+        <span>Basic Configuration</span>
+      </div>
+      <div class="chk-section-body">
+
+        <!-- Row 1 : Label + Required (2 columns) -->
+        <div class="chk-grid-2">
+
+          <!-- Label -->
+          <div class="chk-field">
+            <label class="chk-label">Label</label>
+            <input
+              pInputText
+              formControlName="label"
+              placeholder="e.g. I agree to terms"
+              class="chk-input"
+            />
+          </div>
+
+          <!-- Required -->
+          <div class="chk-field">
+            <label class="chk-label">Required</label>
+            <div class="chk-radio-group">
+              <label class="chk-radio-option">
+                <input type="radio" formControlName="isRequired" value="true" />
+                <span class="chk-radio-label chk-radio-yes">Yes</span>
+              </label>
+              <label class="chk-radio-option">
+                <input type="radio" formControlName="isRequired" value="false" />
+                <span class="chk-radio-label chk-radio-no">No</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 2 : Error Message (full width, dimmed when not required) -->
+        <div class="chk-field" [class.chk-dimmed]="settingsForm.get('isRequired')?.value !== 'true'">
+          <label class="chk-label">
+            Error Message
+            <span class="chk-badge chk-badge-info" *ngIf="settingsForm.get('isRequired')?.value !== 'true'">
+              <i class="pi pi-info-circle"></i> shown only when Required
+            </span>
+          </label>
+          <input
+            pInputText
+            formControlName="errorMsg"
+            placeholder="e.g. This field is required"
+            class="chk-input"
+          />
+        </div>
+
+        <!-- Row 3 : Custom CSS Class (full width) -->
+        <div class="chk-field">
+          <label class="chk-label">Custom CSS Class</label>
+          <input
+            pInputText
+            formControlName="customClass"
+            placeholder="e.g. my-custom-class"
+            class="chk-input"
+          />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section 2 : Value Mapping ── -->
+    <div class="chk-section">
+      <div class="chk-section-header">
+        <i class="pi pi-arrows-h"></i>
+        <span>Value Mapping</span>
+      </div>
+      <div class="chk-section-body">
+
+        <!-- Use user defined mapping -->
+        <div class="chk-field">
+          <label class="chk-label">Use user defined mapping</label>
+          <div class="chk-radio-group">
+            <label class="chk-radio-option">
+              <input type="radio" formControlName="useUserDefinedMapping" value="true" (change)="applyMappingState()" />
+              <span class="chk-radio-label chk-radio-yes">Yes</span>
+            </label>
+            <label class="chk-radio-option">
+              <input type="radio" formControlName="useUserDefinedMapping" value="false" (change)="applyMappingState()" />
+              <span class="chk-radio-label chk-radio-no">No</span>
+            </label>
+          </div>
+          <small class="chk-hint">
+            When enabled, the checkbox submits custom string values instead of <code>true</code> / <code>false</code>.
+          </small>
+        </div>
+
+        <!-- Checked / Unchecked values (2 columns) -->
+        <div class="chk-grid-2">
+
+          <!-- Value for Checked -->
+          <div class="chk-field" [class.chk-disabled-field]="settingsForm.get('checkedValue')?.disabled">
+            <label class="chk-label">
+              Value for Checked
+              <span class="chk-badge chk-badge-lock" *ngIf="settingsForm.get('checkedValue')?.disabled">
+                <i class="pi pi-lock"></i> Enable mapping
+              </span>
+            </label>
+            <input
+              pInputText
+              formControlName="checkedValue"
+              placeholder="e.g. YES, 1, true"
+              class="chk-input"
+            />
+          </div>
+
+          <!-- Value for Unchecked -->
+          <div class="chk-field" [class.chk-disabled-field]="settingsForm.get('uncheckedValue')?.disabled">
+            <label class="chk-label">
+              Value for Unchecked
+              <span class="chk-badge chk-badge-lock" *ngIf="settingsForm.get('uncheckedValue')?.disabled">
+                <i class="pi pi-lock"></i> Enable mapping
+              </span>
+            </label>
+            <input
+              pInputText
+              formControlName="uncheckedValue"
+              placeholder="e.g. NO, 0, false"
+              class="chk-input"
+            />
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </form>
+
+  <!-- ── Footer ── -->
+  <ng-template pTemplate="footer">
+    <div class="chk-dialog-footer">
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-outlined p-button-secondary chk-btn-cancel"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        label="Save Settings"
+        icon="pi pi-check"
+        class="p-button-primary chk-btn-save"
+        (click)="saveSettings()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ── Component Wrapper ────────────────────────────────────────── -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div
+      class="fx-overlay border-gray-400 border rounded cursor-pointer"
+      (click)="onElementSelect(fxData)"
+      (dblclick)="openDialog()"
+    >
+      <div class="fx-actions flex justify-between">
+
+        <!-- Component name tag -->
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}-<span class="text-xs italic">{{ fxData?.id }}</span>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex justify-around items-end mr-2">
+          <div
+            class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t"
+            title="Settings"
+            (click)="openDialog(); $event.stopPropagation()"
+          >
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div
+            (click)="deleteElement(fxData)"
+            class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t"
+            title="Delete"
+          >
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+</div>
