@@ -23,6 +23,7 @@ export class CheckboxComponent extends FxBaseComponent implements OnInit, AfterV
   // ── User-interaction form (what gets submitted) ──────────────────
   public checkboxForm = this.fb.group({
     checked:               [false],
+    label:                 [''],
     useUserDefinedMapping: [false],
     checkedValue:          [''],
     uncheckedValue:        ['']
@@ -31,6 +32,7 @@ export class CheckboxComponent extends FxBaseComponent implements OnInit, AfterV
   // ── Display/behaviour config (driven by the settings panel) ─────
   public checkboxConfig: any = {
     label:                 'Checkbox Label',
+    tooltipText:           '',
     isRequired:            'false',
     errorMsg:              'This field is required',
     customClass:           '',
@@ -102,6 +104,7 @@ export class CheckboxComponent extends FxBaseComponent implements OnInit, AfterV
     }
     mainControl?.updateValueAndValidity();
 
+    this.checkboxForm.get('label')?.setValue(config.label || '');
     this.checkboxForm.get('useUserDefinedMapping')?.setValue(useMapping);
     this.checkboxForm.get('checkedValue')?.setValue(useMapping ? (config.checkedValue || '') : '');
     this.checkboxForm.get('uncheckedValue')?.setValue(useMapping ? (config.uncheckedValue || '') : '');

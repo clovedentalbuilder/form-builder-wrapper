@@ -11,6 +11,7 @@
         <label
           for="lib-chk-{{ fxData?.name }}"
           class="cursor-pointer text-gray-700"
+          [title]="checkboxConfig.tooltipText || ''"
         >
           {{ checkboxConfig.label }}<span *ngIf="isRequired" class="field-required"> *</span>
         </label>

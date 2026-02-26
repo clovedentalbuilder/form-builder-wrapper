@@ -5,7 +5,7 @@
   [closable]="true"
   [draggable]="false"
   [resizable]="false"
-  [style]="{ width: '520px' }"
+  [style]="{ width: '540px' }"
   styleClass="chk-settings-dialog"
   (onHide)="closeDialog()"
 >
@@ -20,7 +20,9 @@
   <!-- ── Body ── -->
   <form [formGroup]="settingsForm" class="chk-settings-body">
 
-    <!-- ── Section 1 : Basic Configuration ── -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Section 1 : Basic Configuration                           -->
+    <!-- ══════════════════════════════════════════════════════════ -->
     <div class="chk-section">
       <div class="chk-section-header">
         <i class="pi pi-sliders-h"></i>
@@ -28,7 +30,7 @@
       </div>
       <div class="chk-section-body">
 
-        <!-- Row 1 : Label + Required (2 columns) -->
+        <!-- Row 1 : Label + Required ── 2 columns -->
         <div class="chk-grid-2">
 
           <!-- Label -->
@@ -59,11 +61,28 @@
 
         </div>
 
-        <!-- Row 2 : Error Message (full width, dimmed when not required) -->
+        <!-- Row 2 : Tooltip Text ── full width (new control) -->
+        <div class="chk-field">
+          <label class="chk-label">
+            Tooltip Text
+            <span class="chk-badge chk-badge-info">
+              <i class="pi pi-info-circle"></i> shown on hover
+            </span>
+          </label>
+          <input
+            pInputText
+            formControlName="tooltipText"
+            placeholder="e.g. Check this to confirm your selection"
+            class="chk-input"
+          />
+        </div>
+
+        <!-- Row 3 : Error Message ── dimmed when not required -->
         <div class="chk-field" [class.chk-dimmed]="settingsForm.get('isRequired')?.value !== 'true'">
           <label class="chk-label">
             Error Message
-            <span class="chk-badge chk-badge-info" *ngIf="settingsForm.get('isRequired')?.value !== 'true'">
+            <span class="chk-badge chk-badge-info"
+                  *ngIf="settingsForm.get('isRequired')?.value !== 'true'">
               <i class="pi pi-info-circle"></i> shown only when Required
             </span>
           </label>
@@ -75,7 +94,7 @@
           />
         </div>
 
-        <!-- Row 3 : Custom CSS Class (full width) -->
+        <!-- Row 4 : Custom CSS Class -->
         <div class="chk-field">
           <label class="chk-label">Custom CSS Class</label>
           <input
@@ -89,7 +108,9 @@
       </div>
     </div>
 
-    <!-- ── Section 2 : Value Mapping ── -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Section 2 : Value Mapping                                 -->
+    <!-- ══════════════════════════════════════════════════════════ -->
     <div class="chk-section">
       <div class="chk-section-header">
         <i class="pi pi-arrows-h"></i>
@@ -97,57 +118,92 @@
       </div>
       <div class="chk-section-body">
 
-        <!-- Use user defined mapping -->
+        <!-- Mapping toggle -->
         <div class="chk-field">
           <label class="chk-label">Use user defined mapping</label>
           <div class="chk-radio-group">
             <label class="chk-radio-option">
-              <input type="radio" formControlName="useUserDefinedMapping" value="true" (change)="applyMappingState()" />
+              <input type="radio" formControlName="useUserDefinedMapping"
+                     value="true" (change)="applyMappingState()" />
               <span class="chk-radio-label chk-radio-yes">Yes</span>
             </label>
             <label class="chk-radio-option">
-              <input type="radio" formControlName="useUserDefinedMapping" value="false" (change)="applyMappingState()" />
+              <input type="radio" formControlName="useUserDefinedMapping"
+                     value="false" (change)="applyMappingState()" />
               <span class="chk-radio-label chk-radio-no">No</span>
             </label>
           </div>
           <small class="chk-hint">
-            When enabled, the checkbox submits custom string values instead of <code>true</code> / <code>false</code>.
+            When enabled, the checkbox submits custom string values
+            instead of <code>true</code> / <code>false</code>.
           </small>
         </div>
 
-        <!-- Checked / Unchecked values (2 columns) -->
+        <!--
+          Checked / Unchecked values — strict 2-column grid.
+
+          FIX: The lock badge is placed BELOW the input, not inside <label>.
+          This keeps both labels single-line so the two columns always align
+          at the same vertical position regardless of whether the badge is
+          visible or hidden.
+        -->
         <div class="chk-grid-2">
 
-          <!-- Value for Checked -->
-          <div class="chk-field" [class.chk-disabled-field]="settingsForm.get('checkedValue')?.disabled">
+          <!-- ── Value for Checked ── -->
+          <div class="chk-field">
             <label class="chk-label">
               Value for Checked
-              <span class="chk-badge chk-badge-lock" *ngIf="settingsForm.get('checkedValue')?.disabled">
-                <i class="pi pi-lock"></i> Enable mapping
-              </span>
+              <!-- required star — only shown when mapping is active -->
+              <span class="chk-required-star" *ngIf="isMappingActive">*</span>
             </label>
+
             <input
               pInputText
               formControlName="checkedValue"
               placeholder="e.g. YES, 1, true"
               class="chk-input"
+              [class.chk-input--disabled]="!isMappingActive"
             />
+
+            <!-- lock note below the input — never inside label -->
+            <span class="chk-lock-note" *ngIf="!isMappingActive">
+              <i class="pi pi-lock"></i> Enable mapping to edit
+            </span>
+
+            <!-- validation error -->
+            <small class="chk-error"
+              *ngIf="settingsForm.get('checkedValue')?.invalid
+                  && settingsForm.get('checkedValue')?.touched">
+              <i class="pi pi-exclamation-triangle"></i>
+              This field is required when mapping is enabled
+            </small>
           </div>
 
-          <!-- Value for Unchecked -->
-          <div class="chk-field" [class.chk-disabled-field]="settingsForm.get('uncheckedValue')?.disabled">
+          <!-- ── Value for Unchecked ── -->
+          <div class="chk-field">
             <label class="chk-label">
               Value for Unchecked
-              <span class="chk-badge chk-badge-lock" *ngIf="settingsForm.get('uncheckedValue')?.disabled">
-                <i class="pi pi-lock"></i> Enable mapping
-              </span>
+              <span class="chk-required-star" *ngIf="isMappingActive">*</span>
             </label>
+
             <input
               pInputText
               formControlName="uncheckedValue"
               placeholder="e.g. NO, 0, false"
               class="chk-input"
+              [class.chk-input--disabled]="!isMappingActive"
             />
+
+            <span class="chk-lock-note" *ngIf="!isMappingActive">
+              <i class="pi pi-lock"></i> Enable mapping to edit
+            </span>
+
+            <small class="chk-error"
+              *ngIf="settingsForm.get('uncheckedValue')?.invalid
+                  && settingsForm.get('uncheckedValue')?.touched">
+              <i class="pi pi-exclamation-triangle"></i>
+              This field is required when mapping is enabled
+            </small>
           </div>
 
         </div>
@@ -190,12 +246,10 @@
     >
       <div class="fx-actions flex justify-between">
 
-        <!-- Component name tag -->
         <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
           #{{ fxData?.name }}-<span class="text-xs italic">{{ fxData?.id }}</span>
         </div>
 
-        <!-- Action buttons -->
         <div class="flex justify-around items-end mr-2">
           <div
             class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t"

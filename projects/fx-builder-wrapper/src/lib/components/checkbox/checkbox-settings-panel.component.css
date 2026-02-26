@@ -116,10 +116,13 @@ lib-checkbox-settings-panel .fx-element:hover .fx-overlay .fx-actions {
 }
 
 /* ── Two-column grid ───────────────────────────────────────────── */
+/* align-items: start keeps both columns anchored at the top so   */
+/* the lock-note / error below one input never shifts the other.  */
 .chk-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.875rem;
+  align-items: start;
 }
 
 /* ── Field ─────────────────────────────────────────────────────── */
@@ -237,6 +240,53 @@ lib-checkbox-settings-panel .fx-element:hover .fx-overlay .fx-actions {
   font-style: italic;
   line-height: 1.4;
 }
+
+/* ── Required star ─────────────────────────────────────────────── */
+.chk-required-star {
+  color: #ef4444;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* ── Lock note (sits BELOW the input — not inside label) ──────── */
+/* Keeping it outside the label prevents column-height mismatch   */
+/* in the 2-column grid when one column has the badge and the     */
+/* other doesn't.                                                 */
+.chk-lock-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.69rem;
+  font-weight: 500;
+  color: #92400e;
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  padding: 2px 7px;
+  width: fit-content;
+  margin-top: 1px;
+}
+.chk-lock-note i { font-size: 0.65rem; }
+
+/* ── Disabled input visual ─────────────────────────────────────── */
+.chk-input--disabled.p-inputtext,
+.chk-input--disabled {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  border-color: #e5e7eb !important;
+}
+
+/* ── Validation error ──────────────────────────────────────────── */
+.chk-error {
+  font-size: 0.72rem;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 1px;
+}
+.chk-error i { font-size: 0.68rem; }
 
 /* ── Footer ────────────────────────────────────────────────────── */
 .chk-dialog-footer {

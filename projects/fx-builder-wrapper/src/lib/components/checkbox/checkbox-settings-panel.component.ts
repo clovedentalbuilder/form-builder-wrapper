@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output, ViewEncapsulation } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FxComponent, FxMode } from '@instantsys-labs/fx';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -21,14 +21,20 @@ export class CheckboxSettingsPanelComponent extends FxComponent {
   protected override readonly FxMode = FxMode;
 
   settingsForm = new FormGroup({
-    label:                  new FormControl(''),
-    isRequired:             new FormControl('false'),
-    errorMsg:               new FormControl('This field is required'),
-    customClass:            new FormControl(''),
-    useUserDefinedMapping:  new FormControl('false'),
-    checkedValue:           new FormControl({ value: '', disabled: true }),
-    uncheckedValue:         new FormControl({ value: '', disabled: true }),
+    label:                 new FormControl(''),
+    tooltipText:           new FormControl(''),           // new: tooltip shown on hover
+    isRequired:            new FormControl('false'),
+    errorMsg:              new FormControl('This field is required'),
+    customClass:           new FormControl(''),
+    useUserDefinedMapping: new FormControl('false'),
+    checkedValue:          new FormControl({ value: '', disabled: true }),
+    uncheckedValue:        new FormControl({ value: '', disabled: true }),
   });
+
+  /** True when "Use user defined mapping" is set to Yes */
+  get isMappingActive(): boolean {
+    return this.settingsForm.get('useUserDefinedMapping')?.value === 'true';
+  }
 
   openDialog(): void {
     this.populateForm();
@@ -36,11 +42,11 @@ export class CheckboxSettingsPanelComponent extends FxComponent {
   }
 
   private populateForm(): void {
-    // Read from the single 'checkbox-config' key (same pattern as dynamic-table's 'table-config')
     const config = this.fxData?.settings?.find((s: any) => s.key === 'checkbox-config')?.value || {};
 
     this.settingsForm.patchValue({
       label:                 config.label                 || 'Checkbox Label',
+      tooltipText:           config.tooltipText           || '',
       isRequired:            config.isRequired            || 'false',
       errorMsg:              config.errorMsg              || 'This field is required',
       customClass:           config.customClass           || '',
@@ -53,21 +59,34 @@ export class CheckboxSettingsPanelComponent extends FxComponent {
   }
 
   applyMappingState(): void {
-    const useMapping = this.settingsForm.get('useUserDefinedMapping')?.value === 'true';
-    if (useMapping) {
-      this.settingsForm.get('checkedValue')?.enable();
-      this.settingsForm.get('uncheckedValue')?.enable();
+    const checkedCtrl   = this.settingsForm.get('checkedValue');
+    const uncheckedCtrl = this.settingsForm.get('uncheckedValue');
+
+    if (this.isMappingActive) {
+      checkedCtrl?.enable();
+      checkedCtrl?.setValidators([Validators.required]);   // mandatory when mapping on
+      uncheckedCtrl?.enable();
+      uncheckedCtrl?.setValidators([Validators.required]); // mandatory when mapping on
     } else {
-      this.settingsForm.get('checkedValue')?.disable();
-      this.settingsForm.get('uncheckedValue')?.disable();
+      checkedCtrl?.disable();
+      checkedCtrl?.clearValidators();
+      uncheckedCtrl?.disable();
+      uncheckedCtrl?.clearValidators();
     }
+
+    checkedCtrl?.updateValueAndValidity();
+    uncheckedCtrl?.updateValueAndValidity();
   }
 
   saveSettings(): void {
+    // Block save and surface errors if mapping fields are empty
+    if (this.settingsForm.invalid) {
+      this.settingsForm.markAllAsTouched();
+      return;
+    }
+
     const raw = this.settingsForm.getRawValue();
 
-    // Write the full config back into the single 'checkbox-config' setting key
-    // (same pattern as dynamic-table's updateSettings() → 'table-config')
     const configSetting = this.fxData?.settings?.find((s: any) => s.key === 'checkbox-config');
     if (configSetting) {
       configSetting.value = raw;
