@@ -16,7 +16,8 @@ import {
   FormGroup,
   Validators,
   AbstractControl,
-  ValidationErrors
+  ValidationErrors,
+  ValidatorFn
 } from '@angular/forms';
 import {
   FxBaseComponent,
@@ -89,33 +90,31 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit, Afte
 
   ngAfterViewInit(): void {
     const key = this.fxComponent?.fxData?.name;
-
     if (key) {
       const datePatch = this.datePickerMap.get(key);
-
-      // ── Build min / max ──────────────────────────────────────────────
-      const todayDate = new Date();
-      const todayFormatted = this.formatDate(todayDate);
-
+      const finalDate = datePatch || this.formatDate(new Date());
+  
+      const today = new Date();
+      const max = new Date();
+      max.setDate(today.getDate());
+      this.maxDate = this.formatDate(max);
+  
       if (this.trtStartDatePatch) {
         this.minDate = this.trtStartDatePatch;
       } else {
-        const defaultMin = new Date();
-        defaultMin.setDate(todayDate.getDate() - 30);
-        this.minDate = this.formatDate(defaultMin);
+        const min = new Date();
+        min.setDate(today.getDate() - 30);
+        this.minDate = this.formatDate(min);
       }
-      this.maxDate = todayFormatted;
-
-      // ── Attach range validator (Safari / iOS fallback) ───────────────
-      this.attachRangeValidator();
-
-      // ── Patch initial value ──────────────────────────────────────────
-      const rawDate = datePatch?.date ?? datePatch;
-      const normalized = this.normalizeDate(rawDate) ?? todayFormatted;
-      const clamped = this.clampToRange(normalized);
-      this.datePickerForm.patchValue({ date: clamped });
+  
+      // Apply validator AFTER min/max are set
+      this.datePickerForm.get('date')?.setValidators([
+        Validators.required,
+        this.dateRangeValidator()
+      ]);
+      this.datePickerForm.get('date')?.updateValueAndValidity();
+      this.datePickerForm.patchValue({ date: finalDate });
     }
-
     this.getContextBaseId();
   }
 
@@ -189,6 +188,22 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit, Afte
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  // Add after formatDate method
+  private dateRangeValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+
+      const selected = new Date(value);
+      const min = this.minDate ? new Date(this.minDate) : null;
+      const max = this.maxDate ? new Date(this.maxDate) : null;
+
+      if (min && selected < min) return { minDate: true };
+      if (max && selected > max) return { maxDate: true };
+      return null;
+    };
   }
 
   private normalizeDate(value: unknown): string | null {
