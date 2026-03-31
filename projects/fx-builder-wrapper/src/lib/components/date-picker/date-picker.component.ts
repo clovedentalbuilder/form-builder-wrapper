@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FxBaseComponent, FxComponent, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { CalendarModule } from 'primeng/calendar';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { Subject, takeUntil } from 'rxjs';
+
 @Component({
   selector: 'lib-date-picker',
   standalone: true,
@@ -15,44 +16,38 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class DatePickerComponent extends FxBaseComponent implements OnInit {
   private fb = inject(FormBuilder);
-  //  minDate = new Date();
-  //  maxDate  = new Date();
+
   minDate!: string;
   maxDate!: string;
   today = new Date();
+
   @ViewChild('fxComponent') fxComponent!: FxComponent;
   private destroy$ = new Subject<Boolean>();
   datePickerMap = new Map<string, any>();
   trtStartDatePatch!: string;
 
-
   public datePickerForm: FormGroup = this.fb.group({
     date: ['', [Validators.required]],
-  })
+  });
 
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private fxBuilderWrapperService: FxBuilderWrapperService) {
-    super(cdr)
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient,
+    private fxBuilderWrapperService: FxBuilderWrapperService
+  ) {
+    super(cdr);
     this.onInit.subscribe(() => {
       this._register(this.datePickerForm);
     });
-
   }
 
-
   ngOnInit(): void {
-
     this.fxBuilderWrapperService.variables$
       .pipe(takeUntil(this.destroy$))
       .subscribe((variables: any) => {
         if (!variables) return;
 
         this.datePickerMap = new Map<string, any>();
-
-        // for (const [key, value] of Object.entries(variables) as [string, any][]) {
-        //   if (key.includes('lib-date-picker')) {
-        //     this.datePickerMap.set(key, value);
-        //   }
-        // }
 
         for (const [key, value] of Object.entries(variables) as [string, any][]) {
           if (
@@ -67,35 +62,8 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit {
             const formattedDate = value.split('T')[0];
             this.trtStartDatePatch = formattedDate;
           }
-
         }
       });
-
-
-    // const today = new Date();
-    // this.minDate = new Date(today);
-    // this.minDate.setDate(today.getDate() - 30);
-
-    // this.maxDate = new Date(today);
-    // this.maxDate.setDate(today.getDate() + 30);
-
-    // this.minDate = this.formatDate(new Date(this.today.setDate(new Date().getDate() - 30)));
-    // this.maxDate = this.formatDate(new Date(this.today.setDate(new Date().getDate() + 31)));
-
-    const today = new Date();
-
-    const min = new Date();
-    min.setDate(today.getDate() - 30);
-
-    const max = new Date();
-    max.setDate(today.getDate());
-
-    // this.minDate = this.formatDate(min);
-    // this.maxDate = this.formatDate(max);
-
-    // this.getRangeValues();
-
-
   }
 
   get dateControl() {
@@ -114,10 +82,41 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit {
       this.minDate = this.normalizeDate(this.trtStartDatePatch) || this.formatDate(defaultMinDate);
       this.maxDate = todayFormatted;
 
+      // Add custom range validator after minDate/maxDate are set (Safari fallback)
+      this.addDateRangeValidator();
+
       const patchedDate = this.normalizeDate(datePatch?.date ?? datePatch) || todayFormatted;
       this.datePickerForm.patchValue({ date: this.clampDateInRange(patchedDate) });
     }
     this.getContextBaseId();
+  }
+
+  /**
+   * Adds a custom validator to enforce min/max date range.
+   * This is the primary enforcement mechanism for Safari, which ignores
+   * the HTML min/max attributes on <input type="date">.
+   */
+  private addDateRangeValidator(): void {
+    const dateControl = this.datePickerForm.get('date');
+    if (!dateControl) return;
+
+    const rangeValidator = (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+
+      if (this.minDate && value < this.minDate) {
+        return { minDate: { min: this.minDate, actual: value } };
+      }
+
+      if (this.maxDate && value > this.maxDate) {
+        return { maxDate: { max: this.maxDate, actual: value } };
+      }
+
+      return null;
+    };
+
+    dateControl.addValidators(rangeValidator);
+    dateControl.updateValueAndValidity();
   }
 
   getRangeValues() {
@@ -127,14 +126,11 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit {
       const minOffset = response[this.setting('minDateKey')] || this.setting('minValidation');
       const maxOffset = response[this.setting('maxDateKey')] || this.setting('maxValidation');
 
-      // this.minDate = new Date(today);
-      // this.minDate.setDate(today.getDate() + minOffset);
-
-      // this.maxDate = new Date(today);
-      // this.maxDate.setDate(today.getDate() + maxOffset);
-
       this.minDate = this.formatDate(new Date(this.today.setDate(new Date().getDate() + minOffset)));
       this.maxDate = this.formatDate(new Date(this.today.setDate(new Date().getDate() + maxOffset)));
+
+      // Re-apply validator after range values update
+      this.addDateRangeValidator();
     });
   }
 
@@ -184,20 +180,35 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit {
     return dateValue;
   }
 
+  /**
+   * Handles date input changes.
+   * Clamps the selected value within min/max range and updates BOTH
+   * the reactive form value AND the native DOM input value.
+   * The native input update is critical for Safari, which does not
+   * reflect form patches back to the DOM automatically.
+   */
   onDateInputChange(event: Event): void {
-    const selectedValue = (event.target as HTMLInputElement)?.value;
+    const input = event.target as HTMLInputElement;
+    const selectedValue = input?.value;
+
     const normalizedDate = this.normalizeDate(selectedValue);
     if (!normalizedDate) {
       return;
     }
 
     const clampedDate = this.clampDateInRange(normalizedDate);
+
+    // Patch reactive form value
+    this.datePickerForm.patchValue({ date: clampedDate });
+
+    // Also manually set the native input value — required for Safari
+    // Safari does not sync the DOM input value from reactive form patches
     if (clampedDate !== selectedValue) {
-      this.datePickerForm.patchValue({ date: clampedDate });
+      input.value = clampedDate;
     }
+
+    this.cdr.detectChanges();
   }
-
-
 
   protected settings(): FxSetting[] {
     return [
@@ -209,11 +220,15 @@ export class DatePickerComponent extends FxBaseComponent implements OnInit {
       new FxStringSetting({ key: 'placeHolder', $title: 'Placeholder', value: 'Select Date' }),
       new FxStringSetting({ key: 'label', $title: 'Label', value: '' }),
       new FxStringSetting({ key: 'datePickerErrorMessage', $title: 'Error Message', value: 'Please fill out the field' }),
-
     ];
   }
 
   protected validations(): FxValidation[] {
     return [FxValidatorService.required];
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 }
