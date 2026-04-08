@@ -212,7 +212,7 @@
             <!-- Metadata on right -->
             <div class="title_notes ml-2">
               <!-- Title -->
-              <div class="input-container" [ngClass]="{'mb-3': !titleCtrl.invalid}">
+              <div class="input-container" [ngClass]="{'mb-3': !(titleCtrl.touched && titleCtrl.invalid)}">
                 <label class="font-semibold text-sm input-title m-0 -mt-1">Title</label>
                 <input [(ngModel)]="file.title" name="title{{i}}" (ngModelChange)="onMetaChange()"
                   placeholder="Enter title" class=" rounded px-3 py-2  w-full outline-none focus:ring" required
