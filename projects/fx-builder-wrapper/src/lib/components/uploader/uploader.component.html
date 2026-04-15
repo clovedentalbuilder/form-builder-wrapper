@@ -2,7 +2,7 @@
   <div class="custom-upload flex flex-col items-start justify-center p-0 rounded-sm">
     <div class="flex gap-8 items-center mb-2">
       <!-- <p class="text-base font-semibold">Patient Images</p> -->
-      <div class="flex justify-center items-center gap-1 upload-default cursor-pointer upload" *ngIf="uploadedFiles.length < setting('maxFileNo')" (click)="openFileDialog()">
+      <div class="flex justify-center items-center gap-1 cursor-pointer upload" *ngIf="uploadedFiles.length < setting('maxFileNo')" (click)="openFileDialog()">
         <div>
           <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 29 28" fill="none">
             <path fill-rule="evenodd" clip-rule="evenodd"
