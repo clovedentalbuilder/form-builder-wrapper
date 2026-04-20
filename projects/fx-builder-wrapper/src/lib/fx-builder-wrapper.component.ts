@@ -19,6 +19,7 @@ import { SummaryComponent } from './components/summary/summary.component';
 import { CustomizeDropdownComponent } from './components/customize-dropdown/customize-dropdown.component';
 import { HeadingComponent } from './components/heading/heading.component';
 import { CheckboxComponent } from './components/checkbox/checkbox.component';
+import { RadioButtonWithOtherComponent } from './components/radio-button-with-other/radio-button-with-other.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -88,7 +89,7 @@ export class FxBuilderWrapperComponent implements OnInit {
      if (!Boolean(this.fxWrapperService.getComponent('lib-dropdown-with-search'))) {
       this.fxWrapperService.registerCustomComponent('Dropdown with Search', 'lib-dropdown-with-search', DropdownWithSearchComponent);
     }
-     if (!Boolean(this.fxWrapperService.getComponent('lib-customize-dropdown'))) {
+    if (!Boolean(this.fxWrapperService.getComponent('lib-customize-dropdown'))) {
       this.fxWrapperService.registerCustomComponent('Multiselect with Form', 'lib-customize-dropdown', CustomizeDropdownComponent);
     }
     //   if (!Boolean(this.fxWrapperService.getComponent('lib-accordian'))) {
@@ -102,6 +103,9 @@ export class FxBuilderWrapperComponent implements OnInit {
     }
     if (!Boolean(this.fxWrapperService.getComponent('lib-checkbox'))) {
       this.fxWrapperService.registerCustomComponent('Checkbox', 'lib-checkbox', CheckboxComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('radio-button-with-other'))) {
+      this.fxWrapperService.registerCustomComponent('Dynamic Radio Button with Other', 'radio-button-with-other', RadioButtonWithOtherComponent);
     }
   };
 

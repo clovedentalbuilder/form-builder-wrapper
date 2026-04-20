@@ -1,0 +1,77 @@
+<lib-radio-button-with-other-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
+  <div [ngClass]="radioConfig.customClass">
+    <form [formGroup]="radioForm" class="flex gap-4 w-full">
+
+      <!-- Radio group -->
+      <div class="flex-1">
+        <label class="font-semibold text-gray-800">
+          {{ radioConfig.label }} <span class="field-required" *ngIf="isRequired">*</span>
+        </label>
+
+        <div class="flex gap-3 my-2 flex-wrap">
+          <label
+            *ngFor="let opt of options"
+            class="flex items-center gap-2 cursor-pointer text-gray-700"
+          >
+            <input
+              type="radio"
+              formControlName="selectedRadioOption"
+              [value]="opt.value"
+              (change)="onSelectionChange(opt.value)"
+              class="w-4 h-4 accent-blue-600 cursor-pointer"
+            />
+            <span>{{ opt.label }}</span>
+          </label>
+        </div>
+
+        <small
+          *ngIf="radioForm.get('selectedRadioOption')?.touched && radioForm.get('selectedRadioOption')?.errors?.['required']"
+          class="text-red-500"
+        >
+          {{ radioConfig.errorMessage }}
+        </small>
+      </div>
+
+      <!-- Other textarea -->
+      <div *ngIf="showOtherInput" class="flex-1 relative">
+        <label class="input-label dark:text-gray-300">
+          {{ radioConfig.otherLabel }} <span class="field-required" *ngIf="isChildRequired">*</span>
+        </label>
+
+        <textarea
+          formControlName="otherInput"
+          placeholder="{{ radioConfig.otherPlaceholder }}"
+          class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows="3"
+          [maxlength]="otherMaxLength"
+          [ngClass]="{
+            'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed': radioForm.get('otherInput')?.disabled
+          }"
+        ></textarea>
+
+        <div class="flex justify-between items-center">
+          <span>
+            <small
+              *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['required']"
+              class="text-red-500"
+            >
+              {{ radioConfig.errorMessageOther }}
+            </small>
+
+            <small
+              *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['pattern']"
+              class="text-red-500"
+            >
+              Special characters are not allowed.
+            </small>
+          </span>
+
+          <small class="text-gray-500 whitespace-nowrap ml-auto" *ngIf="!radioForm.get('otherInput')?.disabled">
+            {{ remainingChars }} character(s) left
+          </small>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</lib-radio-button-with-other-settings-panel>
