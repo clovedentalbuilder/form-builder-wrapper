@@ -182,6 +182,13 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     };
   }
 
+  get textareaGridColumn(): string {
+    if (!this.options.length) return 'span 4';
+    const colOfOther = ((this.options.length - 1) % 4) + 1;
+    if (colOfOther === 4) return '4 / span 1';
+    return `span ${4 - colOfOther}`;
+  }
+
   onSelectionChange(value: string): void {
     const otherControl = this.radioForm.get('otherInput');
     this.showOtherInput = value === 'other';
