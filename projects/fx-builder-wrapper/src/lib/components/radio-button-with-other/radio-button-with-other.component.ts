@@ -77,8 +77,9 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
       const key = this.fxComponent?.fxData?.name;
       if (key && this.radioMap.has(key)) {
         const data = this.radioMap.get(key);
-        this.radioForm.patchValue(data);
-        this.onSelectionChange(data.selectedRadioOption);
+        const resolvedValue = data.selectedRadioOption ?? data.selectedOption ?? '';
+        this.radioForm.patchValue({ selectedRadioOption: resolvedValue, otherInput: data.otherInput ?? '' });
+        this.onSelectionChange(resolvedValue);
       }
     }, 200);
   }
@@ -88,9 +89,9 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
       .pipe(takeUntil(this.destroy$))
       .subscribe((variables: any) => {
         if (!variables) return;
-        for (const [key, value] of Object.entries(variables) as [string, any][]) {
-          if (value && typeof value === 'object' && 'selectedRadioOption' in value) {
-            this.radioMap.set(key, value);
+        for (const [key, entry] of Object.entries(variables) as [string, any][]) {
+          if (entry && typeof entry === 'object' && ('selectedRadioOption' in entry || 'selectedOption' in entry)) {
+            this.radioMap.set(key, entry);
           }
         }
       });
