@@ -182,11 +182,26 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     };
   }
 
+  get regularOptions(): any[] {
+    return this.options.filter(o => o.value !== 'other');
+  }
+
+  get otherOption(): any {
+    return this.options.find(o => o.value === 'other');
+  }
+
+  get colOfOther(): number {
+    if (!this.options.length) return 0;
+    return ((this.options.length - 1) % 4) + 1;
+  }
+
+  get combineOtherWithTextarea(): boolean {
+    return this.showOtherInput && !!this.otherOption && this.colOfOther !== 4;
+  }
+
   get textareaGridColumn(): string {
-    if (!this.options.length) return 'span 4';
-    const colOfOther = ((this.options.length - 1) % 4) + 1;
-    if (colOfOther === 4) return '4 / span 1';
-    return `span ${4 - colOfOther}`;
+    if (this.colOfOther === 4) return '4 / span 1';
+    return 'span 1';
   }
 
   onSelectionChange(value: string): void {

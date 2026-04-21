@@ -6,11 +6,11 @@
         {{ radioConfig.label }} <span class="field-required" *ngIf="isRequired">*</span>
       </label>
 
-      <!-- 4-column grid: radio options + other textarea inline -->
       <div class="grid grid-cols-4 gap-3 items-start">
 
+        <!-- Regular options (all except Other) -->
         <label
-          *ngFor="let opt of options"
+          *ngFor="let opt of regularOptions"
           class="flex items-start gap-2 cursor-pointer text-gray-700 py-1"
         >
           <input
@@ -23,8 +23,56 @@
           <span>{{ opt.label }}</span>
         </label>
 
-        <!-- Other textarea: spans remaining columns in the same row -->
-        <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn" class="relative">
+        <!-- Other: combined (not in last col + textarea visible) → spans 2 cols, same line -->
+        <div
+          *ngIf="combineOtherWithTextarea"
+          [style.grid-column]="'span 2'"
+          class="flex flex-row gap-3 items-start"
+        >
+          <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+            <input
+              type="radio"
+              formControlName="selectedRadioOption"
+              value="other"
+              (change)="onSelectionChange('other')"
+              class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+            />
+            <span>{{ otherOption?.label }}</span>
+          </label>
+          <div class="flex-1">
+            <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+          </div>
+        </div>
+
+        <!-- Other: separate (in last col OR textarea not visible) -->
+        <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
+          <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1">
+            <input
+              type="radio"
+              formControlName="selectedRadioOption"
+              value="other"
+              (change)="onSelectionChange('other')"
+              class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+            />
+            <span>{{ otherOption?.label }}</span>
+          </label>
+          <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
+            <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+          </div>
+        </ng-container>
+
+      </div>
+
+      <small
+        *ngIf="radioForm.get('selectedRadioOption')?.touched && radioForm.get('selectedRadioOption')?.errors?.['required']"
+        class="text-red-500 block mt-1"
+      >
+        {{ radioConfig.errorMessage }}
+      </small>
+
+      <!-- Textarea template (reused in both combined and separate cases) -->
+      <ng-template #otherTextarea>
+        <div class="relative">
           <label class="input-label text-gray-700 block mb-1">
             {{ radioConfig.otherLabel }} <span class="field-required" *ngIf="isChildRequired">*</span>
           </label>
@@ -48,35 +96,24 @@
               >
                 {{ radioConfig.errorMessageOther }}
               </small>
-
               <small
                 *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['pattern']"
                 class="text-red-500"
               >
                 Special characters are not allowed.
               </small>
-
               <ng-container *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['regexErrors'] as regexErrors">
                 <small *ngFor="let err of regexErrors | keyvalue" class="text-red-500 block">
                   {{ err.value }}
                 </small>
               </ng-container>
             </span>
-
             <small class="text-gray-500 whitespace-nowrap ml-auto" *ngIf="!radioForm.get('otherInput')?.disabled">
               {{ remainingChars }} character(s) left
             </small>
           </div>
         </div>
-
-      </div>
-
-      <small
-        *ngIf="radioForm.get('selectedRadioOption')?.touched && radioForm.get('selectedRadioOption')?.errors?.['required']"
-        class="text-red-500 block mt-1"
-      >
-        {{ radioConfig.errorMessage }}
-      </small>
+      </ng-template>
 
     </form>
   </div>
