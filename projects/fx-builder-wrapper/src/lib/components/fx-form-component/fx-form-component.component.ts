@@ -19,6 +19,7 @@ import { SummaryComponent } from '../summary/summary.component';
 import { CustomizeDropdownComponent } from '../customize-dropdown/customize-dropdown.component';
 import { HeadingComponent } from '../heading/heading.component';
 import { CheckboxComponent } from '../checkbox/checkbox.component';
+import { RadioButtonWithOtherComponent } from '../radio-button-with-other/radio-button-with-other.component';
 // import { CustomizeDropdownComponent } from '../multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -91,6 +92,7 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       { name: 'Summary', key: 'lib-summary', component: SummaryComponent },
       { name: 'Header', key: 'lib-heading', component: HeadingComponent },
       { name: 'Checkbox', key: 'lib-checkbox', component: CheckboxComponent },
+      { name: 'Dynamic Radio Button with Other', key: 'radio-button-with-other', component: RadioButtonWithOtherComponent },
     ];
     
     components.forEach(({ name, key, component }) => {

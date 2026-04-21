@@ -64,6 +64,12 @@
             >
               Special characters are not allowed.
             </small>
+
+            <ng-container *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['regexErrors'] as regexErrors">
+              <small *ngFor="let err of regexErrors | keyvalue" class="text-red-500 block">
+                {{ err.value }}
+              </small>
+            </ng-container>
           </span>
 
           <small class="text-gray-500 whitespace-nowrap ml-auto" *ngIf="!radioForm.get('otherInput')?.disabled">

@@ -11,7 +11,10 @@
   <ng-template pTemplate="header">
     <div class="rbo-dialog-header">
       <i class="pi pi-cog rbo-header-icon"></i>
-      <span class="rbo-dialog-title">Radio Button Settings</span>
+      <div class="rbo-header-text">
+        <span class="rbo-dialog-title">Radio Button Settings</span>
+        <span class="rbo-dialog-name" *ngIf="fxData?.name">#{{ fxData?.name }}</span>
+      </div>
     </div>
   </ng-template>
 
@@ -120,6 +123,19 @@
       </div>
       <div class="rbo-section-body">
 
+        <div class="rbo-id-row" *ngIf="fxData?.id">
+          <span class="rbo-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+          <span class="rbo-id-value">{{ fxData!.id }}</span>
+        </div>
+
+        <div class="rbo-field">
+          <label class="rbo-label">
+            Name <span class="rbo-required-star">*</span>
+            <span class="rbo-name-hint">used to identify this component (e.g. clinical_reasons)</span>
+          </label>
+          <input pInputText formControlName="name" placeholder="e.g. clinical_reasons" class="rbo-input" />
+        </div>
+
         <div class="rbo-grid-2">
           <div class="rbo-field">
             <label class="rbo-label">Label</label>
@@ -199,6 +215,55 @@
               <input pInputText formControlName="errorMessageOther" placeholder="Please fill out this field" class="rbo-input" />
             </div>
           </div>
+
+          <!-- Regex Validation -->
+          <div class="rbo-regex-divider"></div>
+
+          <div class="rbo-field">
+            <label class="rbo-label">Enable Regex Validation</label>
+            <div class="rbo-radio-group">
+              <label class="rbo-radio-option">
+                <input type="radio" formControlName="enableRegex" value="true" />
+                <span class="rbo-radio-label rbo-radio-yes">Yes</span>
+              </label>
+              <label class="rbo-radio-option">
+                <input type="radio" formControlName="enableRegex" value="false" />
+                <span class="rbo-radio-label rbo-radio-no">No</span>
+              </label>
+            </div>
+          </div>
+
+          <ng-container *ngIf="settingsForm.get('enableRegex')?.value === 'true'">
+            <div class="rbo-regex-header">
+              <span class="rbo-label">Error Label</span>
+              <span class="rbo-label">Regex Pattern</span>
+              <span></span>
+            </div>
+
+            <div *ngFor="let rx of regexList; let i = index" class="rbo-option-row">
+              <input
+                pInputText
+                [(ngModel)]="rx.label"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="e.g. Invalid format"
+                class="rbo-input"
+              />
+              <input
+                pInputText
+                [(ngModel)]="rx.pattern"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="e.g. ^[A-Za-z]+$"
+                class="rbo-input rbo-input-mono"
+              />
+              <button type="button" class="rbo-remove-btn" (click)="removeRegex(i)" title="Remove">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+
+            <button type="button" class="rbo-add-btn" (click)="addRegex()">
+              <i class="pi pi-plus"></i> Add Regex
+            </button>
+          </ng-container>
         </ng-container>
 
       </div>

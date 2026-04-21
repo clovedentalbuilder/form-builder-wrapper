@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ApiServiceRegistry } from '@instantsys-labs/core';
 import { FxBaseComponent, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { Subject, takeUntil } from 'rxjs';
@@ -166,6 +166,21 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     });
   }
 
+  private buildRegexValidator(regexList: { label: string; pattern: string }[]): ValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value || !regexList?.length) return null;
+      const errors: { [key: string]: string } = {};
+      regexList.forEach((item, index) => {
+        try {
+          if (!new RegExp(item.pattern).test(control.value)) {
+            errors[`regex_${index}`] = item.label || `Pattern ${index + 1} failed`;
+          }
+        } catch { }
+      });
+      return Object.keys(errors).length ? { regexErrors: errors } : null;
+    };
+  }
+
   onSelectionChange(value: string): void {
     const otherControl = this.radioForm.get('otherInput');
     this.showOtherInput = value === 'other';
@@ -173,10 +188,13 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     if (this.showOtherInput) {
       this.isChildRequired = true;
       otherControl?.enable();
-      otherControl?.setValidators([
-        Validators.required,
-        Validators.pattern(/^[\x09\x0A\x0D\x20-\x7E]*$/)
-      ]);
+
+      const validators: ValidatorFn[] = [Validators.required];
+      const regexList = this.radioConfig?.regexList;
+      if (this.radioConfig?.enableRegex === 'true' && regexList?.length) {
+        validators.push(this.buildRegexValidator(regexList));
+      }
+      otherControl?.setValidators(validators);
     } else {
       this.isChildRequired = false;
       otherControl?.disable();

@@ -31,7 +31,10 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
     { option: 'No',  value: 'no'  },
   ];
 
+  regexList: { label: string; pattern: string }[] = [];
+
   settingsForm = new FormGroup({
+    name:             new FormControl<string>(''),
     optionSource:     new FormControl<string>('api'),
     apiUrl:           new FormControl<string>(''),
     serviceName:      new FormControl<string>(''),
@@ -39,6 +42,7 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
     valueKey:         new FormControl<string>('value'),
     label:            new FormControl<string>(''),
     showOtherOption:  new FormControl<string>('false'),
+    enableRegex:      new FormControl<string>('false'),
     otherLabel:       new FormControl<string>('Other'),
     otherPlaceholder: new FormControl<string>(''),
     otherMaxLength:   new FormControl<number>(768),
@@ -47,6 +51,11 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
     errorMessageOther:new FormControl<string>('Please fill out this field'),
     customClass:      new FormControl<string>(''),
   });
+
+  private cleanName(name: string | undefined): string {
+    if (!name) return '';
+    return name.replace(/-[0-9a-f]{8,}$/i, '');
+  }
 
   get isApiMode(): boolean {
     return this.settingsForm.get('optionSource')?.value === 'api';
@@ -61,6 +70,7 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
     const config = this.fxData?.settings?.find((s: any) => s.key === 'radio-config')?.value || {};
 
     this.settingsForm.patchValue({
+      name:              this.cleanName(this.fxData?.name),
       optionSource:      config.optionSource      || 'api',
       apiUrl:            config.apiUrl            || '',
       serviceName:       config.serviceName       || '',
@@ -68,6 +78,7 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
       valueKey:          config.valueKey          || 'value',
       label:             config.label             || '',
       showOtherOption:   config.showOtherOption   || 'false',
+      enableRegex:       config.enableRegex       || 'false',
       otherLabel:        config.otherLabel        || 'Other',
       otherPlaceholder:  config.otherPlaceholder  || '',
       otherMaxLength:    config.otherMaxLength     || 768,
@@ -80,6 +91,8 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
     if (config.manualOptions?.length) {
       this.manualOptions = [...config.manualOptions];
     }
+
+    this.regexList = config.regexList?.length ? [...config.regexList] : [];
   }
 
   addOption(): void {
@@ -90,16 +103,29 @@ export class RadioButtonWithOtherSettingsPanelComponent extends FxComponent {
     this.manualOptions.splice(index, 1);
   }
 
+  addRegex(): void {
+    this.regexList.push({ label: '', pattern: '' });
+  }
+
+  removeRegex(index: number): void {
+    this.regexList.splice(index, 1);
+  }
+
   saveSettings(): void {
     const raw = this.settingsForm.getRawValue();
     const config = {
       ...raw,
       manualOptions: !this.isApiMode ? [...this.manualOptions] : [],
+      regexList: raw.enableRegex === 'true' ? [...this.regexList] : [],
     };
 
     const configSetting = this.fxData?.settings?.find((s: any) => s.key === 'radio-config');
     if (configSetting) {
       configSetting.value = config;
+    }
+
+    if (this.fxData && raw.name) {
+      this.fxData.name = raw.name;
     }
 
     this.configuration.emit(config);

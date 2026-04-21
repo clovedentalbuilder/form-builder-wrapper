@@ -43,7 +43,9 @@ lib-radio-button-with-other-settings-panel .fx-element:hover .fx-overlay .fx-act
 
 .rbo-dialog-header { display: flex; align-items: center; gap: 0.6rem; }
 .rbo-header-icon   { font-size: 1rem; color: rgba(255,255,255,0.9); }
+.rbo-header-text   { display: flex; flex-direction: column; gap: 0.1rem; }
 .rbo-dialog-title  { font-size: 1rem; font-weight: 600; color: #fff; }
+.rbo-dialog-name   { font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.75); letter-spacing: 0.03em; }
 
 .rbo-settings-body { display: flex; flex-direction: column; gap: 0.875rem; }
 
@@ -100,6 +102,12 @@ lib-radio-button-with-other-settings-panel .fx-element:hover .fx-overlay .fx-act
 .rbo-radio-label {
   font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; border: 1px solid transparent;
 }
+.rbo-required-star { color: #ef4444; font-weight: 700; margin-left: 2px; }
+.rbo-name-hint     { font-size: 0.68rem; font-weight: 400; color: #9ca3af; font-style: italic; }
+.rbo-id-row        { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
+.rbo-id-badge      { font-size: 0.7rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 0.25rem; }
+.rbo-id-badge i    { font-size: 0.65rem; }
+.rbo-id-value      { font-size: 0.72rem; font-family: 'Courier New', Courier, monospace; color: #334155; word-break: break-all; }
 .rbo-radio-yes    { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
 .rbo-radio-no     { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
 .rbo-radio-api    { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
@@ -116,6 +124,10 @@ lib-radio-button-with-other-settings-panel .fx-element:hover .fx-overlay .fx-act
 }
 .rbo-remove-btn:hover { background: #fecaca; }
 .rbo-remove-btn i { font-size: 0.7rem; }
+
+.rbo-regex-divider { height: 1px; background: #e2e8f0; margin: 0.25rem 0; }
+.rbo-regex-header  { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 0.875rem; padding-bottom: 0.25rem; }
+.rbo-input-mono    { font-family: 'Courier New', Courier, monospace; font-size: 0.8rem !important; }
 
 .rbo-add-btn {
   display: inline-flex; align-items: center; gap: 0.35rem;
