@@ -10,6 +10,20 @@
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   width: 226px;
+  height: 100%;
+}
+
+.rbo-btn-other-wrapper,
+.rbo-btn-other-wrapper .relative {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.rbo-btn-other-wrapper textarea {
+  flex: 1;
+  resize: none;
+  height: 100% !important;
+  min-height: 0;
 }
 .rbo-btn-option:hover {
   border-color: #9bbbd6;
