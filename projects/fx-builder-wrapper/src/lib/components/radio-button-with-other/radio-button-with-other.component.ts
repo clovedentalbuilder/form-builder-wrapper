@@ -37,6 +37,7 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     valueKey:          'value',
     manualOptions:     [],
     label:             '',
+    displayMode:       'radio',
     showOtherOption:   'false',
     otherLabel:        'Other',
     otherPlaceholder:  '',

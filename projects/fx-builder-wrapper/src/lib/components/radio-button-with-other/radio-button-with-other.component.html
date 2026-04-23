@@ -6,62 +6,96 @@
         {{ radioConfig.label }} <span class="field-required" *ngIf="isRequired">*</span>
       </label>
 
-      <div class="grid grid-cols-4 gap-3 items-start">
+      <!-- ── Radio mode ── -->
+      <ng-container *ngIf="radioConfig.displayMode !== 'button'">
+        <div class="grid grid-cols-4 gap-3 items-start">
 
-        <!-- Regular options (all except Other) -->
-        <label
-          *ngFor="let opt of regularOptions"
-          class="flex items-start gap-2 cursor-pointer text-gray-700 py-1"
-        >
-          <input
-            type="radio"
-            formControlName="selectedRadioOption"
-            [value]="opt.value"
-            (change)="onSelectionChange(opt.value)"
-            class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
-          />
-          <span>{{ opt.label }}</span>
-        </label>
-
-        <!-- Other: combined (not in last col + textarea visible) → spans 2 cols, same line -->
-        <div
-          *ngIf="combineOtherWithTextarea"
-          [style.grid-column]="'span 2'"
-          class="flex flex-row gap-3 items-start"
-        >
-          <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+          <!-- Regular options (all except Other) -->
+          <label
+            *ngFor="let opt of regularOptions"
+            class="flex items-start gap-2 cursor-pointer text-gray-700 py-1"
+          >
             <input
               type="radio"
               formControlName="selectedRadioOption"
-              value="other"
-              (change)="onSelectionChange('other')"
+              [value]="opt.value"
+              (change)="onSelectionChange(opt.value)"
               class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
             />
-            <span>{{ otherOption?.label }}</span>
+            <span>{{ opt.label }}</span>
           </label>
-          <div class="flex-1">
-            <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+
+          <!-- Other: combined (not in last col + textarea visible) → spans 2 cols, same line -->
+          <div
+            *ngIf="combineOtherWithTextarea"
+            [style.grid-column]="'span 2'"
+            class="flex flex-row gap-3 items-start"
+          >
+            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+              <input
+                type="radio"
+                formControlName="selectedRadioOption"
+                value="other"
+                (change)="onSelectionChange('other')"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+              />
+              <span>{{ otherOption?.label }}</span>
+            </label>
+            <div class="flex-1">
+              <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+            </div>
           </div>
+
+          <!-- Other: separate (in last col OR textarea not visible) -->
+          <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
+            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1">
+              <input
+                type="radio"
+                formControlName="selectedRadioOption"
+                value="other"
+                (change)="onSelectionChange('other')"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+              />
+              <span>{{ otherOption?.label }}</span>
+            </label>
+            <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
+              <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+            </div>
+          </ng-container>
+
+        </div>
+      </ng-container>
+
+      <!-- ── Button mode ── -->
+      <ng-container *ngIf="radioConfig.displayMode === 'button'">
+        <div class="flex flex-wrap gap-3">
+
+          <button
+            *ngFor="let opt of regularOptions"
+            type="button"
+            (click)="onSelectionChange(opt.value); radioForm.get('selectedRadioOption')?.setValue(opt.value)"
+            [ngClass]="{
+              'rbo-btn-option--selected': radioForm.get('selectedRadioOption')?.value === opt.value
+            }"
+            class="rbo-btn-option"
+          >{{ opt.label }}</button>
+
+          <button
+            *ngIf="otherOption"
+            type="button"
+            (click)="onSelectionChange('other'); radioForm.get('selectedRadioOption')?.setValue('other')"
+            [ngClass]="{
+              'rbo-btn-option--selected': radioForm.get('selectedRadioOption')?.value === 'other'
+            }"
+            class="rbo-btn-option"
+          >{{ otherOption.label }}</button>
+
         </div>
 
-        <!-- Other: separate (in last col OR textarea not visible) -->
-        <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
-          <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1">
-            <input
-              type="radio"
-              formControlName="selectedRadioOption"
-              value="other"
-              (change)="onSelectionChange('other')"
-              class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
-            />
-            <span>{{ otherOption?.label }}</span>
-          </label>
-          <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
-            <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
-          </div>
-        </ng-container>
-
-      </div>
+        <div *ngIf="showOtherInput" class="mt-3">
+          <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+        </div>
+      </ng-container>
 
       <small
         *ngIf="radioForm.get('selectedRadioOption')?.touched && radioForm.get('selectedRadioOption')?.errors?.['required']"
