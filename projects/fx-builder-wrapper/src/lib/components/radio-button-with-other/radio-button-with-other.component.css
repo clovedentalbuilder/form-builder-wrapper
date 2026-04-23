@@ -1,15 +1,15 @@
 .field-required { color: #ef4444; font-weight: 700; }
 
 .rbo-btn-option {
-  padding: 0.4rem 1.25rem;
+  padding: 0.35rem .55rem;
   border: 1.5px solid #d1d5db;
   border-radius: 6px;
   background: #fff;
   color: #111827;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
+  width: 226px;
 }
 .rbo-btn-option:hover {
   border-color: #9bbbd6;
@@ -18,5 +18,5 @@
   background-color: #dae6f0 !important;
   border-color: #9bbbd6 !important;
   color: #111827;
-  font-weight: 600;
+  font-weight: 500;
 }

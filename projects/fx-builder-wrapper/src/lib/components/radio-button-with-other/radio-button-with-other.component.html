@@ -68,7 +68,7 @@
 
       <!-- ── Button mode ── -->
       <ng-container *ngIf="radioConfig.displayMode === 'button'">
-        <div class="flex flex-wrap" style="gap: 10px;">
+        <div class="flex flex-wrap" style="gap: 10px; align-items: flex-start;">
 
           <button
             *ngFor="let opt of regularOptions"
@@ -90,10 +90,14 @@
             class="rbo-btn-option"
           >{{ otherOption.label }}</button>
 
-        </div>
+          <!-- Textarea: fills remaining space in the same row if available, wraps to next line if not -->
+          <div
+            *ngIf="showOtherInput"
+            style="flex: 0 0 226px;"
+          >
+            <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+          </div>
 
-        <div *ngIf="showOtherInput" class="mt-3">
-          <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
         </div>
       </ng-container>
 
