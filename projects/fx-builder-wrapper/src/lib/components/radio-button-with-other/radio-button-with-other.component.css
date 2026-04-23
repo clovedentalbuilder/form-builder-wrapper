@@ -13,6 +13,20 @@
   height: 70px;
 }
 
+textarea::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+  background-color: #F4F4F4;
+  border-radius: 6px;
+}
+textarea::-webkit-scrollbar {
+  width: 8px;
+  background-color: #F4F4F4;
+}
+textarea::-webkit-scrollbar-thumb {
+  background-color: #999999;
+  border-radius: 6px;
+}
+
 .rbo-btn-textarea-container textarea {
   height: 70px;
   min-height: unset;
