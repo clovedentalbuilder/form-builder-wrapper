@@ -28,7 +28,7 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .rbo-btn-textarea-container textarea {
-  height: 70px;
+  height: 70px !important;
   min-height: unset;
 }
 
