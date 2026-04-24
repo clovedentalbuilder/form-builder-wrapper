@@ -27,8 +27,8 @@
   height: 85px;
 }
 
-.rbo-btn-textarea-container textarea {
-    flex: 0 0 215px;
+.rbo-btn-textarea-container{
+  flex: 0 0 215px;
 }
 
 @media (max-width: 600px) {
@@ -36,7 +36,7 @@
     width: 100%;
   }
 
-  .rbo-btn-textarea-container textarea {
+  .rbo-btn-textarea-container {
     width: 100% !important;
     flex: unset;
   }
