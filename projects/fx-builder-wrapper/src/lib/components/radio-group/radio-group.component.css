@@ -2,9 +2,9 @@
     gap: 1rem;
 }
 
-  .field-required {
-  color: red;
+.field-required {
+  color: #D60000;
   font-size: 1.1em;  /* Adjust size if needed */
   /* vertical-align: super;   */
-  /* margin-left: 5px; */
+  margin-left: 5px;
 }

@@ -2,8 +2,10 @@
   <div [ngClass]="radioConfig.customClass">
     <form [formGroup]="radioForm" class="w-full">
 
-      <label class="font-semibold text-gray-800 block mb-2">
-        {{ radioConfig.label }} <span class="field-required" *ngIf="isRequired">*</span>
+      <label class="input_label font-semibold">
+        {{ radioConfig.label }}
+        <span *ngIf="radioConfig.subLabel" class="sub_label">{{ radioConfig.subLabel }}</span>
+        <span class="field-required ml-1" *ngIf="isRequired">*</span>
       </label>
 
       <!-- ── Radio mode ── -->
@@ -104,7 +106,7 @@
 
       <small
         *ngIf="radioForm.get('selectedRadioOption')?.touched && radioForm.get('selectedRadioOption')?.errors?.['required']"
-        class="text-red-500 block mt-1"
+        class="error_message block mt-1"
       >
         {{ radioConfig.errorMessage }}
       </small>
@@ -127,27 +129,22 @@
             }"
           ></textarea>
 
-          <div class="flex justify-between items-center">
-            <span>
-              <small
-                *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['required']"
-                class="text-red-500"
-              >
-                {{ radioConfig.errorMessageOther }}
+          <div class="flex justify-between items-start">
+            <small *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['required']"
+              class="error_message">
+              {{ radioConfig.errorMessageOther }}
+            </small>
+            <small *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['pattern']"
+              class="error_message">
+              Special characters are not allowed.
+            </small>
+            <ng-container
+              *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['regexErrors'] as regexErrors">
+              <small *ngFor="let err of regexErrors | keyvalue" class="error_message block">
+                {{ err.value }}
               </small>
-              <small
-                *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['pattern']"
-                class="text-red-500"
-              >
-                Special characters are not allowed.
-              </small>
-              <ng-container *ngIf="radioForm.get('otherInput')?.touched && radioForm.get('otherInput')?.errors?.['regexErrors'] as regexErrors">
-                <small *ngFor="let err of regexErrors | keyvalue" class="text-red-500 block">
-                  {{ err.value }}
-                </small>
-              </ng-container>
-            </span>
-            <small class="text-gray-500 whitespace-nowrap ml-auto" *ngIf="!radioForm.get('otherInput')?.disabled">
+            </ng-container>
+            <small class="character_color whitespace-nowrap ml-auto" *ngIf="!radioForm.get('otherInput')?.disabled">
               {{ remainingChars }} character(s) left
             </small>
           </div>
