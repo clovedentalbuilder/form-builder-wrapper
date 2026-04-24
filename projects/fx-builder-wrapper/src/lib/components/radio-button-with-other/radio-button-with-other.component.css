@@ -1,7 +1,7 @@
 .field-required, .error_message { color: #D60000; }
 .character_color { color: #454545; }
 
-.input-label {
+.radio-label {
   font-size: 12px !important;
   padding-bottom: 4px;
   margin: 0 0 0 8px;
