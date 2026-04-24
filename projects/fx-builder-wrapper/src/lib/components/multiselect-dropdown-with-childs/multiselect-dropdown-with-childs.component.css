@@ -30,9 +30,8 @@
     color: #f3a041;
 }
 
-  .field-required {
-  color: red;
-  font-size: 1.1em;  /* Adjust size if needed */
-  
-  /* margin-left: 5px; */
+.field-required {
+  color: #D60000;
+  font-size: 1.1em;  /* Adjust size if needed */  
+  margin-left: 5px;
 }

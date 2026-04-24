@@ -1,6 +1,7 @@
 .field-required {
-  color: red;
+  color: #D60000;
   font-size: 1.1em;
+  margin-left: 5px;
 }
 
 /* ── Reset the hidden native input inside p-checkbox ──────────────────────

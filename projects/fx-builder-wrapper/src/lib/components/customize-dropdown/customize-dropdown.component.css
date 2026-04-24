@@ -90,10 +90,10 @@
 }
 
 .field-required{
-  color: red;
+  color: #D60000;
   font-size: 1.1em;  
   /* vertical-align: super; */
-  /* margin-left: 5px; */
+  margin-left: 5px;
 }
 button{
   height: 33.6px;
