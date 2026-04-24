@@ -1,0 +1,406 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '600px' }"
+  styleClass="cbg-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="cbg-dialog-header">
+      <i class="pi pi-check-square cbg-header-icon"></i>
+      <div class="cbg-header-text">
+        <span class="cbg-dialog-title">Checkbox Group Settings</span>
+        <span class="cbg-dialog-name" *ngIf="fxData?.name">#{{ fxData?.name }}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="cbg-settings-body">
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 1: Option Source       -->
+    <!-- ══════════════════════════════ -->
+    <div class="cbg-section">
+      <div class="cbg-section-header">
+        <i class="pi pi-database"></i>
+        <span>Option Source</span>
+      </div>
+      <div class="cbg-section-body">
+        <div class="cbg-field">
+          <label class="cbg-label">Source</label>
+          <div class="cbg-radio-group">
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="optionSource" value="api" />
+              <span class="cbg-radio-label cbg-radio-api">API</span>
+            </label>
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="optionSource" value="manual" />
+              <span class="cbg-radio-label cbg-radio-manual">Manual</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 2: API Settings        -->
+    <!-- ══════════════════════════════ -->
+    <div class="cbg-section" *ngIf="isApiMode">
+      <div class="cbg-section-header">
+        <i class="pi pi-link"></i>
+        <span>API Configuration</span>
+      </div>
+      <div class="cbg-section-body">
+
+        <div class="cbg-grid-2">
+          <div class="cbg-field">
+            <label class="cbg-label">API Url</label>
+            <input pInputText formControlName="apiUrl" placeholder="e.g. /api/options" class="cbg-input" />
+          </div>
+          <div class="cbg-field">
+            <label class="cbg-label">Service</label>
+            <select formControlName="serviceName" class="cbg-select">
+              <option value="">Select service</option>
+              <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cbg-grid-2">
+          <div class="cbg-field">
+            <label class="cbg-label">Label Key</label>
+            <input pInputText formControlName="labelKey" placeholder="label" class="cbg-input" />
+          </div>
+          <div class="cbg-field">
+            <label class="cbg-label">Value Key</label>
+            <input pInputText formControlName="valueKey" placeholder="value" class="cbg-input" />
+          </div>
+        </div>
+
+        <div class="cbg-field">
+          <label class="cbg-label">
+            Show Textarea for Values
+            <span class="cbg-name-hint">comma-separated option values that show a textarea when selected</span>
+          </label>
+          <input
+            pInputText
+            formControlName="textareaOnValues"
+            placeholder="e.g. option_1, option_2"
+            class="cbg-input"
+          />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 3: Manual Options      -->
+    <!-- ══════════════════════════════ -->
+    <div class="cbg-section" *ngIf="!isApiMode">
+      <div class="cbg-section-header">
+        <i class="pi pi-list"></i>
+        <span>Manual Options</span>
+      </div>
+      <div class="cbg-section-body">
+
+        <div class="cbg-opts-header">
+          <span class="cbg-label">Option Label</span>
+          <span class="cbg-label">Value</span>
+          <span class="cbg-label" style="text-align:center">Textarea</span>
+          <span></span>
+        </div>
+
+        <div *ngFor="let opt of manualOptions; let i = index" class="cbg-opts-row">
+          <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="e.g. Option A" class="cbg-input" />
+          <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="e.g. option_a" class="cbg-input" />
+          <div class="cbg-textarea-toggle-cell">
+            <button
+              type="button"
+              class="cbg-textarea-toggle"
+              [class.cbg-textarea-toggle--on]="opt.hasTextarea"
+              (click)="opt.hasTextarea = !opt.hasTextarea"
+              [title]="opt.hasTextarea ? 'Textarea enabled — click to disable' : 'Click to enable textarea for this option'"
+            >
+              <i class="pi" [class.pi-check-circle]="opt.hasTextarea" [class.pi-circle]="!opt.hasTextarea"></i>
+              <span>{{ opt.hasTextarea ? 'On' : 'Off' }}</span>
+            </button>
+          </div>
+          <button type="button" class="cbg-remove-btn" (click)="removeOption(i)" title="Remove">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+
+        <button type="button" class="cbg-add-btn" (click)="addOption()">
+          <i class="pi pi-plus"></i> Add Option
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 4: Display Settings    -->
+    <!-- ══════════════════════════════ -->
+    <div class="cbg-section">
+      <div class="cbg-section-header">
+        <i class="pi pi-sliders-h"></i>
+        <span>Display Settings</span>
+      </div>
+      <div class="cbg-section-body">
+
+        <div class="cbg-id-row" *ngIf="fxData?.id">
+          <span class="cbg-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+          <span class="cbg-id-value">{{ fxData!.id }}</span>
+        </div>
+
+        <div class="cbg-field">
+          <label class="cbg-label">
+            Name <span class="cbg-required-star">*</span>
+            <span class="cbg-name-hint">used to identify this component (e.g. symptoms)</span>
+          </label>
+          <input pInputText formControlName="name" placeholder="e.g. symptoms" class="cbg-input" />
+        </div>
+
+        <div class="cbg-grid-2">
+          <div class="cbg-field">
+            <label class="cbg-label">Label</label>
+            <input pInputText formControlName="label" placeholder="e.g. Select all that apply" class="cbg-input" />
+          </div>
+          <div class="cbg-field">
+            <label class="cbg-label">Custom CSS Class</label>
+            <input pInputText formControlName="customClass" placeholder="e.g. my-class" class="cbg-input" />
+          </div>
+        </div>
+
+        <div class="cbg-field">
+          <label class="cbg-label">Show as</label>
+          <div class="cbg-radio-group">
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="displayMode" value="checkbox" />
+              <span class="cbg-radio-label cbg-radio-api">Checkbox</span>
+            </label>
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="displayMode" value="button" />
+              <span class="cbg-radio-label cbg-radio-manual">Button</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cbg-grid-2">
+          <div class="cbg-field">
+            <label class="cbg-label">Required</label>
+            <div class="cbg-radio-group">
+              <label class="cbg-radio-option">
+                <input type="radio" formControlName="isRequired" value="true" />
+                <span class="cbg-radio-label cbg-radio-yes">Yes</span>
+              </label>
+              <label class="cbg-radio-option">
+                <input type="radio" formControlName="isRequired" value="false" />
+                <span class="cbg-radio-label cbg-radio-no">No</span>
+              </label>
+            </div>
+          </div>
+          <div class="cbg-field">
+            <label class="cbg-label">Error Message</label>
+            <input pInputText formControlName="errorMessage" placeholder="Please select at least one option" class="cbg-input" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 5: Option Textarea     -->
+    <!-- ══════════════════════════════ -->
+    <div class="cbg-section">
+      <div class="cbg-section-header">
+        <i class="pi pi-align-left"></i>
+        <span>Option Textarea</span>
+      </div>
+      <div class="cbg-section-body">
+
+        <div class="cbg-textarea-hint">
+          <i class="pi pi-info-circle"></i>
+          <span *ngIf="!isApiMode">
+            Enable the <strong>Textarea</strong> toggle on any option above. When that option is checked, a textarea appears inline next to it.
+          </span>
+          <span *ngIf="isApiMode">
+            Enter comma-separated API values in <strong>Show Textarea for Values</strong> above. When one of those options is checked, a textarea appears inline next to it.
+          </span>
+        </div>
+
+        <div class="cbg-grid-2">
+          <div class="cbg-field">
+            <label class="cbg-label">Textarea Label</label>
+            <input pInputText formControlName="textareaLabel" placeholder="Please specify" class="cbg-input" />
+          </div>
+          <div class="cbg-field">
+            <label class="cbg-label">Textarea Placeholder</label>
+            <input pInputText formControlName="textareaPlaceholder" placeholder="Enter here..." class="cbg-input" />
+          </div>
+        </div>
+
+        <div class="cbg-grid-2">
+          <div class="cbg-field">
+            <label class="cbg-label">Max Length</label>
+            <input pInputText type="number" formControlName="textareaMaxLength" class="cbg-input" />
+          </div>
+          <div class="cbg-field">
+            <label class="cbg-label">Required when selected</label>
+            <div class="cbg-radio-group">
+              <label class="cbg-radio-option">
+                <input type="radio" formControlName="textareaRequired" value="true" />
+                <span class="cbg-radio-label cbg-radio-yes">Yes</span>
+              </label>
+              <label class="cbg-radio-option">
+                <input type="radio" formControlName="textareaRequired" value="false" />
+                <span class="cbg-radio-label cbg-radio-no">No</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="cbg-field">
+          <label class="cbg-label">Error Message</label>
+          <input pInputText formControlName="textareaErrorMessage" placeholder="Please fill out this field" class="cbg-input" />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 6: "Other" Option      -->
+    <!-- ══════════════════════════════ -->
+    <div class="cbg-section">
+      <div class="cbg-section-header">
+        <i class="pi pi-pencil"></i>
+        <span>"Other" Option</span>
+      </div>
+      <div class="cbg-section-body">
+
+        <div class="cbg-field">
+          <label class="cbg-label">Show "Other" option</label>
+          <div class="cbg-radio-group">
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="showOtherOption" value="true" />
+              <span class="cbg-radio-label cbg-radio-yes">Yes</span>
+            </label>
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="showOtherOption" value="false" />
+              <span class="cbg-radio-label cbg-radio-no">No</span>
+            </label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.get('showOtherOption')?.value === 'true'">
+          <div class="cbg-grid-2">
+            <div class="cbg-field">
+              <label class="cbg-label">Other Label</label>
+              <input pInputText formControlName="otherLabel" placeholder="Other" class="cbg-input" />
+            </div>
+            <div class="cbg-field">
+              <label class="cbg-label">Other Placeholder</label>
+              <input pInputText formControlName="otherPlaceholder" placeholder="Enter here..." class="cbg-input" />
+            </div>
+          </div>
+          <div class="cbg-grid-2">
+            <div class="cbg-field">
+              <label class="cbg-label">Other Max Length</label>
+              <input pInputText type="number" formControlName="otherMaxLength" class="cbg-input" />
+            </div>
+            <div class="cbg-field">
+              <label class="cbg-label">Other Error Message</label>
+              <input pInputText formControlName="errorMessageOther" placeholder="Please fill out this field" class="cbg-input" />
+            </div>
+          </div>
+
+          <div class="cbg-regex-divider"></div>
+
+          <div class="cbg-field">
+            <label class="cbg-label">Enable Regex Validation</label>
+            <div class="cbg-radio-group">
+              <label class="cbg-radio-option">
+                <input type="radio" formControlName="enableRegex" value="true" />
+                <span class="cbg-radio-label cbg-radio-yes">Yes</span>
+              </label>
+              <label class="cbg-radio-option">
+                <input type="radio" formControlName="enableRegex" value="false" />
+                <span class="cbg-radio-label cbg-radio-no">No</span>
+              </label>
+            </div>
+          </div>
+
+          <ng-container *ngIf="settingsForm.get('enableRegex')?.value === 'true'">
+            <div class="cbg-regex-header">
+              <span class="cbg-label">Error Label</span>
+              <span class="cbg-label">Regex Pattern</span>
+              <span></span>
+            </div>
+
+            <div *ngFor="let rx of regexList; let i = index" class="cbg-option-row">
+              <input pInputText [(ngModel)]="rx.label" [ngModelOptions]="{ standalone: true }" placeholder="e.g. Invalid format" class="cbg-input" />
+              <input pInputText [(ngModel)]="rx.pattern" [ngModelOptions]="{ standalone: true }" placeholder="e.g. ^[A-Za-z]+$" class="cbg-input cbg-input-mono" />
+              <button type="button" class="cbg-remove-btn" (click)="removeRegex(i)" title="Remove">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+
+            <button type="button" class="cbg-add-btn" (click)="addRegex()">
+              <i class="pi pi-plus"></i> Add Regex
+            </button>
+          </ng-container>
+        </ng-container>
+
+      </div>
+    </div>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="cbg-dialog-footer">
+      <button pButton label="Cancel" icon="pi pi-times"
+        class="p-button-outlined p-button-secondary cbg-btn-cancel"
+        (click)="closeDialog()"></button>
+      <button pButton label="Save Settings" icon="pi pi-check"
+        class="p-button-primary cbg-btn-save"
+        (click)="saveSettings()"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Component Wrapper -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div
+      class="fx-overlay border-gray-400 border rounded cursor-pointer"
+      (click)="onElementSelect(fxData)"
+      (dblclick)="openDialog()"
+    >
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}-<span class="text-xs italic">{{ fxData?.id }}</span>
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div
+            class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t"
+            title="Settings"
+            (click)="openDialog(); $event.stopPropagation()"
+          >
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div
+            (click)="deleteElement(fxData)"
+            class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t"
+            title="Delete"
+          >
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

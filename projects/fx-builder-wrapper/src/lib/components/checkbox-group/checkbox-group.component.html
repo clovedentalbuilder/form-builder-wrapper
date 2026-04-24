@@ -1,0 +1,199 @@
+<lib-checkbox-group-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
+  <div [ngClass]="checkboxGroupConfig.customClass">
+    <form [formGroup]="checkboxGroupForm" class="w-full">
+
+      <label class="font-semibold text-gray-800 block mb-2">
+        {{ checkboxGroupConfig.label }} <span class="field-required" *ngIf="isRequired">*</span>
+      </label>
+
+      <!-- ── Checkbox mode ── -->
+      <ng-container *ngIf="checkboxGroupConfig.displayMode !== 'button'">
+        <div class="grid grid-cols-4 gap-3 items-start">
+
+          <ng-container *ngFor="let opt of regularOptions">
+
+            <!-- Option with visible textarea: span 2 cols, checkbox + textarea inline -->
+            <div
+              *ngIf="isTextareaVisible(opt.value)"
+              style="grid-column: span 2"
+              class="flex flex-row gap-3 items-start"
+            >
+              <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+                <input
+                  type="checkbox"
+                  [checked]="isChecked(opt.value)"
+                  (change)="onCheckboxChange(opt.value, $event)"
+                  class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+                />
+                <span>{{ opt.label }}</span>
+              </label>
+              <div class="flex-1">
+                <ng-container *ngTemplateOutlet="optionTextarea; context: { $implicit: opt }"></ng-container>
+              </div>
+            </div>
+
+            <!-- Normal 1-col checkbox -->
+            <label
+              *ngIf="!isTextareaVisible(opt.value)"
+              class="flex items-start gap-2 cursor-pointer text-gray-700 py-1"
+            >
+              <input
+                type="checkbox"
+                [checked]="isChecked(opt.value)"
+                (change)="onCheckboxChange(opt.value, $event)"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+              />
+              <span>{{ opt.label }}</span>
+            </label>
+
+          </ng-container>
+
+          <!-- Other: combined (not in last col + other textarea visible) → spans 2 cols -->
+          <div
+            *ngIf="combineOtherWithTextarea"
+            [style.grid-column]="'span 2'"
+            class="flex flex-row gap-3 items-start"
+          >
+            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+              <input
+                type="checkbox"
+                [checked]="isChecked('other')"
+                (change)="onCheckboxChange('other', $event)"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+              />
+              <span>{{ otherOption?.label }}</span>
+            </label>
+            <div class="flex-1">
+              <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+            </div>
+          </div>
+
+          <!-- Other: separate (in last col OR other textarea not visible) -->
+          <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
+            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1">
+              <input
+                type="checkbox"
+                [checked]="isChecked('other')"
+                (change)="onCheckboxChange('other', $event)"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+              />
+              <span>{{ otherOption?.label }}</span>
+            </label>
+            <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
+              <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+            </div>
+          </ng-container>
+
+        </div>
+      </ng-container>
+
+      <!-- ── Button mode ── -->
+      <ng-container *ngIf="checkboxGroupConfig.displayMode === 'button'">
+        <div class="flex flex-wrap" style="gap: 10px; align-items: stretch;">
+
+          <ng-container *ngFor="let opt of regularOptions">
+            <button
+              type="button"
+              (click)="onButtonToggle(opt.value)"
+              [ngClass]="{ 'cbg-btn-option--selected': isChecked(opt.value) }"
+              class="cbg-btn-option"
+            >{{ opt.label }}</button>
+
+            <div *ngIf="isTextareaVisible(opt.value)" style="flex: 0 0 226px;">
+              <ng-container *ngTemplateOutlet="optionTextarea; context: { $implicit: opt }"></ng-container>
+            </div>
+          </ng-container>
+
+          <button
+            *ngIf="otherOption"
+            type="button"
+            (click)="onButtonToggle('other')"
+            [ngClass]="{ 'cbg-btn-option--selected': isChecked('other') }"
+            class="cbg-btn-option"
+          >{{ otherOption.label }}</button>
+
+          <div *ngIf="showOtherInput" style="flex: 0 0 226px;">
+            <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
+          </div>
+
+        </div>
+      </ng-container>
+
+      <small
+        *ngIf="checkboxGroupForm.get('selectedOptions')?.touched && checkboxGroupForm.get('selectedOptions')?.errors?.['required']"
+        class="text-red-500 block mt-1"
+      >
+        {{ checkboxGroupConfig.errorMessage }}
+      </small>
+
+      <!-- Per-option textarea template -->
+      <ng-template #optionTextarea let-opt>
+        <div class="relative">
+          <label class="input-label text-gray-700 block mb-1 text-sm">
+            {{ checkboxGroupConfig.textareaLabel }}
+            <span class="field-required" *ngIf="checkboxGroupConfig.textareaRequired === 'true'">*</span>
+          </label>
+          <textarea
+            [formControl]="getTextareaControl(opt.value)"
+            [placeholder]="checkboxGroupConfig.textareaPlaceholder || ''"
+            [maxlength]="checkboxGroupConfig.textareaMaxLength || 768"
+            class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+            [ngClass]="{
+              'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed': getTextareaControl(opt.value)?.disabled
+            }"
+          ></textarea>
+          <div class="flex justify-between items-center">
+            <small
+              *ngIf="getTextareaControl(opt.value)?.touched && getTextareaControl(opt.value)?.errors?.['required']"
+              class="text-red-500"
+            >
+              {{ checkboxGroupConfig.textareaErrorMessage }}
+            </small>
+            <small class="text-gray-500 whitespace-nowrap ml-auto" *ngIf="!getTextareaControl(opt.value)?.disabled">
+              {{ (checkboxGroupConfig.textareaMaxLength || 768) - (getTextareaControl(opt.value)?.value?.length || 0) }} character(s) left
+            </small>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- "Other" option textarea template -->
+      <ng-template #otherTextarea>
+        <div class="relative">
+          <label class="input-label text-gray-700 block mb-1">
+            {{ checkboxGroupConfig.otherLabel }} <span class="field-required" *ngIf="isChildRequired">*</span>
+          </label>
+          <textarea
+            formControlName="otherInput"
+            placeholder="{{ checkboxGroupConfig.otherPlaceholder }}"
+            class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+            [maxlength]="otherMaxLength"
+            [ngClass]="{
+              'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed': checkboxGroupForm.get('otherInput')?.disabled
+            }"
+          ></textarea>
+          <div class="flex justify-between items-center">
+            <span>
+              <small
+                *ngIf="checkboxGroupForm.get('otherInput')?.touched && checkboxGroupForm.get('otherInput')?.errors?.['required']"
+                class="text-red-500"
+              >
+                {{ checkboxGroupConfig.errorMessageOther }}
+              </small>
+              <ng-container *ngIf="checkboxGroupForm.get('otherInput')?.touched && checkboxGroupForm.get('otherInput')?.errors?.['regexErrors'] as regexErrors">
+                <small *ngFor="let err of regexErrors | keyvalue" class="text-red-500 block">
+                  {{ err.value }}
+                </small>
+              </ng-container>
+            </span>
+            <small class="text-gray-500 whitespace-nowrap ml-auto" *ngIf="!checkboxGroupForm.get('otherInput')?.disabled">
+              {{ remainingChars }} character(s) left
+            </small>
+          </div>
+        </div>
+      </ng-template>
+
+    </form>
+  </div>
+</lib-checkbox-group-settings-panel>
