@@ -26,6 +26,11 @@
   width: 215px;
   height: 85px;
 }
+@media (max-width: 600px) {
+  .rbo-btn-option {
+    width: 100%;
+  }
+}
 
 textarea::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
