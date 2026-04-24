@@ -26,9 +26,19 @@
   width: 215px;
   height: 85px;
 }
+
+.rbo-btn-textarea-container textarea {
+    flex: 0 0 215px;
+}
+
 @media (max-width: 600px) {
   .rbo-btn-option {
     width: 100%;
+  }
+
+  .rbo-btn-textarea-container textarea {
+    width: 100% !important;
+    flex: unset;
   }
 }
 
