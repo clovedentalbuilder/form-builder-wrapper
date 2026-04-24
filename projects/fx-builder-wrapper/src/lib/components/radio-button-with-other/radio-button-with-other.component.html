@@ -2,10 +2,10 @@
   <div [ngClass]="radioConfig.customClass">
     <form [formGroup]="radioForm" class="w-full">
 
-      <label class="input_label font-semibold">
+      <label class="input-label font-semibold">
         {{ radioConfig.label }}
         <span *ngIf="radioConfig.subLabel" class="sub_label">{{ radioConfig.subLabel }}</span>
-        <span class="field-required ml-1" *ngIf="isRequired">*</span>
+        <span class="field-required" *ngIf="isRequired">*</span>
       </label>
 
       <!-- ── Radio mode ── -->
