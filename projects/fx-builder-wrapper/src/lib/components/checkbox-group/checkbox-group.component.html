@@ -122,7 +122,7 @@
       </ng-container>
 
       <small
-        *ngIf="checkboxGroupForm.get('selectedOptions')?.touched && checkboxGroupForm.get('selectedOptions')?.errors?.['required']"
+        *ngIf="checkboxGroupForm.get('selectedCheckboxOption')?.touched && checkboxGroupForm.get('selectedCheckboxOption')?.errors?.['required']"
         class="error_message block mt-1"
       >
         {{ checkboxGroupConfig.errorMessage }}

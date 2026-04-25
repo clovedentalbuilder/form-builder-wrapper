@@ -58,7 +58,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
   };
 
   public checkboxGroupForm: FormGroup = this.fb.group({
-    selectedOptions: [[] as string[]],
+    selectedCheckboxOption: [[] as string[]],
     otherInput:      [{ value: '', disabled: true }],
     textareaValues:  this.fb.group({}),
   });
@@ -92,15 +92,15 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
       const key = this.fxComponent?.fxData?.name;
       if (key && this.checkboxMap.has(key)) {
         const data = this.checkboxMap.get(key);
-        const selectedOptions: string[] = data.selectedOptions ?? [];
-        this.checkboxGroupForm.patchValue({ selectedOptions, otherInput: data.otherInput ?? '' });
+        const selectedOptions: string[] = data.selectedCheckboxOption ?? [];
+        this.checkboxGroupForm.patchValue({ selectedCheckboxOption: selectedOptions, otherInput: data.otherInput ?? '' });
         this.showOtherInput = selectedOptions.includes('other');
         if (this.showOtherInput) {
           this.checkboxGroupForm.get('otherInput')?.enable();
         }
         if (data.textareaValues) {
           for (const [optVal, textVal] of Object.entries(data.textareaValues) as [string, string][]) {
-            const ctrl = this.textareaValuesGroup.get(optVal);
+            const ctrl = this.textareaValuesGroup.controls[optVal];
             if (ctrl && selectedOptions.includes(optVal)) {
               ctrl.enable();
               ctrl.setValue(textVal);
@@ -117,7 +117,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
       .subscribe((variables: any) => {
         if (!variables) return;
         for (const [key, entry] of Object.entries(variables) as [string, any][]) {
-          if (entry && typeof entry === 'object' && 'selectedOptions' in entry) {
+          if (entry && typeof entry === 'object' && 'selectedCheckboxOption' in entry) {
             this.checkboxMap.set(key, entry);
           }
         }
@@ -139,7 +139,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
     this.otherMaxLength = Number(config.otherMaxLength) || 768;
     this.remainingChars = this.otherMaxLength;
 
-    const mainControl = this.checkboxGroupForm.get('selectedOptions');
+    const mainControl = this.checkboxGroupForm.get('selectedCheckboxOption');
     this.isRequired = config.isRequired === 'true';
     if (this.isRequired) {
       mainControl?.setValidators([this.atLeastOneSelectedValidator()]);
@@ -268,7 +268,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
   }
 
   isChecked(value: string): boolean {
-    const selected = this.checkboxGroupForm.get('selectedOptions')?.value as string[];
+    const selected = this.checkboxGroupForm.get('selectedCheckboxOption')?.value as string[];
     return selected?.includes(value) ?? false;
   }
 
@@ -277,16 +277,16 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
   }
 
   isTextareaVisible(value: string): boolean {
-    return this.isChecked(value) && this.hasTextareaOption(value) && !!this.textareaValuesGroup.get(value);
+    return this.isChecked(value) && this.hasTextareaOption(value) && !!this.textareaValuesGroup.controls[value];
   }
 
   getTextareaControl(value: string): FormControl {
-    return this.textareaValuesGroup.get(value) as FormControl;
+    return this.textareaValuesGroup.controls[value] as FormControl;
   }
 
   onCheckboxChange(value: string, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
-    const control = this.checkboxGroupForm.get('selectedOptions');
+    const control = this.checkboxGroupForm.get('selectedCheckboxOption');
     const current = [...((control?.value as string[]) || [])];
 
     if (checked) {
@@ -307,7 +307,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
   }
 
   onButtonToggle(value: string): void {
-    const control = this.checkboxGroupForm.get('selectedOptions');
+    const control = this.checkboxGroupForm.get('selectedCheckboxOption');
     const current = [...((control?.value as string[]) || [])];
     const idx = current.indexOf(value);
     const isNowSelected = idx === -1;
@@ -329,7 +329,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
   }
 
   private handleOptionTextareaToggle(optionValue: string, selected: boolean): void {
-    const ctrl = this.textareaValuesGroup.get(optionValue);
+    const ctrl = this.textareaValuesGroup.controls[optionValue];
     if (!ctrl) return;
 
     if (selected) {
