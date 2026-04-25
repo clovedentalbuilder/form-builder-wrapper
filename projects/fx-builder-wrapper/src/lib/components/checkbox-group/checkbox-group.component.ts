@@ -23,6 +23,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
 
   options: any[] = [];
   checkboxMap = new Map<string, any>();
+  private pendingRestore: any = null;
   isRequired: boolean = false;
   isChildRequired: boolean = false;
   otherMaxLength: number = 768;
@@ -91,22 +92,8 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
     setTimeout(() => {
       const key = this.fxComponent?.fxData?.name;
       if (key && this.checkboxMap.has(key)) {
-        const data = this.checkboxMap.get(key);
-        const selectedOptions: string[] = data.selectedCheckboxOption ?? [];
-        this.checkboxGroupForm.patchValue({ selectedCheckboxOption: selectedOptions, otherInput: data.otherInput ?? '' });
-        this.showOtherInput = selectedOptions.includes('other');
-        if (this.showOtherInput) {
-          this.checkboxGroupForm.get('otherInput')?.enable();
-        }
-        if (data.textareaValues) {
-          for (const [optVal, textVal] of Object.entries(data.textareaValues) as [string, string][]) {
-            const ctrl = this.textareaValuesGroup.controls[optVal];
-            if (ctrl && selectedOptions.includes(optVal)) {
-              ctrl.enable();
-              ctrl.setValue(textVal);
-            }
-          }
-        }
+        this.pendingRestore = this.checkboxMap.get(key);
+        this.applyRestore();
       }
     }, 200);
   }
@@ -175,6 +162,48 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
           new FormControl({ value: '', disabled: true })
         );
       });
+
+    this.applyRestore();
+  }
+
+  private applyRestore(): void {
+    if (!this.pendingRestore) return;
+    const data = this.pendingRestore;
+    const selectedOptions: string[] = data.selectedCheckboxOption ?? [];
+
+    this.checkboxGroupForm.patchValue({ selectedCheckboxOption: selectedOptions, otherInput: data.otherInput ?? '' });
+
+    this.showOtherInput = selectedOptions.includes('other');
+    if (this.showOtherInput) {
+      const otherControl = this.checkboxGroupForm.get('otherInput');
+      otherControl?.enable();
+      this.isChildRequired = true;
+      const validators: ValidatorFn[] = [Validators.required];
+      const regexList = this.checkboxGroupConfig?.regexList;
+      if (this.checkboxGroupConfig?.enableRegex === 'true' && regexList?.length) {
+        validators.push(this.buildRegexValidator(regexList));
+      }
+      otherControl?.setValidators(validators);
+      otherControl?.updateValueAndValidity();
+    }
+
+    if (data.textareaValues) {
+      let allApplied = true;
+      for (const [optVal, textVal] of Object.entries(data.textareaValues) as [string, string][]) {
+        if (!selectedOptions.includes(optVal)) continue;
+        const ctrl = this.textareaValuesGroup.controls[optVal];
+        if (ctrl) {
+          ctrl.enable();
+          ctrl.setValue(textVal);
+        } else {
+          allApplied = false;
+        }
+      }
+      if (!allApplied) return;
+    }
+
+    this.pendingRestore = null;
+    this.cdr.detectChanges();
   }
 
   private atLeastOneSelectedValidator(): ValidatorFn {
