@@ -37,6 +37,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
     valueKey:             'value',
     manualOptions:        [],
     label:                '',
+    subLabel:             '',
     displayMode:          'checkbox',
     showOtherOption:      'false',
     otherLabel:           'Other',
