@@ -104,7 +104,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
       .subscribe((variables: any) => {
         if (!variables) return;
         for (const [key, entry] of Object.entries(variables) as [string, any][]) {
-          if (entry && typeof entry === 'object' && ('selectedCheckboxOption' in entry || 'selectedOptions' in entry)) {
+          if (entry && typeof entry === 'object' && ('selectedCheckboxOption' in entry || 'selectedOption' in entry)) {
             this.checkboxMap.set(key, entry);
           }
         }
@@ -169,7 +169,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
   private applyRestore(): void {
     if (!this.pendingRestore) return;
     const data = this.pendingRestore;
-    const rawSelected = data.selectedCheckboxOption ?? data.selectedOptions ?? [];
+    const rawSelected = data.selectedCheckboxOption ?? data.selectedOption ?? [];
     const selectedOptions: string[] = Array.isArray(rawSelected) ? rawSelected : (rawSelected ? [rawSelected] : []);
 
     this.checkboxGroupForm.patchValue({ selectedCheckboxOption: selectedOptions, otherInput: data.otherInput ?? '' });
