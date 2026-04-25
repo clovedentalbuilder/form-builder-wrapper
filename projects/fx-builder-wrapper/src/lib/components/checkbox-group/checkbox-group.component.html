@@ -99,7 +99,7 @@
               class="cbg-btn-option"
             >{{ opt.label }}</button>
 
-            <div *ngIf="isTextareaVisible(opt.value)" style="flex: 0 0 226px;">
+            <div *ngIf="isTextareaVisible(opt.value)" class="cbg-btn-textarea-container">
               <ng-container *ngTemplateOutlet="optionTextarea; context: { $implicit: opt }"></ng-container>
             </div>
           </ng-container>
@@ -112,7 +112,7 @@
             class="cbg-btn-option"
           >{{ otherOption.label }}</button>
 
-          <div *ngIf="showOtherInput" style="flex: 0 0 226px;">
+          <div *ngIf="showOtherInput" class="cbg-btn-textarea-container">
             <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
           </div>
 

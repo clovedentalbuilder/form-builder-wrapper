@@ -2,15 +2,35 @@
 
 .cbg-btn-option {
   padding: 0.35rem .55rem;
-  border: 1.5px solid #d1d5db;
+  border: 1.5px solid #9bbbd6;
   border-radius: 6px;
-  background: #fff;
+  background: #f6f6f6;
   color: #111827;
   font-size: 0.75rem;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
-  width: 226px;
-  height: 100%;
+  width: 215px;
+  height: 85px;
+}
+
+.cbg-btn-textarea-container {
+  flex: 0 0 215px;
+}
+
+.cbg-btn-textarea-container textarea {
+  height: 85px !important;
+  min-height: unset;
+}
+
+@media (max-width: 600px) {
+  .cbg-btn-option {
+    width: 100%;
+  }
+
+  .cbg-btn-textarea-container {
+    width: 100% !important;
+    flex: unset;
+  }
 }
 
 .cbg-btn-option:hover {
@@ -21,5 +41,5 @@
   background-color: #dae6f0 !important;
   border-color: #9bbbd6 !important;
   color: #111827;
-  font-weight: 505;
+  font-weight: 500;
 }
