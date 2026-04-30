@@ -2,7 +2,7 @@
   <div [ngClass]="checkboxGroupConfig.customClass">
     <form [formGroup]="checkboxGroupForm" class="w-full">
 
-      <label class="cbg-main-label font-semibold">
+      <label class="cbg-main-label">
         {{ checkboxGroupConfig.label }}
         <span *ngIf="checkboxGroupConfig.subLabel" class="cbg-sub-label">{{ checkboxGroupConfig.subLabel }}</span>
         <span class="field-required" *ngIf="isRequired">*</span>
@@ -18,16 +18,16 @@
             <div
               *ngIf="isTextareaVisible(opt.value)"
               style="grid-column: span 2"
-              class="flex flex-row gap-3 items-start"
+              class="flex flex-row gap-3 items-center"
             >
-              <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+              <label class="flex items-center gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
                 <input
                   type="checkbox"
                   [checked]="isChecked(opt.value)"
                   (change)="onCheckboxChange(opt.value, $event)"
                   class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
                 />
-                <span>{{ opt.label }}</span>
+                <span class="checkbox_label">{{ opt.label }}</span>
               </label>
               <div class="flex-1">
                 <ng-container *ngTemplateOutlet="optionTextarea; context: { $implicit: opt }"></ng-container>

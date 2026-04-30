@@ -2,7 +2,7 @@
   <div [ngClass]="radioConfig.customClass">
     <form [formGroup]="radioForm" class="w-full">
 
-      <label class="radio-label font-semibold">
+      <label class="radio-label">
         {{ radioConfig.label }}
         <span *ngIf="radioConfig.subLabel" class="sub_label">{{ radioConfig.subLabel }}</span>
         <span class="field-required" *ngIf="isRequired">*</span>
@@ -15,7 +15,7 @@
           <!-- Regular options (all except Other) -->
           <label
             *ngFor="let opt of regularOptions"
-            class="flex items-start gap-2 cursor-pointer text-gray-700 py-1"
+            class="flex items-center gap-2 cursor-pointer text-gray-700 py-1"
           >
             <input
               type="radio"
