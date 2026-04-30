@@ -10,7 +10,7 @@
 
       <!-- ── Checkbox mode ── -->
       <ng-container *ngIf="checkboxGroupConfig.displayMode !== 'button'">
-        <div class="grid grid-cols-4 gap-3 items-start">
+        <div class="grid grid-cols-4 gap-3 items-center">
 
           <ng-container *ngFor="let opt of regularOptions">
 
@@ -37,7 +37,7 @@
             <!-- Normal 1-col checkbox -->
             <label
               *ngIf="!isTextareaVisible(opt.value)"
-              class="flex items-start gap-2 cursor-pointer text-gray-700 py-1"
+              class="flex items-center gap-2 cursor-pointer text-gray-700 py-1"
             >
               <input
                 type="checkbox"
@@ -45,7 +45,7 @@
                 (change)="onCheckboxChange(opt.value, $event)"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span>{{ opt.label }}</span>
+              <span class="checkbox_label">{{ opt.label }}</span>
             </label>
 
           </ng-container>
@@ -56,14 +56,14 @@
             [style.grid-column]="'span 2'"
             class="flex flex-row gap-3 items-start"
           >
-            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+            <label class="flex items-center gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
               <input
                 type="checkbox"
                 [checked]="isChecked('other')"
                 (change)="onCheckboxChange('other', $event)"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span>{{ otherOption?.label }}</span>
+              <span class="checkbox_label">{{ otherOption?.label }}</span>
             </label>
             <div class="flex-1">
               <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
@@ -72,14 +72,14 @@
 
           <!-- Other: separate (in last col OR other textarea not visible) -->
           <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
-            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1">
+            <label class="flex items-center gap-2 cursor-pointer text-gray-700 py-1">
               <input
                 type="checkbox"
                 [checked]="isChecked('other')"
                 (change)="onCheckboxChange('other', $event)"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span>{{ otherOption?.label }}</span>
+              <span class="checkbox_label">{{ otherOption?.label }}</span>
             </label>
             <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
               <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
