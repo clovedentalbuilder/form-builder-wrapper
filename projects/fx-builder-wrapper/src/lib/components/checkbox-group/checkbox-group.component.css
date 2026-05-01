@@ -1,5 +1,5 @@
 .field-required, .error_message { color: #D60000; }
-.character_color { color: #454545; }
+.character_color { color: #454545; font-size: 12px; }
 
 textarea::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
@@ -16,8 +16,8 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .cbg-main-label {
-  font-size: 12px !important;
-  padding-bottom: 4px;
+  font-size: 11px !important;
+  padding-bottom: 8px;
   margin: 0 0 0 8px;
   color: #999 !important;
 }

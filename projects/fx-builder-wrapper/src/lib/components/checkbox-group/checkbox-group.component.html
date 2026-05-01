@@ -20,7 +20,7 @@
               style="grid-column: span 2"
               class="flex flex-row gap-3 items-center"
             >
-              <label class="flex items-center gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+              <label class="flex items-center gap-2 cursor-pointer text-gray-700 m-0 flex-shrink-0">
                 <input
                   type="checkbox"
                   [checked]="isChecked(opt.value)"
@@ -37,7 +37,7 @@
             <!-- Normal 1-col checkbox -->
             <label
               *ngIf="!isTextareaVisible(opt.value)"
-              class="flex items-center gap-2 cursor-pointer text-gray-700 py-1"
+              class="flex items-center gap-2 cursor-pointer text-gray-700 m-0"
             >
               <input
                 type="checkbox"
@@ -56,7 +56,7 @@
             [style.grid-column]="'span 2'"
             class="flex flex-row gap-3 items-start"
           >
-            <label class="flex items-center gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+            <label class="flex items-center gap-2 cursor-pointer text-gray-700 m-0 flex-shrink-0">
               <input
                 type="checkbox"
                 [checked]="isChecked('other')"
@@ -72,7 +72,7 @@
 
           <!-- Other: separate (in last col OR other textarea not visible) -->
           <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
-            <label class="flex items-center gap-2 cursor-pointer text-gray-700 py-1">
+            <label class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
               <input
                 type="checkbox"
                 [checked]="isChecked('other')"
@@ -91,7 +91,7 @@
 
       <!-- ── Button mode ── -->
       <ng-container *ngIf="checkboxGroupConfig.displayMode === 'button'">
-        <div class="flex flex-wrap" style="gap: 10px; align-items: stretch;">
+        <div class="flex flex-wrap" style="gap: 16px; align-items: stretch;">
 
           <ng-container *ngFor="let opt of regularOptions">
             <button
