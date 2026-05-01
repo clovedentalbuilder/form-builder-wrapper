@@ -15,7 +15,7 @@
           <!-- Regular options (all except Other) -->
           <label
             *ngFor="let opt of regularOptions"
-            class="flex items-center gap-2 cursor-pointer text-gray-700 py-1"
+            class="flex items-center gap-2 cursor-pointer text-gray-700 m-0"
           >
             <input
               type="radio"
@@ -33,7 +33,7 @@
             [style.grid-column]="'span 2'"
             class="flex flex-row gap-3 items-start"
           >
-            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1 flex-shrink-0">
+            <label class="flex items-start gap-2 cursor-pointer text-gray-700 m-0 flex-shrink-0">
               <input
                 type="radio"
                 formControlName="selectedRadioOption"
@@ -50,7 +50,7 @@
 
           <!-- Other: separate (in last col OR textarea not visible) -->
           <ng-container *ngIf="otherOption && !combineOtherWithTextarea">
-            <label class="flex items-start gap-2 cursor-pointer text-gray-700 py-1">
+            <label class="flex items-start gap-2 cursor-pointer text-gray-700 m-0">
               <input
                 type="radio"
                 formControlName="selectedRadioOption"
