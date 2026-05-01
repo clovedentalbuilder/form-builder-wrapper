@@ -24,7 +24,7 @@
               (change)="onSelectionChange(opt.value)"
               class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
             />
-            <span class="radio_label">{{ opt.label }}</span>
+            <span class="character_color">{{ opt.label }}</span>
           </label>
 
           <!-- Other: combined (not in last col + textarea visible) → spans 2 cols, same line -->
@@ -41,7 +41,7 @@
                 (change)="onSelectionChange('other')"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span class="radio_label">{{ otherOption?.label }}</span>
+              <span class="character_color">{{ otherOption?.label }}</span>
             </label>
             <div class="flex-1">
               <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
@@ -58,7 +58,7 @@
                 (change)="onSelectionChange('other')"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span class="radio_label">{{ otherOption?.label }}</span>
+              <span class="character_color">{{ otherOption?.label }}</span>
             </label>
             <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
               <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>

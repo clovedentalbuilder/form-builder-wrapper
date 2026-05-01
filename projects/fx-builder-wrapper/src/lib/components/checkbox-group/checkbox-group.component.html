@@ -27,7 +27,7 @@
                   (change)="onCheckboxChange(opt.value, $event)"
                   class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
                 />
-                <span class="checkbox_label">{{ opt.label }}</span>
+                <span class="character_color">{{ opt.label }}</span>
               </label>
               <div class="flex-1">
                 <ng-container *ngTemplateOutlet="optionTextarea; context: { $implicit: opt }"></ng-container>
@@ -45,7 +45,7 @@
                 (change)="onCheckboxChange(opt.value, $event)"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span class="checkbox_label">{{ opt.label }}</span>
+              <span class="character_color">{{ opt.label }}</span>
             </label>
 
           </ng-container>
@@ -63,7 +63,7 @@
                 (change)="onCheckboxChange('other', $event)"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span class="checkbox_label">{{ otherOption?.label }}</span>
+              <span class="character_color">{{ otherOption?.label }}</span>
             </label>
             <div class="flex-1">
               <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
@@ -79,7 +79,7 @@
                 (change)="onCheckboxChange('other', $event)"
                 class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
-              <span class="checkbox_label">{{ otherOption?.label }}</span>
+              <span class="character_color">{{ otherOption?.label }}</span>
             </label>
             <div *ngIf="showOtherInput" [style.grid-column]="textareaGridColumn">
               <ng-container *ngTemplateOutlet="otherTextarea"></ng-container>
