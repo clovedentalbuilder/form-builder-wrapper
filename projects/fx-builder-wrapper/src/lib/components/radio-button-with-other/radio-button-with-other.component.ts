@@ -191,17 +191,36 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     return this.options.find(o => o.value === 'other');
   }
 
+  get gridCols(): number {
+    const count = this.options.length;
+    if (count === 1) return 1;
+    if (count === 2) return 2;
+    if (count === 3) return 3;
+    return 4;
+  }
+
+  get gridColsClass(): string {
+    if (this.radioConfig.displayMode !== 'radio') return 'grid-cols-4';
+    if (this.gridCols === 1) return 'grid-cols-1';
+    if (this.gridCols === 2) return 'grid-cols-2';
+    if (this.gridCols === 3) return 'grid-cols-3';
+    return 'grid-cols-4';
+  }
+
   get colOfOther(): number {
     if (!this.options.length) return 0;
-    return ((this.options.length - 1) % 4) + 1;
+    const cols = this.radioConfig.displayMode === 'radio' ? this.gridCols : 4;
+    return ((this.options.length - 1) % cols) + 1;
   }
 
   get combineOtherWithTextarea(): boolean {
-    return this.showOtherInput && !!this.otherOption && this.colOfOther !== 4;
+    const cols = this.radioConfig.displayMode === 'radio' ? this.gridCols : 4;
+    return this.showOtherInput && !!this.otherOption && this.colOfOther !== cols;
   }
 
   get textareaGridColumn(): string {
-    if (this.colOfOther === 4) return '4 / span 1';
+    const cols = this.radioConfig.displayMode === 'radio' ? this.gridCols : 4;
+    if (this.colOfOther === cols) return `${cols} / span 1`;
     return 'span 1';
   }
 
