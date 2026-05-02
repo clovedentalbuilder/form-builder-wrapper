@@ -168,6 +168,20 @@
           </div>
         </div>
 
+        <div class="rbo-field" *ngIf="settingsForm.get('displayMode')?.value === 'radio'">
+          <label class="rbo-label">Layout</label>
+          <div class="rbo-radio-group">
+            <label class="rbo-radio-option">
+              <input type="radio" formControlName="radioLayout" value="flex" />
+              <span class="rbo-radio-label rbo-radio-api">Flex</span>
+            </label>
+            <label class="rbo-radio-option">
+              <input type="radio" formControlName="radioLayout" value="grid" />
+              <span class="rbo-radio-label rbo-radio-manual">Grid</span>
+            </label>
+          </div>
+        </div>
+
         <div class="rbo-grid-2">
           <div class="rbo-field">
             <label class="rbo-label">Required</label>

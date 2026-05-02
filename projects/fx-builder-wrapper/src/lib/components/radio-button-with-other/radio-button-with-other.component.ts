@@ -38,6 +38,7 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     manualOptions:     [],
     label:             '',
     displayMode:       'radio',
+    radioLayout:       'flex',
     showOtherOption:   'false',
     otherLabel:        'Other',
     otherPlaceholder:  '',
@@ -191,36 +192,24 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
     return this.options.find(o => o.value === 'other');
   }
 
-  get gridCols(): number {
-    const count = this.options.length;
-    if (count === 1) return 1;
-    if (count === 2) return 2;
-    if (count === 3) return 3;
-    return 4;
-  }
-
-  get gridColsClass(): string {
-    if (this.radioConfig.displayMode !== 'radio') return 'grid-cols-4';
-    if (this.gridCols === 1) return 'grid-cols-1';
-    if (this.gridCols === 2) return 'grid-cols-2';
-    if (this.gridCols === 3) return 'grid-cols-3';
-    return 'grid-cols-4';
+  get radioContainerClass(): string {
+    if (this.radioConfig.radioLayout === 'grid') {
+      return 'grid grid-cols-4 gap-3 items-start';
+    }
+    return 'flex flex-wrap gap-3 items-start';
   }
 
   get colOfOther(): number {
     if (!this.options.length) return 0;
-    const cols = this.radioConfig.displayMode === 'radio' ? this.gridCols : 4;
-    return ((this.options.length - 1) % cols) + 1;
+    return ((this.options.length - 1) % 4) + 1;
   }
 
   get combineOtherWithTextarea(): boolean {
-    const cols = this.radioConfig.displayMode === 'radio' ? this.gridCols : 4;
-    return this.showOtherInput && !!this.otherOption && this.colOfOther !== cols;
+    return this.showOtherInput && !!this.otherOption && this.colOfOther !== 4;
   }
 
   get textareaGridColumn(): string {
-    const cols = this.radioConfig.displayMode === 'radio' ? this.gridCols : 4;
-    if (this.colOfOther === cols) return `${cols} / span 1`;
+    if (this.colOfOther === 4) return '4 / span 1';
     return 'span 1';
   }
 

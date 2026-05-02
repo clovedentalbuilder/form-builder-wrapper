@@ -10,7 +10,7 @@
 
       <!-- ── Radio mode ── -->
       <ng-container *ngIf="radioConfig.displayMode !== 'button'">
-        <div class="grid gap-3 items-start" [ngClass]="gridColsClass">
+        <div [ngClass]="radioContainerClass">
 
           <!-- Regular options (all except Other) -->
           <label
