@@ -40,6 +40,7 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
     label:                '',
     subLabel:             '',
     displayMode:          'checkbox',
+    checkboxLayout:       'flex',
     showOtherOption:      'false',
     otherLabel:           'Other',
     otherPlaceholder:     '',
@@ -281,6 +282,13 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
 
   get otherOption(): any {
     return this.options.find(o => o.value === 'other');
+  }
+
+  get checkboxContainerClass(): string {
+    if (this.checkboxGroupConfig.checkboxLayout === 'grid') {
+      return 'grid grid-cols-4 gap-3 items-center';
+    }
+    return 'flex flex-wrap gap-3 items-center';
   }
 
   get colOfOther(): number {

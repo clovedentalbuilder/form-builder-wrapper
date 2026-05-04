@@ -2,7 +2,7 @@
 .character_color { color: #454545; font-size: 12px; }
 
 .radio-label {
-  font-size: 11px !important;
+  font-size: 12px !important;
   padding-bottom: 4px;
   margin: 0 0 0 8px;
   color: #999 !important;
@@ -15,7 +15,7 @@
 }
 
 .rbo-btn-option {
-  padding: .35rem .55rem;
+  padding: .15rem;
   border: 1.5px solid #9bbbd6;
   border-radius: 6px;
   background: #f6f6f6;
@@ -23,12 +23,13 @@
   font-size: .75rem;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
-  width: 215px;
-  height: 85px;
+  width: 240px;
+  height: 72px;
+  word-break: break-word;
 }
 
 .rbo-btn-textarea-container{
-  flex: 0 0 215px;
+  flex: 0 0 240px;
 }
 
 @media (max-width: 600px) {

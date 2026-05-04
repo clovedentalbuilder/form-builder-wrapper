@@ -10,7 +10,7 @@
 
       <!-- ── Checkbox mode ── -->
       <ng-container *ngIf="checkboxGroupConfig.displayMode !== 'button'">
-        <div class="grid grid-cols-4 gap-3 items-center">
+        <div [ngClass]="checkboxContainerClass">
 
           <ng-container *ngFor="let opt of regularOptions">
 

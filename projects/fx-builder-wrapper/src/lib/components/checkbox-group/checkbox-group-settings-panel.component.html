@@ -195,6 +195,20 @@
           </div>
         </div>
 
+        <div class="cbg-field" *ngIf="settingsForm.get('displayMode')?.value === 'checkbox'">
+          <label class="cbg-label">Layout</label>
+          <div class="cbg-radio-group">
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="checkboxLayout" value="flex" />
+              <span class="cbg-radio-label cbg-radio-api">Flex</span>
+            </label>
+            <label class="cbg-radio-option">
+              <input type="radio" formControlName="checkboxLayout" value="grid" />
+              <span class="cbg-radio-label cbg-radio-manual">Grid</span>
+            </label>
+          </div>
+        </div>
+
         <div class="cbg-grid-2">
           <div class="cbg-field">
             <label class="cbg-label">Required</label>
