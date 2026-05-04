@@ -58,8 +58,20 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .rbo-btn-textarea-container textarea {
-  height: 85px !important;
+  height: 72px !important;
   min-height: unset;
+}
+
+.rbo-radio-mode-textarea {
+  height: 72px !important;
+  width: 275px;
+  min-height: unset;
+}
+
+@media (max-width: 600px) {
+  .rbo-radio-mode-textarea {
+    width: 260px;
+  }
 }
 
 .rbo-btn-option:hover {

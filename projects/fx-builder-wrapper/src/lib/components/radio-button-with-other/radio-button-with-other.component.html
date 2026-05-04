@@ -124,7 +124,8 @@
 
             [maxlength]="otherMaxLength"
             [ngClass]="{
-              'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed': radioForm.get('otherInput')?.disabled
+              'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed': radioForm.get('otherInput')?.disabled,
+              'rbo-radio-mode-textarea': radioConfig.displayMode !== 'button'
             }"
           ></textarea>
 

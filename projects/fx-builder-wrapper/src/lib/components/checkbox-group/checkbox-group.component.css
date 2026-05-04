@@ -29,7 +29,7 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .cbg-btn-option {
-  padding: 0.35rem .55rem;
+  padding: 0.15rem;
   border: 1.5px solid #9bbbd6;
   border-radius: 6px;
   background: #f6f6f6;
@@ -37,16 +37,17 @@ textarea::-webkit-scrollbar-thumb {
   font-size: 0.75rem;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
-  width: 215px;
-  height: 85px;
+  width: 240px;
+  height: 72px;
+  word-break: break-word;
 }
 
 .cbg-btn-textarea-container {
-  flex: 0 0 215px;
+  flex: 0 0 240px;
 }
 
 .cbg-btn-textarea-container textarea {
-  height: 85px !important;
+  height: 72px !important;
   min-height: unset;
 }
 
@@ -58,6 +59,18 @@ textarea::-webkit-scrollbar-thumb {
   .cbg-btn-textarea-container {
     width: 100% !important;
     flex: unset;
+  }
+}
+
+.cbg-radio-mode-textarea {
+  height: 72px !important;
+  width: 275px;
+  min-height: unset;
+}
+
+@media (max-width: 600px) {
+  .cbg-radio-mode-textarea {
+    width: 260px;
   }
 }
 
