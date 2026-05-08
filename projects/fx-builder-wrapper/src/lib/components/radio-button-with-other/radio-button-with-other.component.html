@@ -80,6 +80,7 @@
               'rbo-btn-option--selected': radioForm.get('selectedRadioOption')?.value === opt.value
             }"
             class="rbo-btn-option"
+            [title]="opt.label"
           >{{ opt.label }}</button>
 
           <button
@@ -90,6 +91,7 @@
               'rbo-btn-option--selected': radioForm.get('selectedRadioOption')?.value === 'other'
             }"
             class="rbo-btn-option"
+            [title]="otherOption.label"
           >{{ otherOption.label }}</button>
 
           <!-- Textarea: fills remaining space in the same row if available, wraps to next line if not -->

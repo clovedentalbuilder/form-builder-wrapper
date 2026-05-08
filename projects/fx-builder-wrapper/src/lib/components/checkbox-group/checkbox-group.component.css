@@ -38,8 +38,12 @@ textarea::-webkit-scrollbar-thumb {
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   width: 240px;
-  height: 72px;
+  height: 80px;
   word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cbg-btn-textarea-container {
@@ -47,7 +51,7 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .cbg-btn-textarea-container textarea {
-  height: 72px !important;
+  height: 80px !important;
   min-height: unset;
 }
 
@@ -63,7 +67,7 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .cbg-radio-mode-textarea {
-  height: 72px !important;
+  height: 80px !important;
   width: 275px;
   min-height: unset;
 }

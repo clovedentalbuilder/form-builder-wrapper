@@ -99,6 +99,7 @@
               (click)="onButtonToggle(opt.value)"
               [ngClass]="{ 'cbg-btn-option--selected': isChecked(opt.value) }"
               class="cbg-btn-option"
+              [title]="opt.label"
             >{{ opt.label }}</button>
 
             <div *ngIf="isTextareaVisible(opt.value)" class="cbg-btn-textarea-container">
@@ -112,6 +113,7 @@
             (click)="onButtonToggle('other')"
             [ngClass]="{ 'cbg-btn-option--selected': isChecked('other') }"
             class="cbg-btn-option"
+            [title]="otherOption.label"
           >{{ otherOption.label }}</button>
 
           <div *ngIf="showOtherInput" class="cbg-btn-textarea-container">
