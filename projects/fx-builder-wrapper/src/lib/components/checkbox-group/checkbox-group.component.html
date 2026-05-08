@@ -95,11 +95,12 @@
 
           <ng-container *ngFor="let opt of regularOptions">
             <button
+              #cbgBtn
               type="button"
               (click)="onButtonToggle(opt.value)"
+              (mouseenter)="cbgBtn.title = cbgBtn.scrollHeight > cbgBtn.clientHeight ? opt.label : ''"
               [ngClass]="{ 'cbg-btn-option--selected': isChecked(opt.value) }"
               class="cbg-btn-option"
-              [title]="opt.label"
             >{{ opt.label }}</button>
 
             <div *ngIf="isTextareaVisible(opt.value)" class="cbg-btn-textarea-container">
@@ -108,12 +109,13 @@
           </ng-container>
 
           <button
+            #cbgOtherBtn
             *ngIf="otherOption"
             type="button"
             (click)="onButtonToggle('other')"
+            (mouseenter)="cbgOtherBtn.title = cbgOtherBtn.scrollHeight > cbgOtherBtn.clientHeight ? otherOption.label : ''"
             [ngClass]="{ 'cbg-btn-option--selected': isChecked('other') }"
             class="cbg-btn-option"
-            [title]="otherOption.label"
           >{{ otherOption.label }}</button>
 
           <div *ngIf="showOtherInput" class="cbg-btn-textarea-container">
