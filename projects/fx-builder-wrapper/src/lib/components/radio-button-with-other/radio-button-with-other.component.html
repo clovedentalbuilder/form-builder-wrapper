@@ -73,11 +73,9 @@
         <div class="flex flex-wrap" style="gap: 16px; align-items: stretch;">
 
           <button
-            #rboBtn
             *ngFor="let opt of regularOptions"
             type="button"
             (click)="onSelectionChange(opt.value); radioForm.get('selectedRadioOption')?.setValue(opt.value)"
-            (mouseenter)="rboBtn.title = rboBtn.scrollHeight > rboBtn.clientHeight ? opt.label : ''"
             [ngClass]="{
               'rbo-btn-option--selected': radioForm.get('selectedRadioOption')?.value === opt.value
             }"
@@ -85,11 +83,9 @@
           >{{ opt.label }}</button>
 
           <button
-            #rboOtherBtn
             *ngIf="otherOption"
             type="button"
             (click)="onSelectionChange('other'); radioForm.get('selectedRadioOption')?.setValue('other')"
-            (mouseenter)="rboOtherBtn.title = rboOtherBtn.scrollHeight > rboOtherBtn.clientHeight ? otherOption.label : ''"
             [ngClass]="{
               'rbo-btn-option--selected': radioForm.get('selectedRadioOption')?.value === 'other'
             }"
