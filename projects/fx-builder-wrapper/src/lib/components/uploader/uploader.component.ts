@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { FxBaseComponent, FxComponent, FxSelectSetting, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
@@ -23,7 +23,7 @@ import { ApiServiceRegistry } from '@instantsys-labs/core'
   templateUrl: './uploader.component.html',
   styleUrl: './uploader.component.css'
 })
-export class UploaderComponent extends FxBaseComponent implements OnInit, AfterViewInit{
+export class UploaderComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck {
   // public uploadFileControl = new UntypedFormControl();
   public uploadFileControl = new FormControl();
   public uploadedFiles: Array<any> = [];
@@ -38,6 +38,8 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
     { label: 'Profile', value: 18 },
   ];
 
+  isUploaderRequired: boolean = false;
+  private _prevTouched = false;
   visible: boolean = false;
   fileVisible: boolean = false;
   selecteImageUrl: string = '';
@@ -472,17 +474,35 @@ ngAfterViewInit(): void {
   }
   },200)
 
-  // setTimeout(() => {
-        
-  //       if (this.setting('isUploaderRequired') === 'true') {
-  //         // this.isRequired = true;
-  //         this.uploadFileControl?.setValidators([Validators.required]);
-  //         this.uploadFileControl?.updateValueAndValidity();
-  //       }
-  //     }, 100)
+  setTimeout(() => {
+    this.isUploaderRequired = this.setting('isUploaderRequired') === 'true';
+
+    this.uploadFileControl.addValidators((ctrl) => {
+      const files: any[] = ctrl.value?.uploadedFiles || [];
+      if (files.length === 0) {
+        return this.isUploaderRequired ? { required: true } : null;
+      }
+      const allValid = files.every(
+        (f: any) => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+      );
+      return allValid ? null : { requiredMeta: true };
+    });
+
+    this.uploadFileControl.updateValueAndValidity();
+  }, 100);
 
 }
 
+
+  ngDoCheck(): void {
+    const touched = this.uploadFileControl.touched;
+    if (touched && !this._prevTouched) {
+      this._prevTouched = true;
+      this.uploadedFiles.forEach(f => { f._showErrors = true; });
+    } else if (!touched) {
+      this._prevTouched = false;
+    }
+  }
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -536,7 +556,8 @@ ngAfterViewInit(): void {
         title: '',
         notes: '',
         categoryId: '',
-        type: fileType
+        type: fileType,
+        _showErrors: false,
       };
 
       if (fileType === 'image') {
@@ -546,17 +567,20 @@ ngAfterViewInit(): void {
           this.uploadedFiles.push(newFile);
           this.formattedData.uploadedFiles = this.uploadedFiles;
           this.uploadFileControl.setValue(this.formattedData);
-          this.uploadFileControl.setErrors({ requiredMeta: true });
-          
+          if (this.uploadFileControl.touched) {
+            this.uploadFileControl.markAsUntouched({ onlySelf: true });
+            this._prevTouched = false;
+          }
         };
-        reader.readAsDataURL(file); // only images need preview
+        reader.readAsDataURL(file);
       } else {
-        // non-image → push directly
         this.uploadedFiles.push(newFile);
         this.formattedData.uploadedFiles = this.uploadedFiles;
         this.uploadFileControl.setValue(this.formattedData);
-        this.uploadFileControl.setErrors({ requiredMeta: true });
-        
+        if (this.uploadFileControl.touched) {
+          this.uploadFileControl.markAsUntouched({ onlySelf: true });
+          this._prevTouched = false;
+        }
       }
     });
     input.value = '';
@@ -571,18 +595,7 @@ ngAfterViewInit(): void {
   onMetaChange() {
     this.formattedData.uploadedFiles = this.uploadedFiles;
     this.uploadFileControl.setValue(this.formattedData);
-
-    // ❌ Invalid if any file is missing required fields
-    const allValid = this.uploadedFiles.every(
-      f => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
-    );
-
-    if (!allValid) {
-      this.uploadFileControl.setErrors({ requiredMeta: true });
-    } else {
-      this.uploadFileControl.markAsUntouched();
-      this.uploadFileControl.setErrors(null);
-    }
+    this.revalidateMeta();
   }
 
 
@@ -633,6 +646,25 @@ ngAfterViewInit(): void {
 
     // Set the value of the uploadFileControl
     this.uploadFileControl.setValue(this.formattedData);
+
+    if (this.isUploaderRequired && this.uploadedFiles.length === 0) {
+      this.uploadFileControl.setErrors({ required: true });
+      this.uploadFileControl.markAsTouched();
+    } else {
+      this.revalidateMeta();
+    }
+  }
+
+  private revalidateMeta(): void {
+    if (this.uploadedFiles.length === 0) return;
+    const allValid = this.uploadedFiles.every(
+      f => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+    );
+    if (!allValid) {
+      this.uploadFileControl.setErrors({ requiredMeta: true });
+    } else {
+      this.uploadFileControl.setErrors(null);
+    }
   }
 
 
@@ -640,12 +672,11 @@ ngAfterViewInit(): void {
   protected settings(): FxSetting[] {
     return [
       new FxStringSetting({ key: 'upload-text', $title: 'Upload Text', value: 'Upload File' }),
-      // new FxStringSetting({ key: 'uploaderErrorMessage', $title: 'Error Message', value: 'Please upload files' }),
+      new FxStringSetting({ key: 'uploaderErrorMessage', $title: 'Error Message', value: 'Please upload at least one file' }),
       new FxSelectSetting({ key: 'multiple-upload', $title: 'Multiple Uploads', value: false }, [{ option: 'Enable', value: true }, { option: 'Disable', value: false }]),
       new FxStringSetting({ key: 'maxFileNo', $title: 'Maximum File Upload Allowed', value: 8 }),
       new FxStringSetting({ key: 'maxFileSize', $title: 'Maximum File Size Allowed', value: 10 }),
-       new FxStringSetting({ key: 'maxFileSize', $title: 'Maximum File Size Allowed', value: 10 }),
-        // new FxSelectSetting({ key: 'isUploaderRequired', $title: 'Required', value: 'true' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
+      new FxSelectSetting({ key: 'isUploaderRequired', $title: 'Required', value: 'false' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
     ];
   }
 

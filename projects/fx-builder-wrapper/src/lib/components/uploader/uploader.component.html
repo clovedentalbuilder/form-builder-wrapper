@@ -31,6 +31,11 @@
 
     </div>
 
+    <small
+      *ngIf="uploadFileControl?.errors?.['required'] && uploadFileControl?.touched"
+      class="text-red-500 block -mt-1 mb-1">
+      {{ setting('uploaderErrorMessage') }}
+    </small>
 
     <input #fileInput type="file" [multiple]="setting('multiple-upload')" (change)="onFileSelected($event)"
       accept=".pdf,image/*,.stl,.htl,.dcm" hidden />
@@ -199,7 +204,7 @@
                 <input [(ngModel)]="file.title" name="title{{i}}" (ngModelChange)="onMetaChange()"
                   placeholder="Enter title" class=" rounded px-3 py-2  w-full outline-none focus:ring" required
                   #titleCtrl="ngModel" maxlength="26"/>
-                <div *ngIf="(titleCtrl.touched || uploadFileControl.touched) && titleCtrl.invalid" class="text-red-500 text-xs mb-2 mt-1">
+                <div *ngIf="(titleCtrl.touched || file._showErrors) && titleCtrl.invalid" class="text-red-500 text-xs mb-2 mt-1">
                   Title is required
                 </div>
 
@@ -210,7 +215,7 @@
                 <textarea [(ngModel)]="file.notes" name="notes{{i}}" (ngModelChange)="onMetaChange()"
                   placeholder="Enter notes" class=" rounded px-3 py-2 mb-0 w-full outline-none focus:ring" rows="2"
                   required #notesCtrl="ngModel" maxlength="768"></textarea>
-                <div *ngIf="(notesCtrl.touched || uploadFileControl.touched) && notesCtrl.invalid" class="text-red-500 text-xs">
+                <div *ngIf="(notesCtrl.touched || file._showErrors) && notesCtrl.invalid" class="text-red-500 text-xs">
                   Notes are required
                 </div>
               </div>
@@ -228,7 +233,7 @@
                 <option *ngFor="let c of categories" [ngValue]="c.value">{{ c.label }}</option>
               </select>
             </div>
-            <div *ngIf="(categoryCtrl.touched || uploadFileControl.touched) && categoryCtrl.invalid" class="text-red-500 text-xs mt-1">
+            <div *ngIf="(categoryCtrl.touched || file._showErrors) && categoryCtrl.invalid" class="text-red-500 text-xs mt-1">
               Category is required
             </div>
           </div>
