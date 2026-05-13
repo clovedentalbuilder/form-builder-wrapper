@@ -43,17 +43,24 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
   @Input() variables: any;
   @Output() fxFormSubmit = new EventEmitter<any>();
 
+  private readonly OBJECT_PATCH_SELECTORS = new Set(['lib-radio-button-with-other', 'dropdown-with-other']);
+
   get normalizedVariables(): any {
     if (!this.variables) return this.variables;
-    const customFieldNames = this.buildCustomFieldNames();
+    const objectPatchFieldNames = this.buildObjectPatchFieldNames();
     const result: any = {};
     for (const [key, val] of Object.entries(this.variables)) {
-      if (!customFieldNames.has(key) && val && typeof val === 'object' && !Array.isArray(val)) {
-        const selected = (val as any).selectedRadioOption ?? (val as any).selectedOption;
-        const extracted = selected === 'other' && (val as any).otherInput
-          ? (val as any).otherInput
-          : selected;
-        result[key] = extracted !== undefined ? extracted : val;
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        if (objectPatchFieldNames.has(key)) {
+          // radio-button-with-other / dropdown-with-other present — skip normalization, they self-patch via variables$
+          result[key] = val;
+        } else {
+          const selected = (val as any).selectedRadioOption ?? (val as any).selectedOption;
+          const extracted = selected === 'other' && (val as any).otherInput
+            ? (val as any).otherInput
+            : selected;
+          result[key] = extracted !== undefined ? extracted : null;
+        }
       } else {
         result[key] = val;
       }
@@ -61,21 +68,21 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
     return result;
   }
 
-  private buildCustomFieldNames(): Set<string> {
+  private buildObjectPatchFieldNames(): Set<string> {
     const names = new Set<string>();
     if (this.fxForm?.elements) {
-      this.collectCustomFields(this.fxForm.elements, names);
+      this.collectObjectPatchFields(this.fxForm.elements, names);
     }
     return names;
   }
 
-  private collectCustomFields(elements: any[], result: Set<string>): void {
+  private collectObjectPatchFields(elements: any[], result: Set<string>): void {
     for (const el of elements) {
-      if (el.name && el.selector && this.fxWrapperService.getComponent(el.selector)) {
+      if (el.name && this.OBJECT_PATCH_SELECTORS.has(el.selector)) {
         result.add(el.name);
       }
       if (el.elements?.length) {
-        this.collectCustomFields(el.elements, result);
+        this.collectObjectPatchFields(el.elements, result);
       }
     }
   }
