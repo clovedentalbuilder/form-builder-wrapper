@@ -91,8 +91,8 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
             // Backwards compatibility: old radio-button-with-other format
             this.dropdownMap.set(key, { selectedOption: value.selectedRadioOption, otherInput: value.otherInput ?? '' });
           } else if (value != null && typeof value === 'string') {
-            // Backwards compatibility: plain string value
-            this.dropdownMap.set(key, { selectedOption: value });
+            // Backwards compatibility: plain string from native field mapped to "other" option
+            this.dropdownMap.set(key, { selectedOption: 'other', otherInput: value });
           }
         }
 

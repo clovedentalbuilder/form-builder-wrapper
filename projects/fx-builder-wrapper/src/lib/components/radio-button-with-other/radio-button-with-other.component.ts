@@ -95,8 +95,8 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
           if (entry && typeof entry === 'object' && ('selectedRadioOption' in entry || 'selectedOption' in entry)) {
             this.radioMap.set(key, entry);
           } else if (entry != null && typeof entry === 'string') {
-            // Backwards compatibility: plain string value wrapped into the expected object shape
-            this.radioMap.set(key, { selectedRadioOption: entry });
+            // Backwards compatibility: plain string from native field mapped to "other" option
+            this.radioMap.set(key, { selectedRadioOption: 'other', otherInput: entry });
           }
         }
       });

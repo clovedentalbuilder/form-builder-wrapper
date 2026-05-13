@@ -51,15 +51,22 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
     const result: any = {};
     for (const [key, val] of Object.entries(this.variables)) {
       if (val && typeof val === 'object' && !Array.isArray(val)) {
-        if (objectPatchFieldNames.has(key)) {
-          // radio-button-with-other / dropdown-with-other present — skip normalization, they self-patch via variables$
+        const selected = (val as any).selectedRadioOption ?? (val as any).selectedOption;
+        const hasRadioSelectKey = selected !== undefined;
+        const isObjectPatchComponent = objectPatchFieldNames.has(key);
+
+        if (hasRadioSelectKey && isObjectPatchComponent) {
+          // radio-button-with-other / dropdown-with-other is present with its object value — skip, self-patches via variables$
           result[key] = val;
-        } else {
-          const selected = (val as any).selectedRadioOption ?? (val as any).selectedOption;
+        } else if (hasRadioSelectKey && !isObjectPatchComponent) {
+          // component replaced with native or other — normalize to string
           const extracted = selected === 'other' && (val as any).otherInput
             ? (val as any).otherInput
             : selected;
-          result[key] = extracted !== undefined ? extracted : null;
+          result[key] = extracted;
+        } else {
+          // no selectedRadioOption/selectedOption — pass through as-is
+          result[key] = val;
         }
       } else {
         result[key] = val;
