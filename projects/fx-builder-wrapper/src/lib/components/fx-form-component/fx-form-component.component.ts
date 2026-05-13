@@ -72,7 +72,6 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
         result[key] = val;
       }
     }
-    // console.log('Normalized variables:', result);
     return result;
   }
 
