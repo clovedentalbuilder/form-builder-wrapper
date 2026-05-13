@@ -28,10 +28,10 @@ import { CheckboxGroupComponent } from '../checkbox-group/checkbox-group.compone
   standalone: true,
   imports: [CommonModule, FxFormComponent],
   template: `
-    <fx-form 
-      [fxForm]="fxForm" 
-      [value]="variables" 
-      (onSubmit)="onSubmit($event)" 
+    <fx-form
+      [fxForm]="fxForm"
+      [value]="normalizedVariables"
+      (onSubmit)="onSubmit($event)"
       #form
     >
     </fx-form>
@@ -42,6 +42,43 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
   @Input() fxForm!: FxForm;
   @Input() variables: any;
   @Output() fxFormSubmit = new EventEmitter<any>();
+
+  get normalizedVariables(): any {
+    if (!this.variables) return this.variables;
+    const customFieldNames = this.buildCustomFieldNames();
+    const result: any = {};
+    for (const [key, val] of Object.entries(this.variables)) {
+      if (!customFieldNames.has(key) && val && typeof val === 'object' && !Array.isArray(val)) {
+        const selected = (val as any).selectedRadioOption ?? (val as any).selectedOption;
+        const extracted = selected === 'other' && (val as any).otherInput
+          ? (val as any).otherInput
+          : selected;
+        result[key] = extracted !== undefined ? extracted : val;
+      } else {
+        result[key] = val;
+      }
+    }
+    return result;
+  }
+
+  private buildCustomFieldNames(): Set<string> {
+    const names = new Set<string>();
+    if (this.fxForm?.elements) {
+      this.collectCustomFields(this.fxForm.elements, names);
+    }
+    return names;
+  }
+
+  private collectCustomFields(elements: any[], result: Set<string>): void {
+    for (const el of elements) {
+      if (el.name && el.selector && this.fxWrapperService.getComponent(el.selector)) {
+        result.add(el.name);
+      }
+      if (el.elements?.length) {
+        this.collectCustomFields(el.elements, result);
+      }
+    }
+  }
 
   constructor(private fxWrapperService: FxBuilderWrapperService) {
     this.registerCustomComponents();

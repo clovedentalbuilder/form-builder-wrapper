@@ -85,12 +85,14 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
         //  }
 
         for (const [key, value] of Object.entries(variables) as [string, any][]) {
-          if (
-            value &&
-            typeof value === 'object' &&
-            'selectedOption' in value
-          ) {
+          if (value && typeof value === 'object' && 'selectedOption' in value) {
             this.dropdownMap.set(key, value);
+          } else if (value && typeof value === 'object' && 'selectedRadioOption' in value) {
+            // Backwards compatibility: old radio-button-with-other format
+            this.dropdownMap.set(key, { selectedOption: value.selectedRadioOption, otherInput: value.otherInput ?? '' });
+          } else if (value != null && typeof value === 'string') {
+            // Backwards compatibility: plain string value
+            this.dropdownMap.set(key, { selectedOption: value });
           }
         }
 
