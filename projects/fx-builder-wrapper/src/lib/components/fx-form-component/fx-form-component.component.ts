@@ -72,7 +72,7 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
         result[key] = val;
       }
     }
-    console.log('Normalized variables:', result);
+    // console.log('Normalized variables:', result);
     return result;
   }
 
@@ -81,7 +81,7 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
     if (this.fxForm?.elements) {
       this.collectObjectPatchFields(this.fxForm.elements, names);
     }
-    console.log('Object patch field names:', names);
+    // console.log('Object patch field names:', names);
     return names;
   }
 
