@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { FxForm, FxFormComponent } from '@instantsys-labs/fx';
 import { DispatchToClinicComponent } from '../../custom-controls/dispatch-to-clinic/dispatch-to-clinic.component';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
+import { COMPONENT_VALUE_ADAPTERS, findAdapterForValue } from './value-adapter-registry';
 import { DynamicTableComponent } from '../dynamic-table/dynamic-table.component';
 import { ToggleButtonComponent } from '../toggle-button/toggle-button.component';
 import { UploaderComponent } from '../uploader/uploader.component';
@@ -43,55 +44,85 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
   @Input() variables: any;
   @Output() fxFormSubmit = new EventEmitter<any>();
 
-  private readonly OBJECT_PATCH_SELECTORS = new Set(['lib-radio-button-with-other', 'dropdown-with-other']);
-
   get normalizedVariables(): any {
     if (!this.variables) return this.variables;
-    const objectPatchFieldNames = this.buildObjectPatchFieldNames();
+    const fieldElementMap = this.buildFieldElementMap();
     const result: any = {};
     for (const [key, val] of Object.entries(this.variables)) {
-      if (val && typeof val === 'object' && !Array.isArray(val)) {
-        const selected = (val as any).selectedRadioOption ?? (val as any).selectedOption;
-        const hasRadioSelectKey = selected !== undefined;
-        const isObjectPatchComponent = objectPatchFieldNames.has(key);
+      const el = fieldElementMap.get(key);
+      const currentAdapter = el?.selector ? COMPONENT_VALUE_ADAPTERS[el.selector] : undefined;
 
-        if (hasRadioSelectKey && isObjectPatchComponent) {
-          // radio-button-with-other / dropdown-with-other is present with its object value — skip, self-patches via variables$
-          result[key] = val;
-        } else if (hasRadioSelectKey && !isObjectPatchComponent) {
-          // component replaced with native or other — normalize to string
-          const extracted = selected === 'other' && (val as any).otherInput
-            ? (val as any).otherInput
-            : selected;
-          result[key] = extracted;
-        } else {
-          // no selectedRadioOption/selectedOption — pass through as-is
-          result[key] = val;
-        }
-      } else {
+      if (currentAdapter) {
+        // Custom component field: pass through as-is — it self-patches via variables$
         result[key] = val;
+      } else {
+        // Native field: extract primitive from any known custom-component object, then
+        // apply a final safety net so a plain object/array never reaches a native input.
+        const storedAdapter = findAdapterForValue(val);
+        const extracted = storedAdapter ? storedAdapter.extractPrimitive(val) : val;
+        result[key] = this.safeNativeValue(extracted);
       }
     }
     return result;
   }
 
-  private buildObjectPatchFieldNames(): Set<string> {
-    const names = new Set<string>();
-    if (this.fxForm?.elements) {
-      this.collectObjectPatchFields(this.fxForm.elements, names);
+  /**
+   * Returns a copy of variables where each value is shaped to match the format
+   * the current component expects. Pushed to variables$ so custom components
+   * receive correctly-structured data even when the stored value came from a
+   * different component type (e.g. native string → lib-checkbox boolean object).
+   * resolveWrapOpts is called per-adapter so component-specific settings (e.g.
+   * whether showOtherOption is enabled) influence how the value is wrapped.
+   */
+  private buildAdaptedVariables(): any {
+    if (!this.variables) return this.variables;
+    const fieldElementMap = this.buildFieldElementMap();
+    const adapted: any = {};
+    for (const [key, val] of Object.entries(this.variables)) {
+      const el = fieldElementMap.get(key);
+      const currentAdapter = el?.selector ? COMPONENT_VALUE_ADAPTERS[el.selector] : undefined;
+
+      if (currentAdapter) {
+        const storedAdapter = findAdapterForValue(val);
+        if (storedAdapter === currentAdapter) {
+          // Same type — no transformation needed
+          adapted[key] = val;
+        } else {
+          // Either stored by a different custom component or a plain native value —
+          // extract to primitive first, then wrap into the current component's shape.
+          const primitive = storedAdapter ? storedAdapter.extractPrimitive(val) : val;
+          const opts = currentAdapter.resolveWrapOpts ? currentAdapter.resolveWrapOpts(el) : {};
+          adapted[key] = currentAdapter.wrapFromPrimitive(primitive, opts);
+        }
+      } else {
+        adapted[key] = val;
+      }
     }
-    // console.log('Object patch field names:', names);
-    return names;
+    return adapted;
   }
 
-  private collectObjectPatchFields(elements: any[], result: Set<string>): void {
+  /** Ensures a value destined for a native form control is always a primitive. */
+  private safeNativeValue(val: any): any {
+    if (val !== null && typeof val === 'object') {
+      // Covers both plain objects { } and arrays [ ] — neither is patchable
+      // into a native fx element (fx-text-field, fx-select-list, fx-radio, etc.)
+      return '';
+    }
+    return val;
+  }
+
+  private buildFieldElementMap(): Map<string, any> {
+    const map = new Map<string, any>();
+    if (this.fxForm?.elements) {
+      this.collectFieldElements(this.fxForm.elements, map);
+    }
+    return map;
+  }
+
+  private collectFieldElements(elements: any[], map: Map<string, any>): void {
     for (const el of elements) {
-      if (el.name && this.OBJECT_PATCH_SELECTORS.has(el.selector)) {
-        result.add(el.name);
-      }
-      if (el.elements?.length) {
-        this.collectObjectPatchFields(el.elements, result);
-      }
+      if (el.name) map.set(el.name, el);
+      if (el.elements?.length) this.collectFieldElements(el.elements, map);
     }
   }
 
@@ -99,12 +130,9 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
     this.registerCustomComponents();
    }
 
-  public ngOnChanges(changes: SimpleChanges): void { 
-    // if('variables' in changes && !changes['fxForm']) {
-    //   this.fxWrapperService.variables$.next(this.variables);
-    // }
+  public ngOnChanges(changes: SimpleChanges): void {
     if ('variables' in changes) {
-      this.fxWrapperService.variables$.next(this.variables);
+      this.fxWrapperService.variables$.next(this.buildAdaptedVariables());
     }
   }
 
