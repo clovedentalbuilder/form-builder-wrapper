@@ -56,7 +56,9 @@ const toStringArray = (v: any): string[] => {
 export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAdapter>> = {
 
   // ── { selectedRadioOption: string, otherInput: string } ──────────────────
-  'lib-radio-button-with-other': {
+  // Key matches the registration key used in fxWrapperService ('radio-button-with-other'),
+  // which is what fxForm.elements[].selector stores — NOT the Angular component selector.
+  'radio-button-with-other': {
     identify: (v) => isObj(v) && 'selectedRadioOption' in v,
 
     extractPrimitive: (v: any) => {
