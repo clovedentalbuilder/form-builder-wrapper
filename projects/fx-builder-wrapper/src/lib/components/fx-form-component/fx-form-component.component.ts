@@ -63,6 +63,7 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
         result[key] = this.safeNativeValue(extracted);
       }
     }
+    console.log('Normalized variables for native form controls:', result);
     return result;
   }
 
