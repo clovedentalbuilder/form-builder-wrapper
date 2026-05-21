@@ -64,18 +64,11 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
       return sel === 'other' && v.otherInput ? v.otherInput : sel;
     },
 
-    // showOtherOption lives inside the single 'radio-config' settings object
-    resolveWrapOpts: (el: any) => {
-      const cfg = el?.settings?.find((s: any) => s.key === 'radio-config')?.value ?? {};
-      return { allowOther: cfg.showOtherOption === 'true' };
-    },
-
-    wrapFromPrimitive: (v: any, opts?: Record<string, any>) => {
+    wrapFromPrimitive: (v: any) => {
       // null / undefined → nothing selected, clean slate
-      if (v == null) return { selectedRadioOption: '', otherInput: '' };
-      // Component not configured with an "other" input → patch empty rather than
-      // pre-selecting an invisible "Other" state that cannot be saved correctly
-      if (!opts?.['allowOther']) return { selectedRadioOption: '', otherInput: '' };
+      if (v == null || v === '') return { selectedRadioOption: '', otherInput: '' };
+      // Consistent with the component's own backward-compat: plain strings always
+      // land in the "other" input so the value is never silently discarded.
       return { selectedRadioOption: 'other', otherInput: String(v) };
     },
   },
