@@ -65,6 +65,7 @@ this.compareValue = (this.fxComponent?.fxData?.settings?.find((s: any) => s.key 
     this.confirmationForm.patchValue(this.radoioMap.get(key));
     const data = this.radoioMap.get(key);
     this.onSelectionChange(data.confirmation);
+    this.revalidateSelection();
   }
 }, 200);
 
@@ -157,6 +158,17 @@ this.compareValue = (this.fxComponent?.fxData?.settings?.find((s: any) => s.key 
         protected validations(): FxValidation[] {
           return [];
         }
+
+        private revalidateSelection(): void {
+    const selected: string = this.confirmationForm.get('confirmation')?.value ?? '';
+    if (!selected) return;
+    if (!this.options?.length) return;
+    const validValues = new Set(this.options.map((o: any) => String(o.value ?? o.option ?? o)));
+    if (!validValues.has(selected)) {
+      this.confirmationForm.patchValue({ confirmation: '' });
+      this.onSelectionChange('');
+    }
+  }
 
         onSelectionChange(selection: string) {
 

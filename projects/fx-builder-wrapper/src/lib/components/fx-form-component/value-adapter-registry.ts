@@ -17,6 +17,11 @@
  *                       Must never produce a shape that would save a wrong/garbage
  *                       value — invalid inputs must produce the component's empty state.
  *
+ * Option validation (checking whether a value is a valid option) is intentionally
+ * NOT done here. Components that load options (lib-checkbox-group,
+ * lib-multiselect-dropdown) validate via revalidateSelection() after their options
+ * load, so the API is never called twice and the check always runs against live data.
+ *
  * To add support for a new component, append an entry below.
  * The order of entries matters for findAdapterForValue: place more-specific
  * identify rules before less-specific ones.
@@ -44,13 +49,6 @@ const isValidDate = (v: any): boolean => {
   return !isNaN(d.getTime());
 };
 
-/** Converts any value to a non-empty string array, or returns [] for null/empty. */
-const toStringArray = (v: any): string[] => {
-  if (Array.isArray(v)) return v;
-  if (v == null || v === '') return [];
-  return [String(v)];
-};
-
 // ── Adapter map ─────────────────────────────────────────────────────────────
 
 export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAdapter>> = {
@@ -66,18 +64,23 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
       return sel === 'other' && v.otherInput ? v.otherInput : sel;
     },
 
-    wrapFromPrimitive: (v: any) => {
-      // null / undefined → nothing selected, clean slate
-      if (v == null || v === '') return { selectedRadioOption: '', otherInput: '' };
-      // Consistent with the component's own backward-compat: plain strings always
-      // land in the "other" input so the value is never silently discarded.
-      return { selectedRadioOption: 'other', otherInput: String(v) };
+    wrapFromPrimitive: (v: any, opts?: Record<string, any>) => {
+      // Array input (from checkbox-group / multiselect): take first element only
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      if (scalar == null || scalar === '') return { selectedRadioOption: '', otherInput: '' };
+      // From another option-based component: place value as the selected option so
+      // the component can validate it against its own option list after loading.
+      // revalidateSelection() will clear it to empty if the option doesn't exist.
+      if (opts?.['fromOptionComponent']) {
+        return { selectedRadioOption: String(scalar), otherInput: '' };
+      }
+      // From a native / free-text field: always land in the "other" input so the
+      // user-typed text is never silently discarded.
+      return { selectedRadioOption: 'other', otherInput: String(scalar) };
     },
   },
 
   // ── { selectedOption: string, otherInput: string } ───────────────────────
-  // dropdown-with-other always appends an "other" option at runtime (hardcoded),
-  // so no resolveWrapOpts needed — allowOther is always implicitly true.
   'dropdown-with-other': {
     identify: (v) => isObj(v) && 'selectedOption' in v && !('selectedRadioOption' in v),
 
@@ -86,33 +89,44 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
       return sel === 'other' && v.otherInput ? v.otherInput : sel;
     },
 
-    wrapFromPrimitive: (v: any) => {
-      if (v == null) return { selectedOption: '', otherInput: '' };
-      return { selectedOption: 'other', otherInput: String(v) };
+    wrapFromPrimitive: (v: any, opts?: Record<string, any>) => {
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      if (scalar == null || scalar === '') return { selectedOption: '', otherInput: '' };
+      if (opts?.['fromOptionComponent']) {
+        return { selectedOption: String(scalar), otherInput: '' };
+      }
+      return { selectedOption: 'other', otherInput: String(scalar) };
     },
   },
 
   // ── { selectedCheckboxOption: string[], otherInput: string, textareaValues: {} } ─
+  // Option validation happens inside the component (revalidateSelection) after
+  // options load, so no resolveWrapOpts is needed here.
   'lib-checkbox-group': {
     identify: (v) => isObj(v) && 'selectedCheckboxOption' in v,
     extractPrimitive: (v: any) => v.selectedCheckboxOption ?? [],
 
-    wrapFromPrimitive: (v: any) => ({
-      // toStringArray handles: null→[], ''→[], 'item'→['item'], ['a','b']→['a','b']
-      selectedCheckboxOption: toStringArray(v),
-      otherInput: '',
-      textareaValues: {},
-    }),
+    wrapFromPrimitive: (v: any) => {
+      const candidates: string[] = Array.isArray(v)
+        ? v
+        : (v != null && v !== '' ? [String(v)] : []);
+      return { selectedCheckboxOption: candidates, otherInput: '', textareaValues: {} };
+    },
   },
 
   // ── { multipleSelectedOption: string[] } ─────────────────────────────────
+  // Option validation happens inside the component (revalidateSelection) after
+  // options load, so no resolveWrapOpts is needed here.
   'lib-multiselect-dropdown': {
     identify: (v) => isObj(v) && 'multipleSelectedOption' in v,
     extractPrimitive: (v: any) => v.multipleSelectedOption ?? [],
 
-    wrapFromPrimitive: (v: any) => ({
-      multipleSelectedOption: toStringArray(v),
-    }),
+    wrapFromPrimitive: (v: any) => {
+      const candidates: string[] = Array.isArray(v)
+        ? v
+        : (v != null && v !== '' ? [String(v)] : []);
+      return { multipleSelectedOption: candidates };
+    },
   },
 
   // ── { confirmation: string, remarks: string, ... } ───────────────────────
@@ -120,12 +134,16 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
     identify: (v) => isObj(v) && 'confirmation' in v && 'remarks' in v,
     extractPrimitive: (v: any) => v.confirmation ?? '',
 
-    wrapFromPrimitive: (v: any) => ({
-      confirmation: v != null ? String(v) : '',
-      remarks: '',
-      valueToShowTextArea: '',
-      label: '',
-    }),
+    wrapFromPrimitive: (v: any) => {
+      // Multiple-value source: take the first element only — confirmation accepts one value.
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      return {
+        confirmation: scalar != null ? String(scalar) : '',
+        remarks: '',
+        valueToShowTextArea: '',
+        label: '',
+      };
+    },
   },
 
   // ── { checked: boolean, ... } ────────────────────────────────────────────
@@ -145,9 +163,11 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
       return v.checked ?? false;
     },
 
-    wrapFromPrimitive: (v: any) => ({
-      checked: v === true || v === 'true',
-    }),
+    wrapFromPrimitive: (v: any) => {
+      // Multiple-value source: take the first element only — checkbox accepts one boolean.
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      return { checked: scalar === true || scalar === 'true' };
+    },
   },
 
   // ── { date: string } ─────────────────────────────────────────────────────
@@ -166,15 +186,38 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
     extractPrimitive: (v: any) => v.date ?? '',
 
     wrapFromPrimitive: (v: any) => {
+      // Multiple-value source: take the first element only — date picker accepts one date.
       // Only preserve the string when it actually parses as a real date.
-      // '896727y28y4', 'null', numbers, random text → empty so the date picker
-      // shows blank rather than patching an invalid/garbage value.
-      return { date: isValidDate(v) ? String(v) : '' };
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      return { date: isValidDate(scalar) ? String(scalar) : '' };
+    },
+  },
+
+  // ── { searchSelectedOption: string } ─────────────────────────────────────
+  'lib-dropdown-with-search': {
+    identify: (v) =>
+      isObj(v) &&
+      'searchSelectedOption' in v &&
+      !('selectedOption' in v) &&
+      !('selectedRadioOption' in v) &&
+      !('multipleSelectedOption' in v) &&
+      !('selectedCheckboxOption' in v),
+
+    extractPrimitive: (v: any) => v.searchSelectedOption ?? '',
+
+    wrapFromPrimitive: (v: any, opts?: Record<string, any>) => {
+      // Array from checkbox-group/multiselect: take first element
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      if (scalar == null || scalar === '') return { searchSelectedOption: '' };
+      // Always try to select directly — no "other" option exists in this component.
+      // revalidateSelection() will clear it if the value is not in the loaded options.
+      return { searchSelectedOption: String(scalar) };
     },
   },
 
   // ── { uploadedFiles: any[], deletedFiles: any[] } ────────────────────────
-  'fx-uploader': {
+  // Registration key is 'uploader' — that is what fxForm.elements[].selector stores.
+  'uploader': {
     identify: (v) => isObj(v) && 'uploadedFiles' in v,
     extractPrimitive: (v: any) => v.uploadedFiles ?? [],
 

@@ -55,6 +55,7 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
 
       if (key && this.dropdownMap.has(key)) {
         this.dropDownForm.patchValue(this.dropdownMap.get(key));
+        this.revalidateSelection();
       }
     }, 200);
 
@@ -160,12 +161,25 @@ export class DropdownWithOtherComponent extends FxBaseComponent implements OnIni
     return [FxValidatorService.required];
   }
 
+  private revalidateSelection(): void {
+    const selected: string = this.dropDownForm.get('selectedOption')?.value ?? '';
+    if (!selected || selected === 'other') return;
+    if (!this.options?.length) return;
+    const validValues = new Set(this.options.map((o: any) => String(o.value)));
+    if (!validValues.has(selected)) {
+      // Clearing via patchValue triggers the valueChanges subscription which
+      // automatically disables and resets the otherInput control.
+      this.dropDownForm.patchValue({ selectedOption: '' });
+    }
+  }
+
   getOptions(serviceUrl: string, url: string) {
     const finalUrl = serviceUrl + url;
     this.http.get<any[]>(finalUrl).subscribe({
       next: (response: any) => {
         this.options = response?.data;
         this.options.push({ value: 'other', label: 'Other' });
+        this.revalidateSelection();
       },
       error: (err) => {
         console.error('Error fetching options', err);
