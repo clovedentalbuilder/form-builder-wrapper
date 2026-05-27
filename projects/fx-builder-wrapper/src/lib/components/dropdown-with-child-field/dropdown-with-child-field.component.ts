@@ -52,7 +52,9 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
 
   form: FormGroup = this.fb.group({
     dwcParentValue: [''],
+    dwcParentLabel: [''],
     dwcChildValue:  [''],
+    dwcChildLabel:  [''],
   });
 
   constructor(
@@ -132,6 +134,8 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
     }
     mainCtrl?.updateValueAndValidity();
 
+    this.form.get('dwcParentLabel')?.setValue(config.label ?? '');
+    this.form.get('dwcChildLabel')?.setValue('');
     this.childFieldControl.setValue('');
     this.childFieldControl.clearValidators();
     this.childFieldControl.updateValueAndValidity();
@@ -211,6 +215,7 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
 
     if (childCfg?.enabled) {
       this.activeChildConfig = childCfg;
+      this.form.get('dwcChildLabel')?.setValue(childCfg.label ?? '');
 
       const cached = this.childValueCache.get(value);
       const defaultVal = childCfg.fieldType === 'checkbox' ? [] : '';
@@ -232,6 +237,7 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
       }
     } else {
       this.activeChildConfig = null;
+      this.form.get('dwcChildLabel')?.setValue('');
       this.childFieldControl.clearValidators();
       this.childFieldControl.setValue('');
       this.childFieldControl.updateValueAndValidity();

@@ -64,7 +64,9 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
 
     wrapFromPrimitive: (v: any) => ({
       dwcParentValue: v != null && v !== '' ? String(v) : '',
+      dwcParentLabel: '',
       dwcChildValue:  '',
+      dwcChildLabel:  '',
     }),
   },
 
@@ -77,7 +79,9 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
 
     wrapFromPrimitive: (v: any) => ({
       rwcParentValue: v != null && v !== '' ? String(v) : '',
+      rwcParentLabel: '',
       rwcChildValue:  '',
+      rwcChildLabel:  '',
     }),
   },
 
