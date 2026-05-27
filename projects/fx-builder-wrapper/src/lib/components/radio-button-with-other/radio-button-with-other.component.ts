@@ -82,6 +82,10 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
         const resolvedValue = data.selectedRadioOption ?? data.selectedOption ?? '';
         this.radioForm.patchValue({ selectedRadioOption: resolvedValue, otherInput: data.otherInput ?? '' });
         this.onSelectionChange(resolvedValue);
+        // For manual options (already loaded by this point), remove the value if it
+        // does not exist in the option list. For API options, revalidateSelection()
+        // fires again inside getOptions() after the response arrives.
+        this.revalidateSelection();
       }
     }, 200);
   }
@@ -153,9 +157,22 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
       : opts;
   }
 
+  private revalidateSelection(): void {
+    const selected: string = this.radioForm.get('selectedRadioOption')?.value ?? '';
+    // 'other' is always valid (user-typed text); empty means nothing selected — skip both.
+    if (!selected || selected === 'other') return;
+    if (!this.options?.length) return;
+    const validValues = new Set(this.options.map((o: any) => String(o.value)));
+    if (!validValues.has(selected)) {
+      this.radioForm.patchValue({ selectedRadioOption: '', otherInput: '' });
+      this.onSelectionChange('');
+    }
+  }
+
   getOptions(serviceUrl: string, url: string, config: any): void {
     if (!url) {
       this.options = this.appendOther([...this.mockOptions], config);
+      this.revalidateSelection();
       return;
     }
 
@@ -164,10 +181,12 @@ export class RadioButtonWithOtherComponent extends FxBaseComponent implements On
       next: (response: any) => {
         const raw = Array.isArray(response) ? response : (response?.data || []);
         this.options = this.appendOther(this.mapOptions(raw, config), config);
+        this.revalidateSelection();
       },
       error: (err) => {
         console.error('Error fetching options', err);
         this.options = this.appendOther([...this.mockOptions], config);
+        this.revalidateSelection();
       }
     });
   }

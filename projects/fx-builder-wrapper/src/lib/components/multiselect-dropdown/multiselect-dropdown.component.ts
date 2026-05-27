@@ -50,6 +50,9 @@ export class MultiselectDropdownComponent extends FxBaseComponent implements OnI
 
       if (key && this.multiselectDropdownMap.has(key)) {
         this.multiselectDropDownForm.patchValue(this.multiselectDropdownMap.get(key));
+        // For manual options (already loaded), remove ghost values immediately.
+        // For API options, revalidateSelection() fires again after the API responds.
+        this.revalidateSelection();
       }
     }, 200);
 
@@ -110,12 +113,27 @@ export class MultiselectDropdownComponent extends FxBaseComponent implements OnI
     return [];
   }
 
+  private revalidateSelection(): void {
+    if (!this.options?.length) return;
+    const control = this.multiselectDropDownForm.get('multipleSelectedOption');
+    const current: string[] = control?.value ?? [];
+    if (!current.length) return;
+    const valid = new Set(this.options.map((o: any) => String(o.value)));
+    const validated = current.filter(v => valid.has(String(v)));
+    if (validated.length !== current.length) {
+      control?.setValue(validated, { emitEvent: false });
+    }
+  }
+
   getOptions(serviceUrl: string, url: string) {
     if (url) {
       const finalUrl = serviceUrl + url;
       this.http.get<any[]>(finalUrl).subscribe({
         next: (response: any) => {
           this.options = response?.data;
+          // Re-validate any pre-patched values against loaded API options so
+          // ghost values (options no longer present) are removed from the control.
+          this.revalidateSelection();
         },
         error: (err) => {
           console.error('Error fetching options', err);

@@ -62,10 +62,9 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
         // apply a final safety net so a plain object/array never reaches a native input.
         const storedAdapter = findAdapterForValue(val);
         const extracted = storedAdapter ? storedAdapter.extractPrimitive(val) : val;
-        result[key] = this.safeNativeValue(extracted);
+        result[key] = this.resolveNativeOptionValue(this.safeNativeValue(extracted), el);
       }
     }
-    console.log('Normalized variables for native form controls:', result);
     return result;
   }
 
@@ -94,7 +93,11 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
           // Either stored by a different custom component or a plain native value —
           // extract to primitive first, then wrap into the current component's shape.
           const primitive = storedAdapter ? storedAdapter.extractPrimitive(val) : val;
-          const opts = currentAdapter.resolveWrapOpts ? currentAdapter.resolveWrapOpts(el) : {};
+          const baseOpts = currentAdapter.resolveWrapOpts ? currentAdapter.resolveWrapOpts(el) : {};
+          // fromOptionComponent tells wrapFromPrimitive whether the value came from
+          // another option-based component (try to match option) or a native/free-text
+          // field (always put in "other" for radio/dropdown-with-other components).
+          const opts = { ...baseOpts, fromOptionComponent: storedAdapter !== undefined };
           adapted[key] = currentAdapter.wrapFromPrimitive(primitive, opts);
         }
       } else {
@@ -112,6 +115,23 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       return '';
     }
     return val;
+  }
+
+  /**
+   * For native option fields (select, dropdown, radio) that define a static
+   * options array on the element: if the saved value is not among the valid
+   * option values, return null so the field shows blank instead of holding
+   * a stale or unrecognised string. Fields with no options (text, textarea,
+   * date, etc.) are returned unchanged.
+   */
+  private resolveNativeOptionValue(value: any, el: any): any {
+    if (value == null || value === '') return value;
+    // Try common option-array paths used by the FX library for native select/radio fields.
+    // Fields with no options (text, textarea, date, etc.) will hit no path → pass through unchanged.
+    const options: any[] | undefined = el?.options ?? el?.data ?? el?.items;
+    if (!Array.isArray(options) || !options.length) return value;
+    const validValues = new Set(options.map((o: any) => String(o.value ?? o.id ?? o)));
+    return validValues.has(String(value)) ? value : null;
   }
 
   private buildFieldElementMap(): Map<string, any> {

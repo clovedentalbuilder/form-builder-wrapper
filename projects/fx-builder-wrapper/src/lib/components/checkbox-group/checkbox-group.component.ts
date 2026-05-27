@@ -167,11 +167,37 @@ export class CheckboxGroupComponent extends FxBaseComponent implements OnInit, A
     this.applyRestore();
   }
 
+  private filterByOptions(values: string[]): string[] {
+    if (!this.options?.length || !values.length) return values;
+    const valid = new Set(this.options.map(o => String(o.value)));
+    return values.filter(v => valid.has(v));
+  }
+
+  private revalidateSelection(): void {
+    if (!this.options?.length) return;
+    const control = this.checkboxGroupForm.get('selectedCheckboxOption');
+    const current: string[] = control?.value ?? [];
+    if (!current.length) return;
+    const validated = this.filterByOptions(current);
+    if (validated.length !== current.length) {
+      control?.setValue(validated, { emitEvent: false });
+      this.cdr.detectChanges();
+    }
+  }
+
   private applyRestore(): void {
-    if (!this.pendingRestore) return;
+    if (!this.pendingRestore) {
+      // API options just loaded but restore was already applied — re-validate to
+      // remove any ghost values that were not in the loaded option list.
+      this.revalidateSelection();
+      return;
+    }
     const data = this.pendingRestore;
     const rawSelected = data.selectedCheckboxOption ?? data.selectedOption ?? [];
-    const selectedOptions: string[] = Array.isArray(rawSelected) ? rawSelected : (rawSelected ? [rawSelected] : []);
+    const rawOptions: string[] = Array.isArray(rawSelected) ? rawSelected : (rawSelected ? [rawSelected] : []);
+    // Filter against loaded options when available; if options haven't loaded yet
+    // the array passes through unchanged and revalidateSelection will fix it later.
+    const selectedOptions = this.filterByOptions(rawOptions);
 
     this.checkboxGroupForm.patchValue({ selectedCheckboxOption: selectedOptions, otherInput: data.otherInput ?? '' });
 

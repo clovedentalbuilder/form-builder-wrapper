@@ -51,6 +51,7 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
 
       if (key && this.searchDropdownMap.has(key)) {
         this.searchDropDownForm.patchValue(this.searchDropdownMap.get(key));
+        this.revalidateSelection();
       }
     }, 200);
 
@@ -112,6 +113,16 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
     return [];
   }
 
+  private revalidateSelection(): void {
+    const selected: string = this.searchDropDownForm.get('searchSelectedOption')?.value ?? '';
+    if (!selected) return;
+    if (!this.options?.length) return;
+    const validValues = new Set(this.options.map((o: any) => String(o.value)));
+    if (!validValues.has(selected)) {
+      this.searchDropDownForm.patchValue({ searchSelectedOption: '' }, { emitEvent: false });
+    }
+  }
+
   getOptions(serviceUrl: string, url: string) {
     if (url) {
       const finalUrl = serviceUrl + url;
@@ -119,7 +130,7 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
         next: (response: any) => {
           this.options = response?.content || [];
           this.options.unshift({ option: 'Select', value: '' });
-
+          this.revalidateSelection();
         },
         error: (err) => {
           console.error('Error fetching options', err);
@@ -127,7 +138,7 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
       });
     } else {
       this.options = (this.fxComponent?.fxData?.settings?.find((s: any) => s.key === 'itemsSearchOption') as any)?.options || [];
-      // this.options.unshift({ option: 'Select', value: '' });
+      this.revalidateSelection();
     }
   }
 }
