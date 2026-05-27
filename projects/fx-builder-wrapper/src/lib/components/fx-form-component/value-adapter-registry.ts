@@ -53,6 +53,36 @@ const isValidDate = (v: any): boolean => {
 
 export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAdapter>> = {
 
+  // ── { dwcParentValue: string, dwcChildValue: any } ───────────────────────────
+  // Unique key names prevent any collision with radio-with-child-field or other adapters.
+  'dropdown-with-child-field': {
+    identify: (v) => isObj(v) && 'dwcParentValue' in v && 'dwcChildValue' in v,
+
+    extractPrimitive: (v: any) => v.dwcParentValue ?? '',
+
+    wrapFromPrimitive: (v: any) => ({
+      dwcParentValue: v != null && v !== '' ? String(v) : '',
+      dwcParentLabel: '',
+      dwcChildValue:  '',
+      dwcChildLabel:  '',
+    }),
+  },
+
+  // ── { rwcParentValue: string, rwcChildValue: any } ───────────────────────────
+  // Unique key names prevent any collision with radio-button-with-other or other adapters.
+  'radio-with-child-field': {
+    identify: (v) => isObj(v) && 'rwcParentValue' in v && 'rwcChildValue' in v,
+
+    extractPrimitive: (v: any) => v.rwcParentValue ?? '',
+
+    wrapFromPrimitive: (v: any) => ({
+      rwcParentValue: v != null && v !== '' ? String(v) : '',
+      rwcParentLabel: '',
+      rwcChildValue:  '',
+      rwcChildLabel:  '',
+    }),
+  },
+
   // ── { selectedRadioOption: string, otherInput: string } ──────────────────
   // Key matches the registration key used in fxWrapperService ('radio-button-with-other'),
   // which is what fxForm.elements[].selector stores — NOT the Angular component selector.

@@ -1,0 +1,35 @@
+.dwc-child-field {
+  margin-top: 0.75rem;
+  padding: 0.875rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+select:not([size]) {
+    background: url("../../../assets/icons/dropdown.svg") right .4rem center no-repeat white;
+    border: 1px solid #cdcdcd;
+    padding: 6px 30px 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100% !important;
+}
+
+.field-required, .error_message { color: #D60000; }
+.character_color { color: #454545; font-size: 12px; }
+.sub_label { font-size: 10px; font-weight: 500; color: #999; }
+
+.radio-label {
+  font-size: 12px !important;
+  padding-bottom: 4px;
+  margin: 0 0 0 8px;
+  color: #999 !important;
+}

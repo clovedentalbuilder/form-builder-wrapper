@@ -21,6 +21,8 @@ import { HeadingComponent } from './components/heading/heading.component';
 import { CheckboxComponent } from './components/checkbox/checkbox.component';
 import { RadioButtonWithOtherComponent } from './components/radio-button-with-other/radio-button-with-other.component';
 import { CheckboxGroupComponent } from './components/checkbox-group/checkbox-group.component';
+import { RadioWithChildFieldComponent } from './components/radio-with-child-field/radio-with-child-field.component';
+import { DropdownWithChildFieldComponent } from './components/dropdown-with-child-field/dropdown-with-child-field.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -110,6 +112,12 @@ export class FxBuilderWrapperComponent implements OnInit {
     }
     if (!Boolean(this.fxWrapperService.getComponent('lib-checkbox-group'))) {
       this.fxWrapperService.registerCustomComponent('Checkbox Group', 'lib-checkbox-group', CheckboxGroupComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('radio-with-child-field'))) {
+      this.fxWrapperService.registerCustomComponent('Radio with Child Field', 'radio-with-child-field', RadioWithChildFieldComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('dropdown-with-child-field'))) {
+      this.fxWrapperService.registerCustomComponent('Dropdown with Child Field', 'dropdown-with-child-field', DropdownWithChildFieldComponent);
     }
   };
 

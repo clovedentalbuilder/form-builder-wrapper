@@ -1,0 +1,578 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '680px' }"
+  styleClass="dwc-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="rbo-dialog-header">
+      <i class="pi pi-chevron-circle-down rbo-header-icon"></i>
+      <div class="rbo-header-text">
+        <span class="rbo-dialog-title">Dropdown with Child Field Settings</span>
+        <span class="rbo-dialog-name" *ngIf="fxData?.name">#{{ fxData?.name }}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="rbo-settings-body">
+
+    <!-- ── Setup tab bar ─────────────────────────────────────────────────────── -->
+    <div class="rwc-setup-tabs">
+      <button type="button" class="rwc-setup-tab"
+        [class.rwc-setup-tab--active]="setupTab === 'manual'"
+        (click)="setupTab = 'manual'">
+        <i class="pi pi-pencil"></i> Manual Setup
+      </button>
+      <button type="button" class="rwc-setup-tab"
+        [class.rwc-setup-tab--active]="setupTab === 'quick'"
+        (click)="setupTab = 'quick'; showJsonImport = false; jsonImportError = ''; uploadedFileName = ''; jsonInput = ''">
+        <i class="pi pi-bolt"></i> Quick Setup
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- Quick Setup — only in Quick tab    -->
+    <!-- ══════════════════════════════════ -->
+    <div class="rbo-section" *ngIf="setupTab === 'quick'">
+      <div class="rbo-section-header">
+        <i class="pi pi-file-import"></i>
+        <span>Quick Setup</span>
+        <span class="rwc-section-hint">import configuration from JSON</span>
+      </div>
+      <div class="rbo-section-body">
+
+        <button type="button" class="rwc-sync-btn" (click)="toggleJsonImport()">
+          <i class="pi" [class.pi-file-import]="!showJsonImport" [class.pi-times]="showJsonImport"></i>
+          {{ showJsonImport ? 'Cancel Import' : 'Import from JSON' }}
+        </button>
+
+        <ng-container *ngIf="showJsonImport">
+          <div class="rwc-import-tabs">
+            <button type="button" class="rwc-import-tab"
+              [class.rwc-import-tab--active]="importMode === 'upload'"
+              (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="rwc-import-tab"
+              [class.rwc-import-tab--active]="importMode === 'paste'"
+              (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="rwc-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload rwc-drop-icon"></i>
+                <span class="rwc-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file rwc-drop-icon rwc-drop-icon--ready"></i>
+                <span class="rwc-drop-label rwc-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="rwc-drop-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="rbo-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "name": "field_name", "optionSource": "manual", "manualOptions": [...], "childFields": { ... } }'
+                class="rbo-input rwc-json-textarea"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="rwc-json-error">
+            <i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}
+          </small>
+
+          <div class="rwc-apply-row">
+            <span class="rwc-apply-warn">
+              <i class="pi pi-info-circle"></i>
+              Applying JSON will overwrite all current settings.
+            </span>
+            <button type="button" class="rwc-import-apply-btn" (click)="importFromJson()">
+              <i class="pi pi-check"></i> Apply JSON
+            </button>
+          </div>
+        </ng-container>
+
+        <div *ngIf="!showJsonImport" class="rwc-how-to-card">
+          <div class="rwc-how-to-header">
+            <span class="rwc-how-to-icon"><i class="pi pi-bolt"></i></span>
+            <div>
+              <div class="rwc-how-to-title">How Quick Setup works</div>
+              <div class="rwc-how-to-subtitle">Configure everything at once using a JSON file</div>
+            </div>
+          </div>
+          <div class="rwc-how-to-steps">
+            <div class="rwc-how-to-step">
+              <span class="rwc-step-num">1</span>
+              <div class="rwc-step-text"><strong>Click "Import from JSON"</strong> above to open the import panel.</div>
+            </div>
+            <div class="rwc-how-to-step">
+              <span class="rwc-step-num">2</span>
+              <div class="rwc-step-text"><strong>Upload a .json file</strong> from your device, or <strong>paste</strong> the JSON directly into the text area.</div>
+            </div>
+            <div class="rwc-how-to-step">
+              <span class="rwc-step-num">3</span>
+              <div class="rwc-step-text"><strong>Click "Apply JSON"</strong> — all fields will be populated and you'll be taken to Manual Setup to review and save.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- All configuration sections — Manual tab only                          -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="setupTab === 'manual'">
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 1: Option Source       -->
+    <!-- ══════════════════════════════ -->
+    <div class="rbo-section">
+      <div class="rbo-section-header">
+        <i class="pi pi-database"></i>
+        <span>Option Source</span>
+      </div>
+      <div class="rbo-section-body">
+        <div class="rbo-field">
+          <label class="rbo-label">Source</label>
+          <div class="rbo-radio-group">
+            <label class="rbo-radio-option">
+              <input type="radio" formControlName="optionSource" value="api" />
+              <span class="rbo-radio-label rbo-radio-api">API</span>
+            </label>
+            <label class="rbo-radio-option">
+              <input type="radio" formControlName="optionSource" value="manual" />
+              <span class="rbo-radio-label rbo-radio-manual">Manual</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 2: API Settings        -->
+    <!-- ══════════════════════════════ -->
+    <div class="rbo-section" *ngIf="isApiMode">
+      <div class="rbo-section-header">
+        <i class="pi pi-link"></i>
+        <span>API Configuration</span>
+      </div>
+      <div class="rbo-section-body">
+        <div class="rbo-grid-2">
+          <div class="rbo-field">
+            <label class="rbo-label">API URL</label>
+            <input pInputText formControlName="apiUrl" placeholder="e.g. /api/options" class="rbo-input" />
+          </div>
+          <div class="rbo-field">
+            <label class="rbo-label">Service</label>
+            <select formControlName="serviceName" class="rbo-select">
+              <option value="">Select service</option>
+              <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="rbo-grid-2">
+          <div class="rbo-field">
+            <label class="rbo-label">Label Key</label>
+            <input pInputText formControlName="labelKey" placeholder="label" class="rbo-input" />
+          </div>
+          <div class="rbo-field">
+            <label class="rbo-label">Value Key</label>
+            <input pInputText formControlName="valueKey" placeholder="value" class="rbo-input" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 3: Manual Options      -->
+    <!-- ══════════════════════════════ -->
+    <div class="rbo-section" *ngIf="!isApiMode">
+      <div class="rbo-section-header">
+        <i class="pi pi-list"></i>
+        <span>Manual Options</span>
+        <button type="button" class="rbo-add-btn rwc-header-add-btn" (click)="addOption()">
+          <i class="pi pi-plus"></i> Add Option
+        </button>
+      </div>
+      <div class="rbo-section-body">
+        <div class="rbo-options-header rbo-grid-2-labels" *ngIf="manualOptions.length > 0">
+          <span class="rbo-label">Option Label</span>
+          <span class="rbo-label">Value</span>
+        </div>
+        <div *ngFor="let opt of manualOptions; let i = index" class="rbo-option-row">
+          <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="e.g. Yes" class="rbo-input" />
+          <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="e.g. yes" class="rbo-input" />
+          <button type="button" class="rbo-remove-btn" (click)="removeOption(i)" title="Remove">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 4: Display Settings    -->
+    <!-- ══════════════════════════════ -->
+    <div class="rbo-section">
+      <div class="rbo-section-header">
+        <i class="pi pi-sliders-h"></i>
+        <span>Display Settings</span>
+      </div>
+      <div class="rbo-section-body">
+
+        <div class="rbo-id-row" *ngIf="fxData?.id">
+          <span class="rbo-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+          <span class="rbo-id-value">{{ fxData!.id }}</span>
+        </div>
+
+        <div class="rbo-field">
+          <label class="rbo-label">
+            Name <span class="rbo-required-star">*</span>
+            <span class="rbo-name-hint">used to identify this component (e.g. clinical_reasons)</span>
+          </label>
+          <input pInputText formControlName="name" placeholder="e.g. clinical_reasons" class="rbo-input" />
+        </div>
+
+        <div class="rbo-grid-2">
+          <div class="rbo-field">
+            <label class="rbo-label">Label</label>
+            <input pInputText formControlName="label" placeholder="e.g. Select a reason" class="rbo-input" />
+          </div>
+          <div class="rbo-field">
+            <label class="rbo-label">Sub Label</label>
+            <input pInputText formControlName="subLabel" placeholder="e.g. (select one)" class="rbo-input" />
+          </div>
+        </div>
+
+        <div class="rbo-grid-2">
+          <div class="rbo-field">
+            <label class="rbo-label">Placeholder</label>
+            <input pInputText formControlName="placeholder" placeholder="e.g. Select an option" class="rbo-input" />
+          </div>
+          <div class="rbo-field">
+            <label class="rbo-label">Custom CSS Class</label>
+            <input pInputText formControlName="customClass" placeholder="e.g. my-class" class="rbo-input" />
+          </div>
+        </div>
+
+        <div class="rbo-grid-2">
+          <div class="rbo-field">
+            <label class="rbo-label">Required</label>
+            <div class="rbo-radio-group">
+              <label class="rbo-radio-option">
+                <input type="radio" formControlName="isRequired" value="true" />
+                <span class="rbo-radio-label rbo-radio-yes">Yes</span>
+              </label>
+              <label class="rbo-radio-option">
+                <input type="radio" formControlName="isRequired" value="false" />
+                <span class="rbo-radio-label rbo-radio-no">No</span>
+              </label>
+            </div>
+          </div>
+          <div class="rbo-field">
+            <label class="rbo-label">Error Message</label>
+            <input pInputText formControlName="errorMessage" placeholder="Please select an option" class="rbo-input" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ -->
+    <!-- Section 5: Child Field Rules   -->
+    <!-- ══════════════════════════════ -->
+    <div class="rbo-section">
+      <div class="rbo-section-header">
+        <i class="pi pi-code-branch"></i>
+        <span>Child Field Rules</span>
+        <span class="rwc-section-hint">A sub-field shown when an option is selected</span>
+      </div>
+      <div class="rbo-section-body">
+
+        <button *ngIf="!isApiMode" type="button" class="rwc-sync-btn" (click)="syncChildRulesFromManualOptions()">
+          <i class="pi pi-sync"></i> Sync rules from manual options
+        </button>
+
+        <div *ngIf="childFieldConfigs.length === 0" class="rwc-empty-hint">
+          No rules yet.
+          <ng-container *ngIf="!isApiMode">Click "Sync" or</ng-container>
+          Click "Add Rule" to configure a child field for a specific option.
+        </div>
+
+        <!-- Rule accordion -->
+        <div *ngFor="let rule of childFieldConfigs; let i = index"
+             class="rwc-child-rule"
+             [class.rwc-child-rule--expanded]="expandedChildIndex === i"
+             [class.rwc-child-rule--disabled]="!rule.enabled">
+
+          <!-- Rule header -->
+          <div class="rwc-child-rule-header" (click)="toggleChildExpand(i)">
+            <div class="rwc-rule-header-left">
+              <span class="rwc-ft-icon-wrap rwc-ft-bg-{{ rule.fieldType }}">
+                <i class="pi" [ngClass]="fieldTypeIcon(rule.fieldType)"></i>
+              </span>
+              <div class="rwc-hdr-meta">
+                <span class="rwc-hdr-kv">
+                  <span class="rwc-hdr-key">Trigger</span>
+                  <span class="rwc-opt-value-badge">{{ rule.optionValue || '—' }}</span>
+                </span>
+                <span class="rwc-hdr-divider"></span>
+                <span class="rwc-hdr-kv">
+                  <span class="rwc-hdr-key">Type</span>
+                  <span class="rwc-type-badge rwc-type-{{ rule.fieldType }}">{{ rule.fieldType }}</span>
+                </span>
+                <ng-container *ngIf="rule.label">
+                  <span class="rwc-hdr-divider"></span>
+                  <span class="rwc-hdr-kv">
+                    <span class="rwc-hdr-key">Label</span>
+                    <span class="rwc-rule-label-hint">{{ rule.label }}</span>
+                  </span>
+                </ng-container>
+                <ng-container *ngIf="rule.isRequired === 'true' || rule.regexPattern">
+                  <span class="rwc-hdr-divider"></span>
+                  <span *ngIf="rule.isRequired === 'true'" class="rwc-status-pill rwc-status-required">
+                    <i class="pi pi-asterisk"></i> Required
+                  </span>
+                  <span *ngIf="rule.regexPattern" class="rwc-status-pill rwc-status-regex">
+                    <i class="pi pi-filter"></i> Regex
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+
+            <div class="rwc-child-rule-actions" (click)="$event.stopPropagation()">
+              <label class="rwc-toggle-switch" title="{{ rule.enabled ? 'Active — click to disable' : 'Off — click to enable' }}">
+                <input type="checkbox" [(ngModel)]="rule.enabled" [ngModelOptions]="{standalone: true}" />
+                <span class="rwc-toggle-slider"></span>
+              </label>
+              <i class="pi rwc-expand-icon"
+                 [class.pi-chevron-down]="expandedChildIndex !== i"
+                 [class.pi-chevron-up]="expandedChildIndex === i"
+                 (click)="toggleChildExpand(i)"></i>
+              <button type="button" class="rbo-remove-btn" (click)="removeChildRule(i)" title="Remove rule">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Rule body (expanded) -->
+          <div class="rwc-child-rule-body" *ngIf="expandedChildIndex === i">
+
+            <!-- Section 1: Trigger & Type -->
+            <div class="rwc-body-section">
+              <div class="rwc-body-divider"><i class="pi pi-sliders-h"></i> Trigger &amp; Type</div>
+              <div class="rbo-grid-2">
+                <div class="rbo-field">
+                  <label class="rbo-label">Option Value (trigger) <span class="rbo-required-star">*</span></label>
+                  <input pInputText [(ngModel)]="rule.optionValue" [ngModelOptions]="{standalone: true}" placeholder="e.g. yes" class="rbo-input" />
+                  <small class="rwc-field-hint">The dropdown value that reveals this child field</small>
+                </div>
+                <div class="rbo-field">
+                  <label class="rbo-label">Field Type</label>
+                  <select [(ngModel)]="rule.fieldType" [ngModelOptions]="{standalone: true}" class="rbo-select">
+                    <option *ngFor="let ft of fieldTypeOptions" [value]="ft.value">{{ ft.label }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Display -->
+            <div class="rwc-body-section">
+              <div class="rwc-body-divider"><i class="pi pi-eye"></i> Display</div>
+              <div class="rbo-grid-2">
+                <div class="rbo-field">
+                  <label class="rbo-label">Label</label>
+                  <input pInputText [(ngModel)]="rule.label" [ngModelOptions]="{standalone: true}" placeholder="e.g. Please specify" class="rbo-input" />
+                </div>
+                <div class="rbo-field">
+                  <label class="rbo-label">Placeholder</label>
+                  <input pInputText [(ngModel)]="rule.placeholder" [ngModelOptions]="{standalone: true}" placeholder="e.g. Enter here..." class="rbo-input" />
+                </div>
+              </div>
+              <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">
+                <div class="rbo-field" style="max-width: 200px;">
+                  <label class="rbo-label">Max Length</label>
+                  <input pInputText type="number" [(ngModel)]="rule.maxLength" [ngModelOptions]="{standalone: true}" class="rbo-input" />
+                </div>
+              </ng-container>
+            </div>
+
+            <!-- Section 3: Validation -->
+            <div class="rwc-body-section">
+              <div class="rwc-body-divider"><i class="pi pi-shield"></i> Validation</div>
+              <div class="rbo-grid-2">
+                <div class="rbo-field">
+                  <label class="rbo-label">Required</label>
+                  <div class="rbo-radio-group">
+                    <label class="rbo-radio-option">
+                      <input type="radio" [name]="'dwc_required_' + i" [(ngModel)]="rule.isRequired" [ngModelOptions]="{standalone: true}" value="true" />
+                      <span class="rbo-radio-label rbo-radio-yes">Yes</span>
+                    </label>
+                    <label class="rbo-radio-option">
+                      <input type="radio" [name]="'dwc_required_' + i" [(ngModel)]="rule.isRequired" [ngModelOptions]="{standalone: true}" value="false" />
+                      <span class="rbo-radio-label rbo-radio-no">No</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="rbo-field">
+                  <label class="rbo-label">Error Message</label>
+                  <input pInputText [(ngModel)]="rule.errorMessage" [ngModelOptions]="{standalone: true}" placeholder="This field is required" class="rbo-input" />
+                </div>
+              </div>
+              <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">
+                <div class="rbo-grid-2">
+                  <div class="rbo-field">
+                    <label class="rbo-label">Regex Pattern <span class="rbo-name-hint">(optional)</span></label>
+                    <input pInputText [(ngModel)]="rule.regexPattern" [ngModelOptions]="{standalone: true}" placeholder="e.g. ^[A-Za-z0-9]+$" class="rbo-input" />
+                  </div>
+                  <div class="rbo-field">
+                    <label class="rbo-label">Regex Error Message</label>
+                    <input pInputText [(ngModel)]="rule.regexErrorMessage" [ngModelOptions]="{standalone: true}" placeholder="e.g. Only alphanumeric allowed" class="rbo-input" />
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+
+            <!-- Section 4: Options (dropdown / radiobutton / checkbox) -->
+            <div class="rwc-body-section" *ngIf="isOptionBasedField(rule.fieldType)">
+              <div class="rwc-body-divider"><i class="pi pi-list"></i> Options</div>
+
+              <div class="rbo-field">
+                <label class="rbo-label">Source</label>
+                <div class="rbo-radio-group">
+                  <label class="rbo-radio-option">
+                    <input type="radio" [name]="'dwc_optsrc_' + i" [(ngModel)]="rule.optionSource" [ngModelOptions]="{standalone: true}" value="api" />
+                    <span class="rbo-radio-label rbo-radio-api">API</span>
+                  </label>
+                  <label class="rbo-radio-option">
+                    <input type="radio" [name]="'dwc_optsrc_' + i" [(ngModel)]="rule.optionSource" [ngModelOptions]="{standalone: true}" value="manual" />
+                    <span class="rbo-radio-label rbo-radio-manual">Manual</span>
+                  </label>
+                </div>
+              </div>
+
+              <ng-container *ngIf="rule.optionSource === 'api'">
+                <div class="rbo-grid-2">
+                  <div class="rbo-field">
+                    <label class="rbo-label">API URL</label>
+                    <input pInputText [(ngModel)]="rule.apiUrl" [ngModelOptions]="{standalone: true}" placeholder="e.g. /api/items" class="rbo-input" />
+                  </div>
+                  <div class="rbo-field">
+                    <label class="rbo-label">Service</label>
+                    <select [(ngModel)]="rule.serviceName" [ngModelOptions]="{standalone: true}" class="rbo-select">
+                      <option value="">Select service</option>
+                      <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="rbo-grid-2">
+                  <div class="rbo-field">
+                    <label class="rbo-label">Label Key</label>
+                    <input pInputText [(ngModel)]="rule.labelKey" [ngModelOptions]="{standalone: true}" placeholder="label" class="rbo-input" />
+                  </div>
+                  <div class="rbo-field">
+                    <label class="rbo-label">Value Key</label>
+                    <input pInputText [(ngModel)]="rule.valueKey" [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="rule.optionSource === 'manual'">
+                <div class="rbo-options-header rbo-grid-2-labels">
+                  <span class="rbo-label">Label</span>
+                  <span class="rbo-label">Value</span>
+                </div>
+                <div *ngFor="let opt of rule.childManualOptions; let j = index" class="rbo-option-row">
+                  <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Label" class="rbo-input" />
+                  <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
+                  <button type="button" class="rbo-remove-btn" (click)="removeChildOption(i, j)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+                <button type="button" class="rbo-add-btn" (click)="addChildOption(i)">
+                  <i class="pi pi-plus"></i> Add Option
+                </button>
+              </ng-container>
+
+            </div>
+
+          </div>
+        </div>
+
+        <button type="button" class="rbo-add-btn" (click)="addChildRule()">
+          <i class="pi pi-plus"></i> Add Rule
+        </button>
+
+      </div>
+    </div>
+
+    </ng-container><!-- end setupTab sections -->
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="rbo-dialog-footer rwc-footer-split">
+      <button pButton label="Export Config" icon="pi pi-download"
+        class="p-button-outlined p-button-secondary rwc-export-btn"
+        (click)="exportCurrentConfig()"
+        title="Download current settings as JSON"></button>
+      <div class="rwc-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times"
+          class="p-button-outlined p-button-secondary"
+          (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check"
+          class="p-button-primary"
+          (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Component Wrapper -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div
+      class="fx-overlay border-gray-400 border rounded cursor-pointer"
+      (click)="onElementSelect(fxData)"
+      (dblclick)="openDialog()"
+    >
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}-<span class="text-xs italic">{{ fxData?.id }}</span>
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div
+            class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t"
+            title="Settings"
+            (click)="openDialog(); $event.stopPropagation()"
+          >
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div
+            (click)="deleteElement(fxData)"
+            class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t"
+            title="Delete"
+          >
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

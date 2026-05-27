@@ -1,0 +1,171 @@
+<lib-radio-with-child-field-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
+  <div [ngClass]="config.customClass">
+    <form [formGroup]="form" class="w-full">
+
+      <label class="radio-label">
+        {{ config.label }}
+        <span *ngIf="config.subLabel" class="sub_label">{{ config.subLabel }}</span>
+        <span class="field-required" *ngIf="isRequired">*</span>
+      </label>
+
+      <!-- Shared child-field template -->
+      <ng-template #childFieldTpl let-optValue="optValue">
+        <ng-container [ngSwitch]="activeChildConfig?.fieldType">
+
+          <ng-container *ngSwitchCase="'textbox'">
+            <label class="input-label text-gray-700 block mb-1">
+              {{ activeChildConfig.label }}
+              <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
+            </label>
+            <input
+              type="text"
+              [formControl]="childFieldControl"
+              [placeholder]="activeChildConfig.placeholder || ''"
+              [maxlength]="activeChildConfig.maxLength || 512"
+              class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div class="flex justify-between items-center mt-1">
+              <span>
+                <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
+                  {{ activeChildConfig.errorMessage }}
+                </small>
+                <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['pattern']" class="error_message">
+                  {{ activeChildConfig.regexErrorMessage || 'Invalid format' }}
+                </small>
+              </span>
+              <small *ngIf="activeChildConfig.maxLength" class="character_color whitespace-nowrap ml-auto">
+                {{ activeChildConfig.maxLength - (childFieldControl.value?.length || 0) }} character(s) left
+              </small>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'textarea'">
+            <label class="input-label text-gray-700 block mb-1">
+              {{ activeChildConfig.label }}
+              <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
+            </label>
+            <textarea
+              [formControl]="childFieldControl"
+              rows="3"
+              [placeholder]="activeChildConfig.placeholder || ''"
+              [maxlength]="activeChildConfig.maxLength || 512"
+              class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+            <div class="flex justify-between items-center mt-1">
+              <span>
+                <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
+                  {{ activeChildConfig.errorMessage }}
+                </small>
+                <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['pattern']" class="error_message">
+                  {{ activeChildConfig.regexErrorMessage || 'Invalid format' }}
+                </small>
+              </span>
+              <small *ngIf="activeChildConfig.maxLength" class="character_color whitespace-nowrap ml-auto">
+                {{ activeChildConfig.maxLength - (childFieldControl.value?.length || 0) }} character(s) left
+              </small>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'dropdown'">
+            <label class="input-label text-gray-700 block mb-1">
+              {{ activeChildConfig.label }}
+              <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
+            </label>
+            <select [formControl]="childFieldControl" class="border p-2 rounded w-full">
+              <option value="">{{ activeChildConfig.placeholder || 'Select' }}</option>
+              <option *ngFor="let o of getChildOptions(optValue)" [value]="o.value">{{ o.label }}</option>
+            </select>
+            <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message block mt-1">
+              {{ activeChildConfig.errorMessage }}
+            </small>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'radiobutton'">
+            <label class="input-label text-gray-700 block mb-1">
+              {{ activeChildConfig.label }}
+              <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
+            </label>
+            <div class="flex gap-4 my-2">
+              <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
+                <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1" />
+                <span class="character_color">{{ o.label }}</span>
+              </label>
+            </div>
+            <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message block mt-1">
+              {{ activeChildConfig.errorMessage }}
+            </small>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'checkbox'">
+            <label class="input-label text-gray-700 block mb-1">
+              {{ activeChildConfig.label }}
+              <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
+            </label>
+            <div class="flex flex-wrap gap-4 my-2">
+              <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
+                <input
+                  type="checkbox"
+                  [checked]="isCheckboxSelected(o.value)"
+                  (change)="onCheckboxChange(o.value, $any($event.target).checked)"
+                  class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+                />
+                <span class="character_color">{{ o.label }}</span>
+              </label>
+            </div>
+            <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message block mt-1">
+              {{ activeChildConfig.errorMessage }}
+            </small>
+          </ng-container>
+
+        </ng-container>
+      </ng-template>
+
+      <!-- ── Radio mode ── -->
+      <ng-container *ngIf="config.displayMode !== 'button'">
+        <div class="flex flex-wrap gap-4 items-start my-2">
+          <label
+            *ngFor="let opt of options"
+            class="flex items-center gap-2 cursor-pointer text-gray-700 m-0"
+          >
+            <input
+              type="radio"
+              formControlName="rwcParentValue"
+              [name]="instanceId + '-main'"
+              [value]="opt.value"
+              (change)="onSelectionChange(opt.value)"
+              class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+            />
+            <span class="character_color">{{ opt.label }}</span>
+          </label>
+          <!-- Child field parallel to last option -->
+          <div *ngIf="activeChildConfig" class="min-w-0 input-container" style="min-width: 200px;">
+            <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: selectedOption }"></ng-container>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── Button mode ── -->
+      <ng-container *ngIf="config.displayMode === 'button'">
+        <div class="flex flex-wrap gap-4 items-start my-2">
+          <button
+            *ngFor="let opt of options"
+            type="button"
+            class="rbo-btn-option"
+            [ngClass]="{ 'rbo-btn-option--selected': form.get('rwcParentValue')?.value === opt.value }"
+            (click)="onSelectionChange(opt.value); form.get('rwcParentValue')?.setValue(opt.value)"
+          >{{ opt.label }}</button>
+          <!-- Child field parallel to last button -->
+          <div *ngIf="activeChildConfig" class="min-w-0 input-container" style="min-width: 200px;">
+            <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: selectedOption }"></ng-container>
+          </div>
+        </div>
+      </ng-container>
+
+      <small
+        *ngIf="form.get('rwcParentValue')?.touched && form.get('rwcParentValue')?.errors?.['required']"
+        class="error_message block mt-1"
+      >{{ config.errorMessage }}</small>
+
+    </form>
+  </div>
+</lib-radio-with-child-field-settings-panel>

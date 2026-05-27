@@ -22,6 +22,8 @@ import { HeadingComponent } from '../heading/heading.component';
 import { CheckboxComponent } from '../checkbox/checkbox.component';
 import { RadioButtonWithOtherComponent } from '../radio-button-with-other/radio-button-with-other.component';
 import { CheckboxGroupComponent } from '../checkbox-group/checkbox-group.component';
+import { RadioWithChildFieldComponent } from '../radio-with-child-field/radio-with-child-field.component';
+import { DropdownWithChildFieldComponent } from '../dropdown-with-child-field/dropdown-with-child-field.component';
 // import { CustomizeDropdownComponent } from '../multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -195,7 +197,9 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       { name: 'Header', key: 'lib-heading', component: HeadingComponent },
       { name: 'Checkbox', key: 'lib-checkbox', component: CheckboxComponent },
       { name: 'Dynamic Radio Button with Other', key: 'radio-button-with-other', component: RadioButtonWithOtherComponent },
-      {name:'Checkbox Group', key:'lib-checkbox-group', component: CheckboxGroupComponent}
+      { name: 'Checkbox Group',              key: 'lib-checkbox-group',        component: CheckboxGroupComponent },
+      { name: 'Radio with Child Field',      key: 'radio-with-child-field',    component: RadioWithChildFieldComponent },
+      { name: 'Dropdown with Child Field',   key: 'dropdown-with-child-field', component: DropdownWithChildFieldComponent },
     ];
     
     components.forEach(({ name, key, component }) => {
