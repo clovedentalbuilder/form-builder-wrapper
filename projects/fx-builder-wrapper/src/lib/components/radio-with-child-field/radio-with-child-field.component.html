@@ -2,7 +2,7 @@
   <div [ngClass]="config.customClass">
     <form [formGroup]="form" class="w-full">
 
-      <label class="font-semibold text-gray-800">
+      <label class="radio-label">
         {{ config.label }}
         <span *ngIf="config.subLabel" class="sub_label">{{ config.subLabel }}</span>
         <span class="field-required" *ngIf="isRequired">*</span>
@@ -13,7 +13,7 @@
         <ng-container [ngSwitch]="activeChildConfig?.fieldType">
 
           <ng-container *ngSwitchCase="'textbox'">
-            <label class="input-label font-medium text-gray-700">
+            <label class="input-label text-gray-700 block mb-1">
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
@@ -40,7 +40,7 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'textarea'">
-            <label class="input-label font-medium text-gray-700">
+            <label class="input-label text-gray-700 block mb-1">
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
@@ -67,7 +67,7 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'dropdown'">
-            <label class="input-label font-medium text-gray-700">
+            <label class="input-label text-gray-700 block mb-1">
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
@@ -81,13 +81,13 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'radiobutton'">
-            <label class="input-label font-medium text-gray-700">
+            <label class="input-label text-gray-700 block mb-1">
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
             <div class="flex gap-3 my-2">
-              <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700">
-                <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer" />
+              <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
+                <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1" />
                 <span class="character_color">{{ o.label }}</span>
               </label>
             </div>
@@ -97,17 +97,17 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'checkbox'">
-            <label class="input-label font-medium text-gray-700">
+            <label class="input-label text-gray-700 block mb-1">
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
             <div class="flex flex-wrap gap-3 my-2">
-              <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700">
+              <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
                 <input
                   type="checkbox"
                   [checked]="isCheckboxSelected(o.value)"
                   (change)="onCheckboxChange(o.value, $any($event.target).checked)"
-                  class="w-4 h-4 accent-blue-600 cursor-pointer"
+                  class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
                 />
                 <span class="character_color">{{ o.label }}</span>
               </label>
@@ -131,7 +131,7 @@
             <!-- Plain label (not the active-with-child option) -->
             <label
               *ngIf="!isActiveWithChild(opt.value)"
-              class="flex items-center gap-2 cursor-pointer text-gray-700"
+              class="flex items-center gap-2 cursor-pointer text-gray-700 m-0"
             >
               <input
                 type="radio"
@@ -139,7 +139,7 @@
                 [name]="instanceId + '-main'"
                 [value]="opt.value"
                 (change)="onSelectionChange(opt.value)"
-                class="w-4 h-4 accent-blue-600 cursor-pointer"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
               <span class="character_color">{{ opt.label }}</span>
             </label>
@@ -156,11 +156,11 @@
                   [name]="instanceId + '-main'"
                   [value]="opt.value"
                   (change)="onSelectionChange(opt.value)"
-                  class="w-4 h-4 accent-blue-600 cursor-pointer"
+                  class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
                 />
                 <span class="character_color">{{ opt.label }}</span>
               </label>
-              <div class="min-w-0" style="min-width: 200px;">
+              <div class="min-w-0 input-container" style="min-width: 200px;">
                 <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: opt.value }"></ng-container>
               </div>
             </div>
@@ -174,14 +174,14 @@
            Selected button expands inline with its child field to the right.
       -->
       <ng-container *ngIf="config.displayMode === 'button'">
-        <div class="flex flex-wrap gap-3 items-start my-2">
+        <div class="flex flex-wrap gap-4 items-start my-2">
           <ng-container *ngFor="let opt of options">
 
             <button
               *ngIf="!isActiveWithChild(opt.value)"
               type="button"
-              class="rwc-btn-option"
-              [ngClass]="{ 'rwc-btn-option--selected': form.get('rwcParentValue')?.value === opt.value }"
+              class="rbo-btn-option"
+              [ngClass]="{ 'rbo-btn-option--selected': form.get('rwcParentValue')?.value === opt.value }"
               (click)="onSelectionChange(opt.value); form.get('rwcParentValue')?.setValue(opt.value)"
             >{{ opt.label }}</button>
 
@@ -191,9 +191,9 @@
             >
               <button
                 type="button"
-                class="rwc-btn-option rwc-btn-option--selected flex-shrink-0"
+                class="rbo-btn-option rbo-btn-option--selected flex-shrink-0"
               >{{ opt.label }}</button>
-              <div class="min-w-0" style="min-width: 200px;">
+              <div class="min-w-0 input-container" style="min-width: 200px;">
                 <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: opt.value }"></ng-container>
               </div>
             </div>

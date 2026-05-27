@@ -1,33 +1,59 @@
+select:not([size]) {
+    background: url("../../../assets/icons/dropdown.svg") right .4rem center no-repeat white;
+    border: 1px solid #cdcdcd;
+    padding: 6px 30px 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100% !important;
+}
+
 .field-required, .error_message { color: #D60000; }
 .character_color { color: #454545; font-size: 12px; }
 .sub_label { font-size: 10px; font-weight: 500; color: #999; }
 
+.radio-label {
+  font-size: 12px !important;
+  padding-bottom: 4px;
+  margin: 0 0 0 8px;
+  color: #999 !important;
+}
+
 /* ── Button mode ─────────────────────────────────────────────────────────────── */
-.rwc-btn-option {
-  padding: 8px 20px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-  color: #374151;
-  font-size: 0.875rem;
-  font-weight: 500;
+.rbo-btn-option {
+  padding: .15rem;
+  border: 1.5px solid #9bbbd6;
+  border-radius: 6px;
+  background: #f6f6f6;
+  color: #111827;
+  font-size: .75rem;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
-  min-width: 80px;
-  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+  width: 240px;
+  height: 80px;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.rwc-btn-option:hover {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #1d4ed8;
+
+@media (max-width: 600px) {
+  .rbo-btn-option {
+    width: 100%;
+  }
 }
-.rwc-btn-option--selected {
-  border-color: #3b82f6;
-  background: #3b82f6;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+
+.rbo-btn-option:hover {
+  border-color: #9bbbd6;
 }
-.rwc-btn-option--selected:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+.rbo-btn-option--selected {
+  background-color: #dae6f0 !important;
+  border-color: #9bbbd6 !important;
+  color: #111827;
+  font-weight: 500;
 }
