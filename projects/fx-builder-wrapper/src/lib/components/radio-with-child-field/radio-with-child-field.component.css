@@ -1,0 +1,33 @@
+.field-required, .error_message { color: #D60000; }
+.character_color { color: #454545; font-size: 12px; }
+.sub_label { font-size: 10px; font-weight: 500; color: #999; }
+
+/* ── Button mode ─────────────────────────────────────────────────────────────── */
+.rwc-btn-option {
+  padding: 8px 20px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
+  min-width: 80px;
+  text-align: center;
+}
+.rwc-btn-option:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.rwc-btn-option--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+.rwc-btn-option--selected:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
