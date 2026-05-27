@@ -56,7 +56,9 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
 
   form: FormGroup = this.fb.group({
     rwcParentValue: [''],
+    rwcParentLabel: [''],
     rwcChildValue:  [''],
+    rwcChildLabel:  [''],
   });
 
   constructor(
@@ -138,7 +140,9 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     }
     mainCtrl?.updateValueAndValidity();
 
-    // Reset child control and cache on settings change
+    // Set parent label from config; reset child label on settings change
+    this.form.get('rwcParentLabel')?.setValue(config.label ?? '');
+    this.form.get('rwcChildLabel')?.setValue('');
     this.childFieldControl.setValue('');
     this.childFieldControl.clearValidators();
     this.childFieldControl.updateValueAndValidity();
@@ -215,11 +219,15 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     }
 
     this.selectedOption = value;
+
     const childFields = this.config.childFields || {};
     const childCfg = childFields[value];
 
     if (childCfg?.enabled) {
       this.activeChildConfig = childCfg;
+
+      // Update child label from the active child field configuration
+      this.form.get('rwcChildLabel')?.setValue(childCfg.label ?? '');
 
       // Restore cached value for this option, or reset to default
       const cached = this.childValueCache.get(value);
@@ -248,6 +256,7 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
       }
     } else {
       this.activeChildConfig = null;
+      this.form.get('rwcChildLabel')?.setValue('');
       this.childFieldControl.clearValidators();
       this.childFieldControl.setValue('');
       this.childFieldControl.updateValueAndValidity();

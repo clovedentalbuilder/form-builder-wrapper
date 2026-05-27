@@ -8,7 +8,7 @@
         <span class="field-required" *ngIf="isRequired">*</span>
       </label>
 
-      <!-- Shared child-field template. Uses [formControl] directly to bypass ng-template injector context. -->
+      <!-- Shared child-field template -->
       <ng-template #childFieldTpl let-optValue="optValue">
         <ng-container [ngSwitch]="activeChildConfig?.fieldType">
 
@@ -120,85 +120,44 @@
         </ng-container>
       </ng-template>
 
-      <!-- ── Radio mode ──
-           All options in ONE flex row.
-           Selected option expands inline with its child field to the right.
-      -->
+      <!-- ── Radio mode ── -->
       <ng-container *ngIf="config.displayMode !== 'button'">
         <div class="flex flex-wrap gap-4 items-start my-2">
-          <ng-container *ngFor="let opt of options">
-
-            <!-- Plain label (not the active-with-child option) -->
-            <label
-              *ngIf="!isActiveWithChild(opt.value)"
-              class="flex items-center gap-2 cursor-pointer text-gray-700 m-0"
-            >
-              <input
-                type="radio"
-                formControlName="rwcParentValue"
-                [name]="instanceId + '-main'"
-                [value]="opt.value"
-                (change)="onSelectionChange(opt.value)"
-                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
-              />
-              <span class="character_color">{{ opt.label }}</span>
-            </label>
-
-            <!-- Selected option + child field side-by-side in the same row slot -->
-            <div
-              *ngIf="isActiveWithChild(opt.value)"
-              class="flex gap-4 items-start"
-            >
-              <label class="flex items-center gap-2 cursor-pointer text-gray-700 flex-shrink-0">
-                <input
-                  type="radio"
-                  [formControl]="$any(mainRadioControl)"
-                  [name]="instanceId + '-main'"
-                  [value]="opt.value"
-                  (change)="onSelectionChange(opt.value)"
-                  class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
-                />
-                <span class="character_color">{{ opt.label }}</span>
-              </label>
-              <div class="min-w-0 input-container" style="min-width: 200px;">
-                <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: opt.value }"></ng-container>
-              </div>
-            </div>
-
-          </ng-container>
+          <label
+            *ngFor="let opt of options"
+            class="flex items-center gap-2 cursor-pointer text-gray-700 m-0"
+          >
+            <input
+              type="radio"
+              formControlName="rwcParentValue"
+              [name]="instanceId + '-main'"
+              [value]="opt.value"
+              (change)="onSelectionChange(opt.value)"
+              class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
+            />
+            <span class="character_color">{{ opt.label }}</span>
+          </label>
+          <!-- Child field parallel to last option -->
+          <div *ngIf="activeChildConfig" class="min-w-0 input-container" style="min-width: 200px;">
+            <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: selectedOption }"></ng-container>
+          </div>
         </div>
       </ng-container>
 
-      <!-- ── Button mode ──
-           All buttons in ONE flex row.
-           Selected button expands inline with its child field to the right.
-      -->
+      <!-- ── Button mode ── -->
       <ng-container *ngIf="config.displayMode === 'button'">
         <div class="flex flex-wrap gap-4 items-start my-2">
-          <ng-container *ngFor="let opt of options">
-
-            <button
-              *ngIf="!isActiveWithChild(opt.value)"
-              type="button"
-              class="rbo-btn-option"
-              [ngClass]="{ 'rbo-btn-option--selected': form.get('rwcParentValue')?.value === opt.value }"
-              (click)="onSelectionChange(opt.value); form.get('rwcParentValue')?.setValue(opt.value)"
-            >{{ opt.label }}</button>
-
-            <div
-              *ngIf="isActiveWithChild(opt.value)"
-              class="flex gap-4 items-start"
-            >
-              <button
-                type="button"
-                class="rbo-btn-option rbo-btn-option--selected flex-shrink-0"
-              >{{ opt.label }}</button>
-              <div class="min-w-0 input-container" style="min-width: 200px;">
-                <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: opt.value }"></ng-container>
-              </div>
-            </div>
-
-          </ng-container>
+          <button
+            *ngFor="let opt of options"
+            type="button"
+            class="rbo-btn-option"
+            [ngClass]="{ 'rbo-btn-option--selected': form.get('rwcParentValue')?.value === opt.value }"
+            (click)="onSelectionChange(opt.value); form.get('rwcParentValue')?.setValue(opt.value)"
+          >{{ opt.label }}</button>
+          <!-- Child field parallel to last button -->
+          <div *ngIf="activeChildConfig" class="min-w-0 input-container" style="min-width: 200px;">
+            <ng-container *ngTemplateOutlet="childFieldTpl; context: { optValue: selectedOption }"></ng-container>
+          </div>
         </div>
       </ng-container>
 
