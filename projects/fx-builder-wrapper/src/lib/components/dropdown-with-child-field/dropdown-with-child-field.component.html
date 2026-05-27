@@ -1,45 +1,46 @@
 <lib-dropdown-with-child-field-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
   <div [ngClass]="config.customClass">
-    <form [formGroup]="form" class="w-full">
-
-      <label class="font-semibold text-gray-800">
-        {{ config.label }}
-        <span *ngIf="config.subLabel" class="sub_label">{{ config.subLabel }}</span>
-        <span class="field-required" *ngIf="isRequired">*</span>
-      </label>
+    <form [formGroup]="form" class="flex gap-4 w-full">
 
       <!-- Parent dropdown -->
-      <select
-        formControlName="dwcParentValue"
-        (change)="onSelectionChange($any($event.target).value)"
-        class="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1 bg-white"
-      >
-        <option value="">{{ config.placeholder || 'Select an option' }}</option>
-        <option *ngFor="let opt of options" [value]="opt.value">{{ opt.label }}</option>
-      </select>
+      <div class="flex-1 relative">
+        <label class="input-label dark:text-gray-300">
+          {{ config.label }}
+          <span *ngIf="config.subLabel" class="sub_label">{{ config.subLabel }}</span>
+          <span class="field-required" *ngIf="isRequired">*</span>
+        </label>
+        <select
+          formControlName="dwcParentValue"
+          (change)="onSelectionChange($any($event.target).value)"
+          class="border p-2 rounded w-full"
+        >
+          <option value="">{{ config.placeholder || 'Select an option' }}</option>
+          <option *ngFor="let opt of options" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+        <small
+          *ngIf="form.get('dwcParentValue')?.touched && form.get('dwcParentValue')?.errors?.['required']"
+          class="error_message"
+        >{{ config.errorMessage }}</small>
+      </div>
 
-      <small
-        *ngIf="form.get('dwcParentValue')?.touched && form.get('dwcParentValue')?.errors?.['required']"
-        class="error_message block mt-1"
-      >{{ config.errorMessage }}</small>
+      <!-- Child field — rendered parallel to parent when active -->
+      <div class="flex-1 relative" *ngIf="activeChildConfig">
 
-      <!-- Child field — shown below dropdown when the selected option has a child config -->
-      <div *ngIf="activeChildConfig" class="dwc-child-field">
+        <label class="input-label dark:text-gray-300">
+          {{ activeChildConfig.label }}
+          <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
+        </label>
 
         <!-- Textbox -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'textbox'">
-          <label class="input-label font-medium text-gray-700">
-            {{ activeChildConfig.label }}
-            <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
-          </label>
           <input
             type="text"
             [formControl]="childFieldControl"
             [placeholder]="activeChildConfig.placeholder || ''"
             [maxlength]="activeChildConfig.maxLength || 512"
-            class="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="border p-2 rounded w-full"
           />
-          <div class="flex justify-between items-center mt-1">
+          <div class="flex justify-between items-center">
             <span>
               <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
                 {{ activeChildConfig.errorMessage }}
@@ -48,7 +49,7 @@
                 {{ activeChildConfig.regexErrorMessage || 'Invalid format' }}
               </small>
             </span>
-            <small class="character_color whitespace-nowrap ml-auto">
+            <small class="character_color whitespace-nowrap">
               {{ (activeChildConfig.maxLength || 512) - (childFieldControl.value?.length || 0) }} character(s) left
             </small>
           </div>
@@ -56,18 +57,14 @@
 
         <!-- Textarea -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'textarea'">
-          <label class="input-label font-medium text-gray-700">
-            {{ activeChildConfig.label }}
-            <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
-          </label>
           <textarea
             [formControl]="childFieldControl"
-            rows="3"
+            rows="2"
             [placeholder]="activeChildConfig.placeholder || ''"
             [maxlength]="activeChildConfig.maxLength || 512"
-            class="border border-gray-300 rounded-lg p-3 w-full resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="border p-2 rounded w-full"
           ></textarea>
-          <div class="flex justify-between items-center mt-1">
+          <div class="flex justify-between items-center">
             <span>
               <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
                 {{ activeChildConfig.errorMessage }}
@@ -76,7 +73,7 @@
                 {{ activeChildConfig.regexErrorMessage || 'Invalid format' }}
               </small>
             </span>
-            <small class="character_color whitespace-nowrap ml-auto">
+            <small class="character_color whitespace-nowrap">
               {{ (activeChildConfig.maxLength || 512) - (childFieldControl.value?.length || 0) }} character(s) left
             </small>
           </div>
@@ -84,54 +81,42 @@
 
         <!-- Dropdown child -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'dropdown'">
-          <label class="input-label font-medium text-gray-700">
-            {{ activeChildConfig.label }}
-            <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
-          </label>
-          <select [formControl]="childFieldControl" class="border border-gray-300 rounded-lg p-3 w-full bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select [formControl]="childFieldControl" class="border p-2 rounded w-full">
             <option value="">{{ activeChildConfig.placeholder || 'Select' }}</option>
             <option *ngFor="let o of getChildOptions(selectedOption)" [value]="o.value">{{ o.label }}</option>
           </select>
-          <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message block mt-1">
+          <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
             {{ activeChildConfig.errorMessage }}
           </small>
         </ng-container>
 
         <!-- Radiobutton child -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'radiobutton'">
-          <label class="input-label font-medium text-gray-700">
-            {{ activeChildConfig.label }}
-            <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
-          </label>
           <div class="flex gap-3 my-2">
-            <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700">
-              <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer" />
+            <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
+              <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1" />
               <span class="character_color">{{ o.label }}</span>
             </label>
           </div>
-          <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message block mt-1">
+          <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
             {{ activeChildConfig.errorMessage }}
           </small>
         </ng-container>
 
         <!-- Checkbox child -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'checkbox'">
-          <label class="input-label font-medium text-gray-700">
-            {{ activeChildConfig.label }}
-            <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
-          </label>
           <div class="flex flex-wrap gap-3 my-2">
-            <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700">
+            <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
               <input
                 type="checkbox"
                 [checked]="isCheckboxSelected(o.value)"
                 (change)="onCheckboxChange(o.value, $any($event.target).checked)"
-                class="w-4 h-4 accent-blue-600 cursor-pointer"
+                class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1"
               />
               <span class="character_color">{{ o.label }}</span>
             </label>
           </div>
-          <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message block mt-1">
+          <small *ngIf="childFieldControl.touched && childFieldControl.errors?.['required']" class="error_message">
             {{ activeChildConfig.errorMessage }}
           </small>
         </ng-container>
