@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ApiServiceRegistry } from '@instantsys-labs/core';
 import { FxBaseComponent, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
@@ -15,7 +15,7 @@ import { DropdownWithChildFieldSettingsPanelComponent } from './dropdown-with-ch
   templateUrl: './dropdown-with-child-field.component.html',
   styleUrl: './dropdown-with-child-field.component.css',
 })
-export class DropdownWithChildFieldComponent extends FxBaseComponent implements OnInit, AfterViewInit {
+export class DropdownWithChildFieldComponent extends FxBaseComponent implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<boolean>();
 
@@ -160,6 +160,7 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
   private loadMainOptions(serviceUrl: string, url: string, config: any): void {
     if (!url) {
       this.options = [...this.mockOptions];
+      this.revalidateSelection();
       return;
     }
     this.http.get<any>(serviceUrl + url).subscribe({
@@ -169,9 +170,37 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
           label: item[config.labelKey || 'label'],
           value: item[config.valueKey || 'value'],
         }));
+        this.revalidateSelection();
       },
-      error: () => { this.options = [...this.mockOptions]; },
+      error: () => {
+        this.options = [...this.mockOptions];
+        this.revalidateSelection();
+      },
     });
+  }
+
+  private revalidateSelection(): void {
+    const currentValue = this.form.get('dwcParentValue')?.value;
+    if (!currentValue) return;
+    const opt = this.options.find(o => o.value === currentValue);
+    if (opt) {
+      this.form.get('dwcParentLabel')?.setValue(opt.label);
+    } else {
+      // Saved value no longer exists in options — reset so required error shows
+      this.form.get('dwcParentValue')?.setValue('');
+      this.form.get('dwcParentLabel')?.setValue('');
+      this.selectedOption = '';
+      this.activeChildConfig = null;
+      this.childFieldControl.clearValidators();
+      this.childFieldControl.setValue('');
+      this.childFieldControl.updateValueAndValidity();
+      this.form.get('dwcChildLabel')?.setValue('');
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 
   private loadChildOptions(optionValue: string, childConfig: any): void {
