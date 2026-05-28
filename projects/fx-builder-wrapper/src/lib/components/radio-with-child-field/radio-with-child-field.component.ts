@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ApiServiceRegistry } from '@instantsys-labs/core';
 import { FxBaseComponent, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
@@ -15,7 +15,7 @@ import { RadioWithChildFieldSettingsPanelComponent } from './radio-with-child-fi
   templateUrl: './radio-with-child-field.component.html',
   styleUrl: './radio-with-child-field.component.css',
 })
-export class RadioWithChildFieldComponent extends FxBaseComponent implements OnInit, AfterViewInit {
+export class RadioWithChildFieldComponent extends FxBaseComponent implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<boolean>();
 
@@ -167,6 +167,7 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
   private loadMainOptions(serviceUrl: string, url: string, config: any): void {
     if (!url) {
       this.options = [...this.mockOptions];
+      this.revalidateSelection();
       return;
     }
     this.http.get<any>(serviceUrl + url).subscribe({
@@ -176,9 +177,37 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
           label: item[config.labelKey || 'label'],
           value: item[config.valueKey || 'value'],
         }));
+        this.revalidateSelection();
       },
-      error: () => { this.options = [...this.mockOptions]; },
+      error: () => {
+        this.options = [...this.mockOptions];
+        this.revalidateSelection();
+      },
     });
+  }
+
+  private revalidateSelection(): void {
+    const currentValue = this.form.get('rwcParentValue')?.value;
+    if (!currentValue) return;
+    const opt = this.options.find(o => o.value === currentValue);
+    if (opt) {
+      this.form.get('rwcParentLabel')?.setValue(opt.label);
+    } else {
+      // Saved value no longer exists in options — reset so required error shows
+      this.form.get('rwcParentValue')?.setValue('');
+      this.form.get('rwcParentLabel')?.setValue('');
+      this.selectedOption = '';
+      this.activeChildConfig = null;
+      this.childFieldControl.clearValidators();
+      this.childFieldControl.setValue('');
+      this.childFieldControl.updateValueAndValidity();
+      this.form.get('rwcChildLabel')?.setValue('');
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 
   private loadChildOptions(optionValue: string, childConfig: any): void {
