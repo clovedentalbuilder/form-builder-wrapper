@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output, ViewEncapsulation } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FxComponent, FxMode } from '@instantsys-labs/fx';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -10,7 +10,7 @@ export interface ChildFieldConfig {
   optionValue: string;
   optionLabel: string;
   enabled: boolean;
-  fieldType: 'textbox' | 'textarea' | 'dropdown' | 'radiobutton' | 'checkbox';
+  fieldType: '' | 'textbox' | 'textarea' | 'dropdown' | 'radiobutton' | 'checkbox';
   label: string;
   placeholder: string;
   isRequired: 'true' | 'false';
@@ -38,6 +38,8 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
   @Output() configuration = new EventEmitter<any>();
 
   visible = false;
+  saveError = '';
+  saveAttempted = false;
   protected override readonly FxMode = FxMode;
   expandedChildIndex: number | null = null;
 
@@ -94,13 +96,13 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
   childFieldConfigs: ChildFieldConfig[] = [];
 
   settingsForm = new FormGroup({
-    name:         new FormControl<string>(''),
+    name:         new FormControl<string>('', Validators.required),
     optionSource: new FormControl<string>('api'),
     apiUrl:       new FormControl<string>(''),
     serviceName:  new FormControl<string>(''),
     labelKey:     new FormControl<string>('label'),
     valueKey:     new FormControl<string>('value'),
-    label:        new FormControl<string>(''),
+    label:        new FormControl<string>('', Validators.required),
     subLabel:     new FormControl<string>(''),
     displayMode:  new FormControl<string>('radio'),
     radioLayout:  new FormControl<string>('flex'),
@@ -177,6 +179,7 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
     this.jsonInput = '';
     this.uploadedFileName = '';
     this.jsonImportError = '';
+    this.saveAttempted = false;
   }
 
   // ── Manual main-options management ──────────────────────────────────────────
@@ -196,7 +199,7 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
       optionValue:        '',
       optionLabel:        '',
       enabled:            true,
-      fieldType:          'textbox',
+      fieldType:          '',
       label:              '',
       placeholder:        '',
       isRequired:         'false',
@@ -265,6 +268,10 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
 
   isOptionBasedField(fieldType: string): boolean {
     return ['dropdown', 'radiobutton', 'checkbox'].includes(fieldType);
+  }
+
+  fieldTypeLabel(fieldType: string): string {
+    return this.fieldTypeOptions.find(ft => ft.value === fieldType)?.label ?? fieldType;
   }
 
   fieldTypeIcon(fieldType: string): string {
@@ -505,6 +512,7 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
   }
 
   exportCurrentConfig(): void {
+    if (!this.validateForm('export')) return;
     const raw = this.settingsForm.getRawValue();
     const childFields: Record<string, any> = {};
     for (const cfg of this.childFieldConfigs) {
@@ -541,9 +549,66 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
 
   // ── Save / close ─────────────────────────────────────────────────────────────
 
-  saveSettings(): void {
+  private validateForm(action: 'save' | 'export' = 'save'): boolean {
+    this.saveError = '';
+    this.saveAttempted = true;
+
+    const apiUrlCtrl      = this.settingsForm.get('apiUrl')!;
+    const serviceNameCtrl = this.settingsForm.get('serviceName')!;
+    if (this.isApiMode) {
+      apiUrlCtrl.setValidators(Validators.required);
+      serviceNameCtrl.setValidators(Validators.required);
+    } else {
+      apiUrlCtrl.clearValidators();
+      serviceNameCtrl.clearValidators();
+    }
+    apiUrlCtrl.updateValueAndValidity({ emitEvent: false });
+    serviceNameCtrl.updateValueAndValidity({ emitEvent: false });
+
+    this.settingsForm.markAllAsTouched();
+
+    if (this.settingsForm.invalid) {
+      this.saveError = action === 'export'
+        ? 'Please fill all required fields before exporting.'
+        : 'Please fill all required fields before saving.';
+      return false;
+    }
+
     const raw = this.settingsForm.getRawValue();
 
+    if (raw.optionSource === 'manual' && this.manualOptions.filter(o => o.option || o.value).length === 0) {
+      this.saveError = 'Please add at least one option before saving.';
+      return false;
+    }
+
+    for (let i = 0; i < this.childFieldConfigs.length; i++) {
+      const cfg = this.childFieldConfigs[i];
+      if (cfg.enabled && (!cfg.optionValue || !cfg.fieldType)) {
+        this.expandedChildIndex = i;
+        this.saveError = `Child rule ${i + 1} has missing required fields (option value or field type).`;
+        return false;
+      }
+    }
+
+    for (const cfg of this.childFieldConfigs) {
+      if (
+        cfg.enabled &&
+        this.isOptionBasedField(cfg.fieldType) &&
+        cfg.optionSource === 'manual' &&
+        cfg.childManualOptions.filter(o => o.option || o.value).length === 0
+      ) {
+        this.saveError = `Child rule "${cfg.optionValue || 'unnamed'}" has no manual options. Add at least one or switch to API.`;
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  saveSettings(): void {
+    if (!this.validateForm()) return;
+
+    const raw = this.settingsForm.getRawValue();
     const childFields: Record<string, any> = {};
     for (const cfg of this.childFieldConfigs) {
       if (cfg.optionValue) {
@@ -589,5 +654,7 @@ export class RadioWithChildFieldSettingsPanelComponent extends FxComponent {
 
   closeDialog(): void {
     this.visible = false;
+    this.saveAttempted = false;
+    this.saveError = '';
   }
 }

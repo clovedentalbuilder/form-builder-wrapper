@@ -185,6 +185,13 @@ lib-radio-with-child-field-settings-panel .fx-element:hover .fx-overlay .fx-acti
 .rwc-empty-hint {
   font-size: 0.78rem; color: #94a3b8; font-style: italic; padding: 0.25rem 0;
 }
+.rwc-empty-error {
+  color: #b91c1c;
+  font-style: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
 
 /* ── Child rule accordion ───────────────────────────────────────────────────── */
 .rwc-child-rule {
@@ -223,7 +230,7 @@ lib-radio-with-child-field-settings-panel .fx-element:hover .fx-overlay .fx-acti
 
 .rwc-type-badge {
   font-size: 0.7rem; font-weight: 600; padding: 1px 8px; border-radius: 20px;
-  border: 1px solid transparent; text-transform: lowercase;
+  border: 1px solid transparent;
 }
 .rwc-type-textbox    { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
 .rwc-type-textarea   { background: #f3e8ff; color: #6d28d9; border-color: #ddd6fe; }
@@ -508,6 +515,22 @@ lib-radio-with-child-field-settings-panel .fx-element:hover .fx-overlay .fx-acti
   color: #b91c1c;
 }
 .rwc-json-error i { font-size: 0.7rem; }
+
+.rwc-field-error {
+  font-size: 0.72rem;
+  color: #b91c1c;
+  margin-top: 0.1rem;
+}
+
+.rwc-save-error {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #b91c1c;
+  margin-right: 0.5rem;
+}
+.rwc-save-error i { font-size: 0.7rem; }
 
 /* ── Apply row ──────────────────────────────────────────────────────────────── */
 .rwc-apply-row {
