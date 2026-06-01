@@ -150,23 +150,45 @@
   color: #f3a041;
 }
 
-/* ── Attach-from-files iframe ─────────────────────────────────────────────── */
-.attach-files-dialog .p-dialog-content {
-  padding: 0 !important;
+/* ── Attach-from-files iframe (lwoAttachFile-dialog) ─────────────────────── */
+.lwoAttachFile-dialog.p-dialog {
+  background-color: #DEDEDE !important;
+  border-radius: 8px;
+  padding: 4px;
+  /* left: 50%;
+  transform: translateX(-50%); */
 }
 
-.attach-iframe-wrapper {
-  position: relative;
-  min-height: 600px;
+.lwoAttachFile-dialog .p-dialog-content {
+  padding: 0 !important;
+  background: unset !important;
+  background-color: #DEDEDE !important;
+  height: 589px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.lwoAttachFile-dialog .modal-inset {
+  height: 100%;
+}
+
+.lwoAttachFile-dialog .modal-body {
+  height: 589px !important;
+  max-height: unset;
+  padding: 0;
+  overflow: hidden;
+}
+
+.lwoAttachFile-dialog .modal-body iframe {
+  border-radius: 15px;
 }
 
 .attach-iframe-loader {
-  position: absolute;
-  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  height: 100%;
   gap: 10px;
   color: #f3a041;
   font-size: 14px;

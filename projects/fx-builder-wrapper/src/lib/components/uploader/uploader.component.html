@@ -291,22 +291,27 @@
     [closable]="false"
     [showHeader]="false"
     [(visible)]="iframeDialogVisible"
-    [style]="{ width: '80vw', padding: '0' }"
-    styleClass="attach-files-dialog"
+    [style]="{ width: '72vw', padding: '4px', 'background-color': '#DEDEDE', height: '600px' }"
+    styleClass="lwoAttachFile-dialog"
     (onHide)="closeAttachDialog()"
   >
-    <div class="attach-iframe-wrapper">
-      <div class="attach-iframe-loader" *ngIf="iframeLoading">
-        <i class="pi pi-spin pi-spinner"></i>
-        <span>Loading...</span>
+    <div class="modal-inset">
+      <div class="modal-body" style="height: 589px; padding: 0; overflow: hidden;">
+        <div class="attach-iframe-loader" *ngIf="iframeLoading">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Loading...</span>
+        </div>
+        <iframe
+          [src]="attachIframeSrc"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          scrolling="no"
+          id="fileAttachFrame"
+          style="border: 0; display: none; border-radius: 15px;"
+          (load)="onIframeLoad($event)"
+        ></iframe>
       </div>
-      <iframe
-        [src]="attachIframeSrc"
-        width="100%"
-        height="600"
-        style="border: none; display: none;"
-        (load)="onIframeLoad($event)"
-      ></iframe>
     </div>
   </p-dialog>
 

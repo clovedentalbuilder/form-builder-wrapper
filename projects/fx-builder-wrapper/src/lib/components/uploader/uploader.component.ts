@@ -875,6 +875,17 @@ ngAfterViewInit(): void {
 
   onIframeLoad(event: Event): void {
     const iframe = event.target as HTMLIFrameElement;
+    setTimeout(() => {
+      try {
+        const body = iframe.contentDocument?.body;
+        if (body) {
+          body.style.setProperty('background', '#fff', 'important');
+          body.style.setProperty('background-color', '#fff', 'important');
+        }
+      } catch {
+        // cross-origin — safe to ignore
+      }
+    }, 100);
     this.sendMessageToAttachIframe(iframe);
     this.iframeLoading = false;
     iframe.style.display = 'block';
