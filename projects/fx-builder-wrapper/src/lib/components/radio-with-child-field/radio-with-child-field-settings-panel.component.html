@@ -190,15 +190,17 @@
       <div class="rbo-section-body">
         <div class="rbo-grid-2">
           <div class="rbo-field">
-            <label class="rbo-label">API URL</label>
+            <label class="rbo-label">API URL <span class="rbo-required-star">*</span></label>
             <input pInputText formControlName="apiUrl" placeholder="e.g. /api/options" class="rbo-input" />
+            <small *ngIf="settingsForm.get('apiUrl')?.invalid && settingsForm.get('apiUrl')?.touched" class="rwc-field-error">API URL is required.</small>
           </div>
           <div class="rbo-field">
-            <label class="rbo-label">Service</label>
+            <label class="rbo-label">Service <span class="rbo-required-star">*</span></label>
             <select formControlName="serviceName" class="rbo-select">
               <option value="">Select service</option>
               <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
             </select>
+            <small *ngIf="settingsForm.get('serviceName')?.invalid && settingsForm.get('serviceName')?.touched" class="rwc-field-error">Service is required.</small>
           </div>
         </div>
         <div class="rbo-grid-2">
@@ -226,6 +228,9 @@
         </button>
       </div>
       <div class="rbo-section-body">
+        <div *ngIf="manualOptions.length === 0" class="rwc-empty-hint rwc-empty-error">
+          <i class="pi pi-exclamation-triangle"></i> No options added. Please add at least one option.
+        </div>
         <div class="rbo-options-header rbo-grid-2-labels" *ngIf="manualOptions.length > 0">
           <span class="rbo-label">Option Label</span>
           <span class="rbo-label">Value</span>
@@ -261,12 +266,14 @@
             <span class="rbo-name-hint">used to identify this component (e.g. clinical_reasons)</span>
           </label>
           <input pInputText formControlName="name" placeholder="e.g. clinical_reasons" class="rbo-input" />
+          <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="rwc-field-error">Name is required.</small>
         </div>
 
         <div class="rbo-grid-2">
           <div class="rbo-field">
-            <label class="rbo-label">Label</label>
+            <label class="rbo-label">Label <span class="rbo-required-star">*</span></label>
             <input pInputText formControlName="label" placeholder="e.g. Select an option" class="rbo-input" />
+            <small *ngIf="settingsForm.get('label')?.invalid && settingsForm.get('label')?.touched" class="rwc-field-error">Label is required.</small>
           </div>
           <div class="rbo-field">
             <label class="rbo-label">Sub Label</label>
@@ -377,7 +384,7 @@
                 <span class="rwc-hdr-divider"></span>
                 <span class="rwc-hdr-kv">
                   <span class="rwc-hdr-key">Type</span>
-                  <span class="rwc-type-badge rwc-type-{{ rule.fieldType }}">{{ rule.fieldType }}</span>
+                  <span class="rwc-type-badge rwc-type-{{ rule.fieldType }}">{{ fieldTypeLabel(rule.fieldType) }}</span>
                 </span>
                 <ng-container *ngIf="rule.label">
                   <span class="rwc-hdr-divider"></span>
@@ -429,99 +436,49 @@
                   <label class="rbo-label">Option Value (trigger) <span class="rbo-required-star">*</span></label>
                   <input pInputText [(ngModel)]="rule.optionValue" [ngModelOptions]="{standalone: true}" placeholder="e.g. yes" class="rbo-input" />
                   <small class="rwc-field-hint">The radio value that reveals this child field</small>
+                  <small *ngIf="saveAttempted && !rule.optionValue" class="rwc-field-error">Option value is required.</small>
                 </div>
                 <div class="rbo-field">
-                  <label class="rbo-label">Field Type</label>
+                  <label class="rbo-label">Field Type <span class="rbo-required-star">*</span></label>
                   <select [(ngModel)]="rule.fieldType" [ngModelOptions]="{standalone: true}" class="rbo-select">
+                    <option value="">Select type</option>
                     <option *ngFor="let ft of fieldTypeOptions" [value]="ft.value">{{ ft.label }}</option>
                   </select>
+                  <small *ngIf="saveAttempted && !rule.fieldType" class="rwc-field-error">Field type is required.</small>
                 </div>
               </div>
             </div>
 
-            <!-- Section 2: Display -->
-            <div class="rwc-body-section">
-              <div class="rwc-body-divider">
-                <i class="pi pi-eye"></i> Display
+            <!-- Section 2: Option Source (option-based fields only) -->
+            <div class="rbo-section" *ngIf="isOptionBasedField(rule.fieldType)">
+              <div class="rbo-section-header">
+                <i class="pi pi-database"></i>
+                <span>Option Source</span>
               </div>
-              <div class="rbo-grid-2">
+              <div class="rbo-section-body">
                 <div class="rbo-field">
-                  <label class="rbo-label">Label</label>
-                  <input pInputText [(ngModel)]="rule.label" [ngModelOptions]="{standalone: true}" placeholder="e.g. Please specify" class="rbo-input" />
-                </div>
-                <div class="rbo-field">
-                  <label class="rbo-label">Placeholder</label>
-                  <input pInputText [(ngModel)]="rule.placeholder" [ngModelOptions]="{standalone: true}" placeholder="e.g. Enter here..." class="rbo-input" />
-                </div>
-              </div>
-              <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">
-                <div class="rbo-field" style="max-width: 200px;">
-                  <label class="rbo-label">Max Length</label>
-                  <input pInputText type="number" [(ngModel)]="rule.maxLength" [ngModelOptions]="{standalone: true}" class="rbo-input" />
-                </div>
-              </ng-container>
-            </div>
-
-            <!-- Section 3: Validation -->
-            <div class="rwc-body-section">
-              <div class="rwc-body-divider">
-                <i class="pi pi-shield"></i> Validation
-              </div>
-              <div class="rbo-grid-2">
-                <div class="rbo-field">
-                  <label class="rbo-label">Required</label>
+                  <label class="rbo-label">Source</label>
                   <div class="rbo-radio-group">
                     <label class="rbo-radio-option">
-                      <input type="radio" [name]="'rwc_required_' + i" [(ngModel)]="rule.isRequired" [ngModelOptions]="{standalone: true}" value="true" />
-                      <span class="rbo-radio-label rbo-radio-yes">Yes</span>
+                      <input type="radio" [name]="'rwc_optsrc_' + i" [(ngModel)]="rule.optionSource" [ngModelOptions]="{standalone: true}" value="api" />
+                      <span class="rbo-radio-label rbo-radio-api">API</span>
                     </label>
                     <label class="rbo-radio-option">
-                      <input type="radio" [name]="'rwc_required_' + i" [(ngModel)]="rule.isRequired" [ngModelOptions]="{standalone: true}" value="false" />
-                      <span class="rbo-radio-label rbo-radio-no">No</span>
+                      <input type="radio" [name]="'rwc_optsrc_' + i" [(ngModel)]="rule.optionSource" [ngModelOptions]="{standalone: true}" value="manual" />
+                      <span class="rbo-radio-label rbo-radio-manual">Manual</span>
                     </label>
                   </div>
                 </div>
-                <div class="rbo-field">
-                  <label class="rbo-label">Error Message</label>
-                  <input pInputText [(ngModel)]="rule.errorMessage" [ngModelOptions]="{standalone: true}" placeholder="This field is required" class="rbo-input" />
-                </div>
               </div>
-              <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">
-                <div class="rbo-grid-2">
-                  <div class="rbo-field">
-                    <label class="rbo-label">Regex Pattern <span class="rbo-name-hint">(optional)</span></label>
-                    <input pInputText [(ngModel)]="rule.regexPattern" [ngModelOptions]="{standalone: true}" placeholder="e.g. ^[A-Za-z0-9]+$" class="rbo-input" />
-                  </div>
-                  <div class="rbo-field">
-                    <label class="rbo-label">Regex Error Message</label>
-                    <input pInputText [(ngModel)]="rule.regexErrorMessage" [ngModelOptions]="{standalone: true}" placeholder="e.g. Only alphanumeric allowed" class="rbo-input" />
-                  </div>
-                </div>
-              </ng-container>
             </div>
 
-            <!-- Section 4: Options (dropdown / radiobutton / checkbox only) -->
-            <div class="rwc-body-section" *ngIf="isOptionBasedField(rule.fieldType)">
-              <div class="rwc-body-divider">
-                <i class="pi pi-list"></i> Options
+            <!-- Section 3: API Configuration (option-based + API source) -->
+            <div class="rbo-section" *ngIf="isOptionBasedField(rule.fieldType) && rule.optionSource === 'api'">
+              <div class="rbo-section-header">
+                <i class="pi pi-link"></i>
+                <span>API Configuration</span>
               </div>
-
-              <div class="rbo-field">
-                <label class="rbo-label">Source</label>
-                <div class="rbo-radio-group">
-                  <label class="rbo-radio-option">
-                    <input type="radio" [name]="'rwc_optsrc_' + i" [(ngModel)]="rule.optionSource" [ngModelOptions]="{standalone: true}" value="api" />
-                    <span class="rbo-radio-label rbo-radio-api">API</span>
-                  </label>
-                  <label class="rbo-radio-option">
-                    <input type="radio" [name]="'rwc_optsrc_' + i" [(ngModel)]="rule.optionSource" [ngModelOptions]="{standalone: true}" value="manual" />
-                    <span class="rbo-radio-label rbo-radio-manual">Manual</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- API sub-config -->
-              <ng-container *ngIf="rule.optionSource === 'api'">
+              <div class="rbo-section-body">
                 <div class="rbo-grid-2">
                   <div class="rbo-field">
                     <label class="rbo-label">API URL</label>
@@ -545,26 +502,93 @@
                     <input pInputText [(ngModel)]="rule.valueKey" [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
                   </div>
                 </div>
-              </ng-container>
+              </div>
+            </div>
 
-              <!-- Manual sub-options -->
-              <ng-container *ngIf="rule.optionSource === 'manual'">
-                <div class="rbo-options-header rbo-grid-2-labels">
-                  <span class="rbo-label">Label</span>
-                  <span class="rbo-label">Value</span>
-                </div>
-                <div *ngFor="let opt of rule.childManualOptions; let j = index" class="rbo-option-row">
-                  <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Label" class="rbo-input" />
-                  <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
-                  <button type="button" class="rbo-remove-btn" (click)="removeChildOption(i, j)">
-                    <i class="pi pi-trash"></i>
-                  </button>
-                </div>
-                <button type="button" class="rbo-add-btn" (click)="addChildOption(i)">
+            <!-- Section 4: Manual Options (option-based + manual source) -->
+            <div class="rbo-section" *ngIf="isOptionBasedField(rule.fieldType) && rule.optionSource === 'manual'">
+              <div class="rbo-section-header">
+                <i class="pi pi-list"></i>
+                <span>Manual Options</span>
+                <button type="button" class="rbo-add-btn rwc-header-add-btn" (click)="addChildOption(i)">
                   <i class="pi pi-plus"></i> Add Option
                 </button>
-              </ng-container>
+              </div>
+              <div class="rbo-section-body">
+                <div *ngIf="rule.childManualOptions.length === 0" class="rwc-empty-hint rwc-empty-error">
+                  <i class="pi pi-exclamation-triangle"></i> No options added. Please add at least one option.
+                </div>
+                <ng-container *ngIf="rule.childManualOptions.length > 0">
+                  <div class="rbo-options-header rbo-grid-2-labels">
+                    <span class="rbo-label">Label</span>
+                    <span class="rbo-label">Value</span>
+                  </div>
+                  <div *ngFor="let opt of rule.childManualOptions; let j = index" class="rbo-option-row">
+                    <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Label" class="rbo-input" />
+                    <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
+                    <button type="button" class="rbo-remove-btn" (click)="removeChildOption(i, j)">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
 
+            <!-- Section 5: Display Settings (includes validation) -->
+            <div class="rbo-section">
+              <div class="rbo-section-header">
+                <i class="pi pi-sliders-h"></i>
+                <span>Display Settings</span>
+              </div>
+              <div class="rbo-section-body">
+                <div class="rbo-grid-2">
+                  <div class="rbo-field">
+                    <label class="rbo-label">Label</label>
+                    <input pInputText [(ngModel)]="rule.label" [ngModelOptions]="{standalone: true}" placeholder="e.g. Please specify" class="rbo-input" />
+                  </div>
+                  <div class="rbo-field">
+                    <label class="rbo-label">Placeholder</label>
+                    <input pInputText [(ngModel)]="rule.placeholder" [ngModelOptions]="{standalone: true}" placeholder="e.g. Enter here..." class="rbo-input" />
+                  </div>
+                </div>
+                <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">
+                  <div class="rbo-field" style="max-width: 200px;">
+                    <label class="rbo-label">Max Length</label>
+                    <input pInputText type="number" [(ngModel)]="rule.maxLength" [ngModelOptions]="{standalone: true}" class="rbo-input" />
+                  </div>
+                </ng-container>
+                <div class="rbo-grid-2">
+                  <div class="rbo-field">
+                    <label class="rbo-label">Required</label>
+                    <div class="rbo-radio-group">
+                      <label class="rbo-radio-option">
+                        <input type="radio" [name]="'rwc_required_' + i" [(ngModel)]="rule.isRequired" [ngModelOptions]="{standalone: true}" value="true" />
+                        <span class="rbo-radio-label rbo-radio-yes">Yes</span>
+                      </label>
+                      <label class="rbo-radio-option">
+                        <input type="radio" [name]="'rwc_required_' + i" [(ngModel)]="rule.isRequired" [ngModelOptions]="{standalone: true}" value="false" />
+                        <span class="rbo-radio-label rbo-radio-no">No</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="rbo-field">
+                    <label class="rbo-label">Error Message</label>
+                    <input pInputText [(ngModel)]="rule.errorMessage" [ngModelOptions]="{standalone: true}" placeholder="This field is required" class="rbo-input" />
+                  </div>
+                </div>
+                <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">
+                  <div class="rbo-grid-2">
+                    <div class="rbo-field">
+                      <label class="rbo-label">Regex Pattern <span class="rbo-name-hint">(optional)</span></label>
+                      <input pInputText [(ngModel)]="rule.regexPattern" [ngModelOptions]="{standalone: true}" placeholder="e.g. ^[A-Za-z0-9]+$" class="rbo-input" />
+                    </div>
+                    <div class="rbo-field">
+                      <label class="rbo-label">Regex Error Message</label>
+                      <input pInputText [(ngModel)]="rule.regexErrorMessage" [ngModelOptions]="{standalone: true}" placeholder="e.g. Only alphanumeric allowed" class="rbo-input" />
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
             </div>
 
           </div>
@@ -588,6 +612,9 @@
         (click)="exportCurrentConfig()"
         title="Download current settings as JSON"></button>
       <div class="rwc-footer-actions">
+        <small *ngIf="saveError" class="rwc-save-error">
+          <i class="pi pi-exclamation-triangle"></i> {{ saveError }}
+        </small>
         <button pButton label="Cancel" icon="pi pi-times"
           class="p-button-outlined p-button-secondary"
           (click)="closeDialog()"></button>
