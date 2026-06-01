@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { FxBaseComponent, FxComponent, FxSelectSetting, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
@@ -23,7 +23,7 @@ import { ApiServiceRegistry } from '@instantsys-labs/core'
   templateUrl: './uploader.component.html',
   styleUrl: './uploader.component.css'
 })
-export class UploaderComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck {
+export class UploaderComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck, OnDestroy {
   // public uploadFileControl = new UntypedFormControl();
   public uploadFileControl = new FormControl();
   public uploadedFiles: Array<any> = [];
@@ -47,15 +47,32 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   fileType: string | null = null;
   fileName: string | null = null;
   private destroy$ = new Subject<Boolean>();
+
+  // Attach-from-files (iframe)
+  showUploadDropdown = false;
+  iframeDialogVisible = false;
+  iframeLoading = false;
+  attachIframeSrc!: SafeResourceUrl;
+  private readonly ATTACH_IFRAME_URL = 'http://localhost:4300/document';
+  private get attachIframeOrigin(): string {
+    try { return new URL(this.ATTACH_IFRAME_URL).origin; } catch { return '*'; }
+  }
+  private messageHandler!: (event: MessageEvent) => void;
   private http = inject(HttpClient);
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   constructor(private cdr: ChangeDetectorRef, private fxBuilderWrapperService: FxBuilderWrapperService, private messageService: MessageService, private confirmationService: ConfirmationService, private sanitizer: DomSanitizer,
     private fxApiService: ApiServiceRegistry
   ) {
-    super(cdr)
+    super(cdr);
+    this.attachIframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.ATTACH_IFRAME_URL);
     this.onInit.subscribe((fxData) => {
       this._register(this.uploadFileControl);
-    })
+    });
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.showUploadDropdown = false;
   }
 
   stlFileVisible: boolean = false;
@@ -491,8 +508,77 @@ ngAfterViewInit(): void {
     this.uploadFileControl.updateValueAndValidity();
   }, 100);
 
+  // Listen for iframe postMessage responses
+  this.messageHandler = (event: MessageEvent) => {
+    if (event.origin !== this.attachIframeOrigin) return;
+
+    if (event.data?.type === 'SELECTED_FILES_RESPONSE') {
+      const selectedFiles: any[] = event.data.payload;
+      if (selectedFiles?.length > 0) {
+        const newFiles = selectedFiles.map((item: any) => {
+          const bucketName  = item.uploadDir;
+          const objectKey   = item.filePath;
+          const fileName    = item.fileName;
+          const mimeType    = item.mimeType;
+
+          // Extract region from the pre-signed fileUrl
+          const urlForRegion = item.fileUrl || item.thumbnailUrl || '';
+          const regionMatch  = urlForRegion.match(/\.s3\.([\w-]+)\.amazonaws\.com/) ||
+                               urlForRegion.match(/s3-([\w-]+)\.amazonaws\.com/);
+          const region = regionMatch?.[1] || '';
+
+          // Non-presigned S3 fileUrl (matches the format used by existing uploaded files)
+          const s3FileUrl = (region && bucketName && objectKey)
+            ? `https://s3.${region}.amazonaws.com/${bucketName}/${objectKey}`
+            : item.fileUrl;
+
+          // Thumbnail using thumbnailPath when available
+          const thumbnailPath = item.thumbnailPath || `document_thumb/${objectKey}`;
+          const thumbnailUrl  = (region && bucketName)
+            ? `https://s3.${region}.amazonaws.com/${bucketName}/${thumbnailPath}`
+            : item.thumbnailUrl;
+
+          return {
+            id: uuidv4(),
+            file: null,
+            originalUrl: {
+              bucketName,
+              fileName,
+              previewUrl:   item.fileUrl,   // pre-signed URL for preview
+              objectKey,
+              fileUrl:      s3FileUrl,
+              mimeType,
+              region,
+              thumbnailUrl,
+            },
+            result:     item.fileUrl,       // pre-signed URL for display
+            name:       fileName,
+            title:      (item.title || fileName || '').substring(0, 26),
+            notes:      item.notes || '',
+            categoryId: item.categoryId || '',
+            type:       this.detectFileTypeFromName(fileName || ''),
+            _showErrors: false,
+          };
+        });
+        this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
+        this.formattedData.uploadedFiles = this.uploadedFiles;
+        this.uploadFileControl.setValue(this.formattedData);
+      }
+      this.iframeDialogVisible = false;
+    }
+
+    if (event.data?.type === 'CLOSE_MODAL') {
+      this.iframeDialogVisible = false;
+    }
+  };
+  window.addEventListener('message', this.messageHandler);
 }
 
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.messageHandler);
+    this.destroy$.next(true);
+    this.destroy$.complete();
+  }
 
   ngDoCheck(): void {
     const touched = this.uploadFileControl.touched;
@@ -767,6 +853,64 @@ ngAfterViewInit(): void {
   //   fileInput.value = '';
   //   fileInput.click();
   // }
+
+  // ── Upload dropdown ───────────────────────────────────────────────────────────
+
+  toggleUploadDropdown(e: Event): void {
+    e.stopPropagation();
+    this.showUploadDropdown = !this.showUploadDropdown;
+  }
+
+  openSystemUpload(): void {
+    this.showUploadDropdown = false;
+    this.fileInput.nativeElement.value = '';
+    this.fileInput.nativeElement.click();
+  }
+
+  openAttachFromFiles(): void {
+    this.showUploadDropdown = false;
+    this.iframeLoading = true;
+    this.iframeDialogVisible = true;
+  }
+
+  onIframeLoad(event: Event): void {
+    const iframe = event.target as HTMLIFrameElement;
+    this.sendMessageToAttachIframe(iframe);
+    this.iframeLoading = false;
+    iframe.style.display = 'block';
+  }
+
+  sendMessageToAttachIframe(iframe: HTMLIFrameElement): void {
+    if (iframe?.contentWindow) {
+      const limit = this.setting('maxFileNo');
+      iframe.contentWindow.postMessage({
+        action: 'filesSharing',
+        attachLimit: limit,
+        elementId: 'headtab, leftMenuToggle',
+        elementModificationClass: 'filesAttachProvision',
+        limit,
+      }, this.attachIframeOrigin);
+    }
+  }
+
+  closeAttachDialog(): void {
+    this.iframeDialogVisible = false;
+    this.iframeLoading = false;
+  }
+
+  detectFileTypeFromName(name: string): 'image' | 'csv' | 'text' | 'pdf' | 'excel' | 'word' | 'stl' | 'other' | 'dcm' | 'htl' {
+    const n = (name || '').toLowerCase();
+    if (/\.(png|jpe?g|gif|webp|bmp|svg|tiff?|ico|heif|heic|avif)$/.test(n)) return 'image';
+    if (n.endsWith('.csv'))  return 'csv';
+    if (n.endsWith('.txt'))  return 'text';
+    if (n.endsWith('.pdf'))  return 'pdf';
+    if (/\.(xls|xlsx)$/.test(n)) return 'excel';
+    if (/\.(doc|docx)$/.test(n)) return 'word';
+    if (n.endsWith('.stl'))  return 'stl';
+    if (n.endsWith('.dcm'))  return 'dcm';
+    if (n.endsWith('.htl'))  return 'htl';
+    return 'other';
+  }
 
   openFileDialog() {
     // if (this.uploadedFiles.length > this.setting('maxFileNo')) {
