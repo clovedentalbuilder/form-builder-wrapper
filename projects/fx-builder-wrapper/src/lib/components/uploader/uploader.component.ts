@@ -477,10 +477,12 @@ ngAfterViewInit(): void {
           originalUrl: originalUrlObj,
           result: previewUrl,
           name: fileName,
-          title: fileObj?.title || '',
-          notes: fileObj?.notes || '',
+          title:      fileObj?.title || '',
+          notes:      fileObj?.notes || '',
           categoryId: fileObj?.categoryId || '',
-          type: type,
+          isAttached: fileObj?.isAttached || false,
+          fileMetaId: fileObj?.fileMetaId || null,
+          type:       type,
         };
       });
     if (formatted.length > 0) {
@@ -500,7 +502,7 @@ ngAfterViewInit(): void {
         return this.isUploaderRequired ? { required: true } : null;
       }
       const allValid = files.every(
-        (f: any) => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+        (f: any) => f.title?.trim() && (f.isAttached || (f.notes?.trim() && f.categoryId?.toString().trim()))
       );
       return allValid ? null : { requiredMeta: true };
     });
@@ -551,12 +553,14 @@ ngAfterViewInit(): void {
               region,
               thumbnailUrl,
             },
-            result:     item.fileUrl,       // pre-signed URL for display
-            name:       fileName,
-            title:      (item.title || fileName || '').substring(0, 26),
-            notes:      item.notes || '',
-            categoryId: item.categoryId || '',
-            type:       this.detectFileTypeFromName(fileName || ''),
+            result:      item.fileUrl,       // pre-signed URL for display
+            name:        fileName,
+            title:       (item.title || fileName || '').substring(0, 26),
+            notes:       item.notes || '',
+            categoryId:  '',
+            isAttached:  true,
+            fileMetaId:  item.fileMetaId || null,
+            type:        this.detectFileTypeFromName(fileName || ''),
             _showErrors: false,
           };
         });
@@ -639,10 +643,12 @@ ngAfterViewInit(): void {
         originalUrl: null,
         result: null,
         name: file.name,
-        title: '',
-        notes: '',
+        title:      '',
+        notes:      '',
         categoryId: '',
-        type: fileType,
+        isAttached: false,
+        fileMetaId: null,
+        type:       fileType,
         _showErrors: false,
       };
 
@@ -744,7 +750,7 @@ ngAfterViewInit(): void {
   private revalidateMeta(): void {
     if (this.uploadedFiles.length === 0) return;
     const allValid = this.uploadedFiles.every(
-      f => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+      f => f.title?.trim() && f.notes?.trim() && (f.isAttached || f.categoryId?.toString().trim())
     );
     if (!allValid) {
       this.uploadFileControl.setErrors({ requiredMeta: true });

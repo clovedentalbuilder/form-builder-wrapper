@@ -119,10 +119,34 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     if (sel) {
       this.onSelectionChange(sel);
       if (data.rwcChildValue !== undefined && data.rwcChildValue !== null) {
-        this.childFieldControl.setValue(data.rwcChildValue);
+        const childCfg = this.activeChildConfig;
+        if (childCfg && this.isOptionBasedField(childCfg.fieldType)) {
+          const opts = this.childOptionMap.get(sel) || [];
+          if (opts.length > 0) {
+            // Options already available (manual source) — validate before patching
+            this.childFieldControl.setValue(
+              this.validateChildValue(opts, childCfg.fieldType, data.rwcChildValue)
+            );
+          } else {
+            // Options loading async (API source) — set tentatively;
+            // loadChildOptions callback will validate and correct after load
+            this.childFieldControl.setValue(data.rwcChildValue);
+          }
+        } else {
+          // textbox / textarea — no option validation needed
+          this.childFieldControl.setValue(data.rwcChildValue);
+        }
       }
     }
     this.cdr.detectChanges();
+  }
+
+  private validateChildValue(opts: any[], fieldType: string, rawValue: any): any {
+    if (fieldType === 'checkbox') {
+      const arr = Array.isArray(rawValue) ? rawValue : [];
+      return arr.filter((v: string) => opts.some((o: any) => o.value === v));
+    }
+    return opts.some((o: any) => o.value === rawValue) ? rawValue : '';
   }
 
   onSettingsChanged(config: any): void {
@@ -226,10 +250,20 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     this.http.get<any>(serviceUrl + childConfig.apiUrl).subscribe({
       next: (res: any) => {
         const raw = Array.isArray(res) ? res : (res?.data || []);
-        this.childOptionMap.set(optionValue, raw.map((item: any) => ({
+        const options = raw.map((item: any) => ({
           label: item[childConfig.labelKey || 'label'],
           value: item[childConfig.valueKey || 'value'],
-        })));
+        }));
+        this.childOptionMap.set(optionValue, options);
+        // If this is the active selection, validate the tentatively-patched value
+        // against the now-loaded options, then re-set to force SelectControlValueAccessor
+        // to sync the native <select> element after *ngFor renders the <option>s.
+        if (this.selectedOption === optionValue) {
+          this.childFieldControl.setValue(
+            this.validateChildValue(options, childConfig.fieldType, this.childFieldControl.value)
+          );
+          this.cdr.detectChanges();
+        }
       },
       error: () => { this.childOptionMap.set(optionValue, [...this.mockOptions]); },
     });
