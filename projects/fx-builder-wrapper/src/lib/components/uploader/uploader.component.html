@@ -218,7 +218,7 @@
 
               </div>
               <!-- Notes -->
-              <div class="input-container">
+              <div class="input-container" *ngIf="!file.isAttached">
                 <label class="font-semibold text-sm input-title m-0 -mt-1">Notes <span class="text-red-500">*</span></label>
                 <textarea [(ngModel)]="file.notes" name="notes{{i}}" (ngModelChange)="onMetaChange()"
                   placeholder="Enter notes" class=" rounded px-3 py-2 mb-0 w-full outline-none focus:ring" rows="2"
@@ -231,7 +231,7 @@
             </div>
 
           </div>
-          <div class="category my-2 mt-3">
+          <div class="category my-2 mt-3" *ngIf="!file.isAttached">
             <!-- Category -->
             <div class="input-container">
               <label class="font-semibold text-sm input-title m-0">Category <span class="text-red-500">*</span></label>
