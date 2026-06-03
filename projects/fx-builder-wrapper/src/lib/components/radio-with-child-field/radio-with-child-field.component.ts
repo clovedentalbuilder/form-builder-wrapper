@@ -116,6 +116,9 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     const sel = data.rwcParentValue ?? '';
     this.hasPatched = true;
     this.form.get('rwcParentValue')?.setValue(sel);
+    // Always apply fresh labels from config — never from saved data
+    this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '');
+    this.form.get('rwcChildLabel')?.setValue('');
     if (sel) {
       this.onSelectionChange(sel);
       if (data.rwcChildValue !== undefined && data.rwcChildValue !== null) {
@@ -215,7 +218,7 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     if (!currentValue) return;
     const opt = this.options.find(o => o.value === currentValue);
     if (opt) {
-      this.form.get('rwcParentLabel')?.setValue(opt.label);
+      // rwcParentLabel stays as config.label (already set in applySettings)
     } else {
       // Saved value no longer exists in options — reset so required error shows
       this.form.get('rwcParentValue')?.setValue('');
@@ -282,6 +285,9 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     }
 
     this.selectedOption = value;
+
+    // Always set parent label fresh from config on every selection
+    this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '');
 
     const childFields = this.config.childFields || {};
     const childCfg = childFields[value];
