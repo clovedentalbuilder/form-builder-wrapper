@@ -83,6 +83,8 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
       this.viewInitialized = true;
       // Patch now if variables$ already emitted before view was ready
       this.patchSavedValues();
+      // Ensure labels are always fresh after all patching settles
+      setTimeout(() => this.refreshLabels(), 0);
     }, 100);
   }
 
@@ -108,6 +110,10 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
       });
   }
 
+  private refreshLabels(): void {
+    this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '', { emitEvent: false });
+  }
+
   private patchSavedValues(): void {
     if (this.hasPatched) return;
     const key = this.fxComponent?.fxData?.name;
@@ -116,9 +122,6 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     const sel = data.rwcParentValue ?? '';
     this.hasPatched = true;
     this.form.get('rwcParentValue')?.setValue(sel);
-    // Always apply fresh labels from config — never from saved data
-    this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '');
-    this.form.get('rwcChildLabel')?.setValue('');
     if (sel) {
       this.onSelectionChange(sel);
       if (data.rwcChildValue !== undefined && data.rwcChildValue !== null) {
@@ -141,6 +144,8 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
         }
       }
     }
+    // Run in next tick so labels override any FxBaseComponent patch that fires after us
+    setTimeout(() => this.refreshLabels(), 0);
     this.cdr.detectChanges();
   }
 
