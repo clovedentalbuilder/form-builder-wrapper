@@ -78,6 +78,7 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
       this.applySettings(this.config);
       this.viewInitialized = true;
       this.patchSavedValues();
+      setTimeout(() => this.refreshLabels(), 0);
     }, 100);
   }
 
@@ -102,6 +103,10 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
       });
   }
 
+  private refreshLabels(): void {
+    this.form.get('dwcParentLabel')?.setValue(this.config.label ?? '', { emitEvent: false });
+  }
+
   private patchSavedValues(): void {
     if (this.hasPatched) return;
     const key = this.fxComponent?.fxData?.name;
@@ -110,15 +115,13 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
     const sel = data.dwcParentValue ?? '';
     this.hasPatched = true;
     this.form.get('dwcParentValue')?.setValue(sel);
-    // Always apply fresh labels from config — never from saved data
-    this.form.get('dwcParentLabel')?.setValue(this.config.label ?? '');
-    this.form.get('dwcChildLabel')?.setValue('');
     if (sel) {
       this.onSelectionChange(sel);
       if (data.dwcChildValue !== undefined && data.dwcChildValue !== null) {
         this.childFieldControl.setValue(data.dwcChildValue);
       }
     }
+    setTimeout(() => this.refreshLabels(), 0);
     this.cdr.detectChanges();
   }
 
