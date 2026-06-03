@@ -70,6 +70,19 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
   }
 
   ngAfterViewInit(): void {
+    // Guards set up immediately — any patch (including FxBaseComponent's) is overridden at the point it fires
+    this.form.get('dwcParentLabel')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.form.get('dwcParentLabel')?.setValue(this.config.label ?? '', { emitEvent: false });
+      });
+
+    this.form.get('dwcChildLabel')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.form.get('dwcChildLabel')?.setValue(this.activeChildConfig?.label ?? '', { emitEvent: false });
+      });
+
     setTimeout(() => {
       const savedConfig = this.setting('dropdown-with-child-config');
       if (savedConfig && typeof savedConfig === 'object' && Object.keys(savedConfig).length) {
@@ -78,7 +91,6 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
       this.applySettings(this.config);
       this.viewInitialized = true;
       this.patchSavedValues();
-      setTimeout(() => this.refreshLabels(), 0);
     }, 100);
   }
 
@@ -103,10 +115,6 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
       });
   }
 
-  private refreshLabels(): void {
-    this.form.get('dwcParentLabel')?.setValue(this.config.label ?? '', { emitEvent: false });
-  }
-
   private patchSavedValues(): void {
     if (this.hasPatched) return;
     const key = this.fxComponent?.fxData?.name;
@@ -121,7 +129,6 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
         this.childFieldControl.setValue(data.dwcChildValue);
       }
     }
-    setTimeout(() => this.refreshLabels(), 0);
     this.cdr.detectChanges();
   }
 
@@ -140,6 +147,9 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
     }
     mainCtrl?.updateValueAndValidity();
 
+    // Reset active child before label setters so valueChanges guards read correct state
+    this.activeChildConfig = null;
+    this.selectedOption = '';
     this.form.get('dwcParentLabel')?.setValue(config.label ?? '');
     this.form.get('dwcChildLabel')?.setValue('');
     this.childFieldControl.setValue('');
@@ -189,12 +199,9 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
     const currentValue = this.form.get('dwcParentValue')?.value;
     if (!currentValue) return;
     const opt = this.options.find(o => o.value === currentValue);
-    if (opt) {
-      // dwcParentLabel stays as config.label (already set in applySettings)
-    } else {
+    if (!opt) {
       // Saved value no longer exists in options — reset so required error shows
       this.form.get('dwcParentValue')?.setValue('');
-      this.form.get('dwcParentLabel')?.setValue('');
       this.selectedOption = '';
       this.activeChildConfig = null;
       this.childFieldControl.clearValidators();
@@ -246,9 +253,6 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
     }
 
     this.selectedOption = value;
-
-    // Always set parent label fresh from config on every selection
-    this.form.get('dwcParentLabel')?.setValue(this.config.label ?? '');
 
     const childCfg = (this.config.childFields || {})[value];
 
