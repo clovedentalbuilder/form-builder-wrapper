@@ -74,6 +74,19 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
   }
 
   ngAfterViewInit(): void {
+    // Guards set up immediately — any patch (including FxBaseComponent's) is overridden at the point it fires
+    this.form.get('rwcParentLabel')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '', { emitEvent: false });
+      });
+
+    this.form.get('rwcChildLabel')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.form.get('rwcChildLabel')?.setValue(this.activeChildConfig?.label ?? '', { emitEvent: false });
+      });
+
     setTimeout(() => {
       const savedConfig = this.setting('radio-with-child-config');
       if (savedConfig && typeof savedConfig === 'object' && Object.keys(savedConfig).length) {
@@ -81,10 +94,7 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
       }
       this.applySettings(this.config);
       this.viewInitialized = true;
-      // Patch now if variables$ already emitted before view was ready
       this.patchSavedValues();
-      // Ensure labels are always fresh after all patching settles
-      setTimeout(() => this.refreshLabels(), 0);
     }, 100);
   }
 
@@ -108,10 +118,6 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
           this.patchSavedValues();
         }
       });
-  }
-
-  private refreshLabels(): void {
-    this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '', { emitEvent: false });
   }
 
   private patchSavedValues(): void {
@@ -144,8 +150,6 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
         }
       }
     }
-    // Run in next tick so labels override any FxBaseComponent patch that fires after us
-    setTimeout(() => this.refreshLabels(), 0);
     this.cdr.detectChanges();
   }
 
@@ -172,7 +176,9 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     }
     mainCtrl?.updateValueAndValidity();
 
-    // Set parent label from config; reset child label on settings change
+    // Reset active child before label setters so valueChanges guards read correct state
+    this.activeChildConfig = null;
+    this.selectedOption = '';
     this.form.get('rwcParentLabel')?.setValue(config.label ?? '');
     this.form.get('rwcChildLabel')?.setValue('');
     this.childFieldControl.setValue('');
@@ -222,12 +228,9 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     const currentValue = this.form.get('rwcParentValue')?.value;
     if (!currentValue) return;
     const opt = this.options.find(o => o.value === currentValue);
-    if (opt) {
-      // rwcParentLabel stays as config.label (already set in applySettings)
-    } else {
+    if (!opt) {
       // Saved value no longer exists in options — reset so required error shows
       this.form.get('rwcParentValue')?.setValue('');
-      this.form.get('rwcParentLabel')?.setValue('');
       this.selectedOption = '';
       this.activeChildConfig = null;
       this.childFieldControl.clearValidators();
@@ -290,9 +293,6 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     }
 
     this.selectedOption = value;
-
-    // Always set parent label fresh from config on every selection
-    this.form.get('rwcParentLabel')?.setValue(this.config.label ?? '');
 
     const childFields = this.config.childFields || {};
     const childCfg = childFields[value];
