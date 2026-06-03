@@ -283,8 +283,12 @@
 
         <div class="rbo-grid-2">
           <div class="rbo-field">
-            <label class="rbo-label">Custom CSS Class</label>
-            <input pInputText formControlName="customClass" placeholder="e.g. my-class" class="rbo-input" />
+            <label class="rbo-label">Wrapper Class</label>
+            <input pInputText formControlName="customClass" placeholder="e.g. col-12" class="rbo-input" />
+          </div>
+          <div class="rbo-field">
+            <label class="rbo-label">Parent Class</label>
+            <input pInputText formControlName="parentClass" placeholder="e.g. w-1/2 relative" class="rbo-input" />
           </div>
         </div>
 
@@ -549,6 +553,12 @@
                   <div class="rbo-field">
                     <label class="rbo-label">Placeholder</label>
                     <input pInputText [(ngModel)]="rule.placeholder" [ngModelOptions]="{standalone: true}" placeholder="e.g. Enter here..." class="rbo-input" />
+                  </div>
+                </div>
+                <div class="rbo-grid-2">
+                  <div class="rbo-field">
+                    <label class="rbo-label">Child Class</label>
+                    <input pInputText [(ngModel)]="rule.childClass" [ngModelOptions]="{standalone: true}" placeholder="e.g. w-1/2 relative" class="rbo-input" />
                   </div>
                 </div>
                 <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">

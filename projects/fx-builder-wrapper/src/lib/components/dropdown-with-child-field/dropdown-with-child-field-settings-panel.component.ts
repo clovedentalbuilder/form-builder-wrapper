@@ -24,6 +24,7 @@ export interface DwcChildFieldConfig {
   childManualOptions: { option: string; value: string }[];
   regexPattern: string;
   regexErrorMessage: string;
+  childClass: string;
 }
 
 @Component({
@@ -85,6 +86,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
     isRequired:   new FormControl<string>('false'),
     errorMessage: new FormControl<string>('Please select an option'),
     customClass:  new FormControl<string>(''),
+    parentClass:  new FormControl<string>(''),
   });
 
   private cleanName(name: string | undefined): string {
@@ -117,6 +119,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
       isRequired:   config.isRequired   || 'false',
       errorMessage: config.errorMessage || 'Please select an option',
       customClass:  config.customClass  || '',
+      parentClass:  config.parentClass  || '',
     });
 
     if (config.manualOptions?.length) {
@@ -144,6 +147,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           childManualOptions: childCfg.manualOptions      || [],
           regexPattern:       childCfg.regexPattern       || '',
           regexErrorMessage:  childCfg.regexErrorMessage  || '',
+          childClass:         childCfg.childClass         || '',
         });
       }
     }
@@ -188,6 +192,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
       childManualOptions: [],
       regexPattern:       '',
       regexErrorMessage:  '',
+      childClass:         '',
     });
     this.expandedChildIndex = this.childFieldConfigs.length - 1;
   }
@@ -227,6 +232,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           childManualOptions: [],
           regexPattern:       '',
           regexErrorMessage:  '',
+          childClass:         '',
         });
         existing.add(opt.value);
       }
@@ -313,6 +319,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
       isRequired:   parsed.isRequired   ?? 'false',
       errorMessage: parsed.errorMessage ?? 'Please select an option',
       customClass:  parsed.customClass  ?? '',
+      parentClass:  parsed.parentClass  ?? '',
     });
 
     if (Array.isArray(parsed.manualOptions)) {
@@ -343,6 +350,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           childManualOptions: Array.isArray(childCfg.manualOptions) ? childCfg.manualOptions : [],
           regexPattern:       childCfg.regexPattern       ?? '',
           regexErrorMessage:  childCfg.regexErrorMessage  ?? '',
+          childClass:         childCfg.childClass         ?? '',
         });
       }
     }
@@ -378,6 +386,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           manualOptions:     cfg.childManualOptions,
           regexPattern:      cfg.regexPattern,
           regexErrorMessage: cfg.regexErrorMessage,
+          childClass:        cfg.childClass,
         };
       }
     }
@@ -473,6 +482,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           manualOptions:     cfg.childManualOptions,
           regexPattern:      cfg.regexPattern,
           regexErrorMessage: cfg.regexErrorMessage,
+          childClass:        cfg.childClass,
         };
       }
     }

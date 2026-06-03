@@ -3,7 +3,7 @@
     <form [formGroup]="form" class="flex gap-4 w-full">
 
       <!-- Parent dropdown -->
-      <div class="flex-1 relative">
+      <div [class]="config.parentClass || 'flex-1 relative'">
         <label class="input-label dark:text-gray-300">
           {{ config.label }}
           <span *ngIf="config.subLabel" class="sub_label">{{ config.subLabel }}</span>
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Child field — rendered parallel to parent when active -->
-      <div class="flex-1 relative" *ngIf="activeChildConfig">
+      <div [class]="activeChildConfig?.childClass || 'flex-1 relative'" *ngIf="activeChildConfig">
 
         <label class="input-label dark:text-gray-300">
           {{ activeChildConfig.label }}
@@ -92,7 +92,7 @@
 
         <!-- Radiobutton child -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'radiobutton'">
-          <div class="flex gap-4 my-2">
+          <div class="flex gap-4 flex-wrap my-2">
             <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
               <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1" />
               <span class="character_color">{{ o.label }}</span>
