@@ -220,8 +220,14 @@
           <span class="rbo-label">Value</span>
         </div>
         <div *ngFor="let opt of manualOptions; let i = index" class="rbo-option-row">
-          <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="e.g. Yes" class="rbo-input" />
-          <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="e.g. yes" class="rbo-input" />
+          <div class="rbo-field" style="flex:1;">
+            <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="e.g. Yes" class="rbo-input" />
+            <small *ngIf="saveAttempted && !opt.option?.trim()" class="rwc-field-error">Label required.</small>
+          </div>
+          <div class="rbo-field" style="flex:1;">
+            <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="e.g. yes" class="rbo-input" />
+            <small *ngIf="saveAttempted && !opt.value?.trim()" class="rwc-field-error">Value required.</small>
+          </div>
           <button type="button" class="rbo-remove-btn" (click)="removeOption(i)" title="Remove">
             <i class="pi pi-trash"></i>
           </button>
@@ -278,8 +284,16 @@
 
         <div class="rbo-grid-2">
           <div class="rbo-field">
+            <label class="rbo-label">Parent Width (%)</label>
+            <input pInputText type="number" min="0" max="100" formControlName="parentWidth"
+              placeholder="50" class="rbo-input" (input)="onParentWidthChange()" />
+          </div>
+        </div>
+
+        <div class="rbo-grid-2">
+          <div class="rbo-field">
             <label class="rbo-label">Parent Class</label>
-            <input pInputText formControlName="parentClass" placeholder="e.g. col-6" class="rbo-input" />
+            <input pInputText formControlName="parentClass" placeholder="e.g. text-center" class="rbo-input" />
           </div>
         </div>
 
@@ -482,8 +496,14 @@
                     <span class="rbo-label">Value</span>
                   </div>
                   <div *ngFor="let opt of rule.childManualOptions; let j = index" class="rbo-option-row">
-                    <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Label" class="rbo-input" />
-                    <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
+                    <div class="rbo-field" style="flex:1;">
+                      <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Label" class="rbo-input" />
+                      <small *ngIf="saveAttempted && !opt.option?.trim()" class="rwc-field-error">Label required.</small>
+                    </div>
+                    <div class="rbo-field" style="flex:1;">
+                      <input pInputText [(ngModel)]="opt.value"  [ngModelOptions]="{standalone: true}" placeholder="value" class="rbo-input" />
+                      <small *ngIf="saveAttempted && !opt.value?.trim()" class="rwc-field-error">Value required.</small>
+                    </div>
                     <button type="button" class="rbo-remove-btn" (click)="removeChildOption(i, j)">
                       <i class="pi pi-trash"></i>
                     </button>
@@ -501,8 +521,9 @@
               <div class="rbo-section-body">
                 <div class="rbo-grid-2">
                   <div class="rbo-field">
-                    <label class="rbo-label">Label</label>
+                    <label class="rbo-label">Label <span class="rbo-required-star">*</span></label>
                     <input pInputText [(ngModel)]="rule.label" [ngModelOptions]="{standalone: true}" placeholder="e.g. Please specify" class="rbo-input" />
+                    <small *ngIf="saveAttempted && !rule.label?.trim()" class="rwc-field-error">Label is required.</small>
                   </div>
                   <div class="rbo-field">
                     <label class="rbo-label">Placeholder</label>
@@ -511,8 +532,12 @@
                 </div>
                 <div class="rbo-grid-2">
                   <div class="rbo-field">
+                    <label class="rbo-label">Child Width (%)</label>
+                    <input pInputText type="number" min="0" max="100" [(ngModel)]="rule.childWidth" [ngModelOptions]="{standalone: true}" placeholder="50" class="rbo-input" />
+                  </div>
+                  <div class="rbo-field">
                     <label class="rbo-label">Child Class</label>
-                    <input pInputText [(ngModel)]="rule.childClass" [ngModelOptions]="{standalone: true}" placeholder="e.g. col-6 relative" class="rbo-input" />
+                    <input pInputText [(ngModel)]="rule.childClass" [ngModelOptions]="{standalone: true}" placeholder="e.g. text-center" class="rbo-input" />
                   </div>
                 </div>
                 <ng-container *ngIf="rule.fieldType === 'textbox' || rule.fieldType === 'textarea'">

@@ -48,6 +48,7 @@ export class DropdownWithChildFieldComponent extends FxBaseComponent implements 
     errorMessage:  'Please select an option',
     customClass:   '',
     parentClass:   '',
+    parentWidth:   50,
     childFields:   {},
   };
 
