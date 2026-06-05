@@ -52,6 +52,7 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
     errorMessage: 'Please select an option',
     customClass:  '',
     parentClass:  '',
+    parentWidth:  50,
     childFields:  {},
   };
 

@@ -25,6 +25,7 @@ export interface DwcChildFieldConfig {
   regexPattern: string;
   regexErrorMessage: string;
   childClass: string;
+  childWidth: number;
 }
 
 @Component({
@@ -87,11 +88,16 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
     errorMessage: new FormControl<string>('Please select an option'),
     customClass:  new FormControl<string>(''),
     parentClass:  new FormControl<string>(''),
+    parentWidth:  new FormControl<number>(50),
   });
 
   private cleanName(name: string | undefined): string {
     if (!name) return '';
     return name.replace(/-[0-9a-f]{8,}$/i, '');
+  }
+
+  onParentWidthChange(): void {
+    // childWidth is per child rule — no top-level auto-fill
   }
 
   get isApiMode(): boolean {
@@ -120,6 +126,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
       errorMessage: config.errorMessage || 'Please select an option',
       customClass:  config.customClass  || '',
       parentClass:  config.parentClass  || '',
+      parentWidth:  config.parentWidth  ?? 50,
     });
 
     if (config.manualOptions?.length) {
@@ -148,6 +155,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           regexPattern:       childCfg.regexPattern       || '',
           regexErrorMessage:  childCfg.regexErrorMessage  || '',
           childClass:         childCfg.childClass         || '',
+          childWidth:         childCfg.childWidth         ?? 50,
         });
       }
     }
@@ -193,6 +201,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
       regexPattern:       '',
       regexErrorMessage:  '',
       childClass:         '',
+      childWidth:         50,
     });
     this.expandedChildIndex = this.childFieldConfigs.length - 1;
   }
@@ -233,6 +242,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           regexPattern:       '',
           regexErrorMessage:  '',
           childClass:         '',
+          childWidth:         50,
         });
         existing.add(opt.value);
       }
@@ -320,6 +330,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
       errorMessage: parsed.errorMessage ?? 'Please select an option',
       customClass:  parsed.customClass  ?? '',
       parentClass:  parsed.parentClass  ?? '',
+      parentWidth:  parsed.parentWidth  ?? 50,
     });
 
     if (Array.isArray(parsed.manualOptions)) {
@@ -351,6 +362,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           regexPattern:       childCfg.regexPattern       ?? '',
           regexErrorMessage:  childCfg.regexErrorMessage  ?? '',
           childClass:         childCfg.childClass         ?? '',
+          childWidth:         childCfg.childWidth         ?? 50,
         });
       }
     }
@@ -387,6 +399,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           regexPattern:      cfg.regexPattern,
           regexErrorMessage: cfg.regexErrorMessage,
           childClass:        cfg.childClass,
+          childWidth:        cfg.childWidth,
         };
       }
     }
@@ -441,17 +454,38 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
         this.saveError = `Child rule ${i + 1} has missing required fields (option value or field type).`;
         return false;
       }
+      if (cfg.enabled && !cfg.label?.trim()) {
+        this.expandedChildIndex = i;
+        this.saveError = `Child rule "${cfg.optionValue || i + 1}" is missing a label.`;
+        return false;
+      }
     }
 
-    for (const cfg of this.childFieldConfigs) {
-      if (
-        cfg.enabled &&
-        this.isOptionBasedField(cfg.fieldType) &&
-        cfg.optionSource === 'manual' &&
-        cfg.childManualOptions.filter(o => o.option || o.value).length === 0
-      ) {
-        this.saveError = `Child rule "${cfg.optionValue || 'unnamed'}" has no manual options. Add at least one or switch to API.`;
-        return false;
+    // Validate top-level manual options — both label and value required
+    if (!this.isApiMode) {
+      for (const opt of this.manualOptions) {
+        if (!opt.option?.trim() || !opt.value?.trim()) {
+          this.saveError = 'All options must have both a label and a value.';
+          return false;
+        }
+      }
+    }
+
+    for (let i = 0; i < this.childFieldConfigs.length; i++) {
+      const cfg = this.childFieldConfigs[i];
+      if (cfg.enabled && this.isOptionBasedField(cfg.fieldType) && cfg.optionSource === 'manual') {
+        if (cfg.childManualOptions.filter(o => o.option || o.value).length === 0) {
+          this.expandedChildIndex = i;
+          this.saveError = `Child rule "${cfg.optionValue || 'unnamed'}" has no manual options. Add at least one or switch to API.`;
+          return false;
+        }
+        for (const opt of cfg.childManualOptions) {
+          if (!opt.option?.trim() || !opt.value?.trim()) {
+            this.expandedChildIndex = i;
+            this.saveError = `Child rule "${cfg.optionValue || 'unnamed'}" has options with missing label or value.`;
+            return false;
+          }
+        }
       }
     }
 
@@ -483,6 +517,7 @@ export class DropdownWithChildFieldSettingsPanelComponent extends FxComponent {
           regexPattern:      cfg.regexPattern,
           regexErrorMessage: cfg.regexErrorMessage,
           childClass:        cfg.childClass,
+          childWidth:        cfg.childWidth,
         };
       }
     }

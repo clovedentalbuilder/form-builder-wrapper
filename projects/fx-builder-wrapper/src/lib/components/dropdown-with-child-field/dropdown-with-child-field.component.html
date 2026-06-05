@@ -1,9 +1,10 @@
 <lib-dropdown-with-child-field-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
-  <div [ngClass]="config.customClass">
-    <form [formGroup]="form" class="flex gap-4 w-full">
+  <div [ngClass]="config.customClass || 'w-full'">
+    <form [formGroup]="form" class="flex items-start w-full">
 
       <!-- Parent dropdown -->
-      <div [class]="config.parentClass || 'flex-1 relative'">
+      <div class="min-w-0 relative overflow-hidden" [ngClass]="config.parentClass"
+        [style.width]="(config.parentWidth ?? 50) + '%'">
         <label class="input-label dark:text-gray-300">
           {{ config.label }}
           <span *ngIf="config.subLabel" class="sub_label">{{ config.subLabel }}</span>
@@ -24,7 +25,8 @@
       </div>
 
       <!-- Child field — rendered parallel to parent when active -->
-      <div [class]="activeChildConfig?.childClass || 'flex-1 relative'" *ngIf="activeChildConfig">
+      <div *ngIf="activeChildConfig" class="min-w-0 relative overflow-hidden" [ngClass]="activeChildConfig?.childClass"
+        [style.width]="(activeChildConfig?.childWidth ?? 50) + '%'">
 
         <label class="input-label dark:text-gray-300">
           {{ activeChildConfig.label }}
