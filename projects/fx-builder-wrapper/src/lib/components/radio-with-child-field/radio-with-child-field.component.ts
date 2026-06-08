@@ -387,8 +387,8 @@ export class RadioWithChildFieldComponent extends FxBaseComponent implements OnI
 
   get radioContainerClass(): string {
     return this.config.radioLayout === 'grid'
-      ? 'grid grid-cols-4 gap-3 items-start'
-      : 'flex flex-wrap gap-3 items-start';
+      ? 'grid grid-cols-4 gap-4 items-start'
+      : 'flex flex-wrap gap-4 items-start';
   }
 
   get isRequired(): boolean {
