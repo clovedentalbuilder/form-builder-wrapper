@@ -1,5 +1,5 @@
 <lib-radio-with-child-field-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
-  <div [ngClass]="config.customClass">
+  <div [ngClass]="config.customClass" class="p-3">
     <form [formGroup]="form" class="w-full">
 
       <!-- Shared child-field template -->
@@ -79,7 +79,7 @@
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
-            <div class="flex flex-wrap gap-4 my-2">
+            <div class="flex flex-wrap gap-4">
               <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
                 <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1" />
                 <span class="character_color">{{ o.label }}</span>
@@ -95,7 +95,7 @@
               {{ activeChildConfig.label }}
               <span class="field-required" *ngIf="activeChildConfig.isRequired === 'true'">*</span>
             </label>
-            <div class="flex flex-wrap gap-4 my-2">
+            <div class="flex flex-wrap gap-4">
               <label *ngFor="let o of getChildOptions(optValue)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
                 <input
                   type="checkbox"
@@ -148,7 +148,7 @@
 
           <!-- Button mode -->
           <ng-container *ngIf="config.displayMode === 'button'">
-            <div class="flex flex-wrap gap-4 items-start my-2">
+            <div class="flex flex-wrap gap-4 items-start">
               <button
                 *ngFor="let opt of options"
                 type="button"
