@@ -1,5 +1,5 @@
 <lib-dropdown-with-child-field-settings-panel #fxComponent [fxData]="fxData" (configuration)="onSettingsChanged($event)">
-  <div class="custom-dropdown" [ngClass]="config.customClass">
+  <div class="p-3" [ngClass]="config.customClass">
     <form [formGroup]="form" class="flex gap-4 w-full">
 
       <!-- Parent dropdown -->
@@ -94,7 +94,7 @@
 
         <!-- Radiobutton child -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'radiobutton'">
-          <div class="flex gap-4 flex-wrap my-2">
+          <div class="flex gap-4 flex-wrap">
             <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
               <input type="radio" [formControl]="childFieldControl" [name]="instanceId + '-child'" [value]="o.value" class="w-4 h-4 accent-blue-600 cursor-pointer flex-shrink-0 mt-1" />
               <span class="character_color">{{ o.label }}</span>
@@ -107,7 +107,7 @@
 
         <!-- Checkbox child -->
         <ng-container *ngIf="activeChildConfig.fieldType === 'checkbox'">
-          <div class="flex flex-wrap gap-4 my-2">
+          <div class="flex flex-wrap gap-4">
             <label *ngFor="let o of getChildOptions(selectedOption)" class="flex items-center gap-2 cursor-pointer text-gray-700 m-0">
               <input
                 type="checkbox"
