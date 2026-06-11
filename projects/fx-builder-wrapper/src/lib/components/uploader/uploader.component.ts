@@ -47,12 +47,27 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   fileType: string | null = null;
   fileName: string | null = null;
   private destroy$ = new Subject<Boolean>();
+
+  // Attach-from-files (iframe)
+  showUploadDropdown = false;
+  iframeDialogVisible = false;
+  iframeLoading = false;
+  attachIframeSrc: SafeResourceUrl | null = null;
+  private get attachIframeUrl(): string {
+    return window.location.hostname === 'localhost'
+      ? 'http://localhost:4300/document'
+      : `${window.location.origin}/webappnew/document`;
+  }
+  private get attachIframeOrigin(): string {
+    try { return new URL(this.attachIframeUrl).origin; } catch { return '*'; }
+  }
+  private messageHandler!: (event: MessageEvent) => void;
   private http = inject(HttpClient);
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   constructor(private cdr: ChangeDetectorRef, private fxBuilderWrapperService: FxBuilderWrapperService, private messageService: MessageService, private confirmationService: ConfirmationService, private sanitizer: DomSanitizer,
     private fxApiService: ApiServiceRegistry
   ) {
-    super(cdr)
+    super(cdr);
     this.onInit.subscribe((fxData) => {
       this._register(this.uploadFileControl);
     })
@@ -463,7 +478,9 @@ ngAfterViewInit(): void {
           title: fileObj?.title || '',
           notes: fileObj?.notes || '',
           categoryId: fileObj?.categoryId || '',
-          type: type,
+          // isAttached: fileObj?.isAttached || false,
+          fileMetaId: fileObj?.fileMetaId || null,
+          type:       type,
         };
       });
     if (formatted.length > 0) {
@@ -482,15 +499,78 @@ ngAfterViewInit(): void {
       if (files.length === 0) {
         return this.isUploaderRequired ? { required: true } : null;
       }
-      const allValid = files.every(
-        (f: any) => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
-      );
-      return allValid ? null : { requiredMeta: true };
+      return null;
     });
 
     this.uploadFileControl.updateValueAndValidity();
   }, 100);
 
+  // Listen for iframe postMessage responses
+  this.messageHandler = (event: MessageEvent) => {
+    if (event.origin !== this.attachIframeOrigin) return;
+
+    if (event.data?.type === 'SELECTED_FILES_RESPONSE') {
+      const selectedFiles: any[] = event.data.payload;
+      if (selectedFiles?.length > 0) {
+        const newFiles = selectedFiles.map((item: any) => {
+          const bucketName  = item.uploadDir;
+          const objectKey   = item.filePath;
+          const fileName    = item.fileName;
+          const mimeType    = item.mimeType;
+
+          // Extract region from the pre-signed fileUrl
+          const urlForRegion = item.fileUrl || item.thumbnailUrl || '';
+          const regionMatch  = urlForRegion.match(/\.s3\.([\w-]+)\.amazonaws\.com/) ||
+                               urlForRegion.match(/s3-([\w-]+)\.amazonaws\.com/);
+          const region = regionMatch?.[1] || '';
+
+          // Non-presigned S3 fileUrl (matches the format used by existing uploaded files)
+          const s3FileUrl = (region && bucketName && objectKey)
+            ? `https://s3.${region}.amazonaws.com/${bucketName}/${objectKey}`
+            : item.fileUrl;
+
+          // Thumbnail using thumbnailPath when available
+          const thumbnailPath = item.thumbnailPath || `document_thumb/${objectKey}`;
+          const thumbnailUrl  = (region && bucketName)
+            ? `https://s3.${region}.amazonaws.com/${bucketName}/${thumbnailPath}`
+            : item.thumbnailUrl;
+
+          return {
+            id: uuidv4(),
+            file: null,
+            originalUrl: {
+              bucketName,
+              fileName,
+              previewUrl:   item.fileUrl,   // pre-signed URL for preview
+              objectKey,
+              fileUrl:      s3FileUrl,
+              mimeType,
+              region,
+              thumbnailUrl,
+            },
+            result:      item.fileUrl,       // pre-signed URL for display
+            name:        fileName,
+            title:       (item.title || fileName || '').substring(0, 26),
+            notes:       item.notes || '',
+            categoryId:  item.categoryId || '',
+            // isAttached:  true,
+            fileMetaId:  item.fileMetaId || null,
+            type:        this.detectFileTypeFromName(fileName || ''),
+            // _showErrors: false,
+          };
+        });
+        this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
+        this.formattedData.uploadedFiles = this.uploadedFiles;
+        this.uploadFileControl.setValue(this.formattedData);
+      }
+      this.iframeDialogVisible = false;
+    }
+
+    if (event.data?.type === 'CLOSE_MODAL') {
+      this.iframeDialogVisible = false;
+    }
+  };
+  window.addEventListener('message', this.messageHandler);
 }
 
 
@@ -498,7 +578,7 @@ ngAfterViewInit(): void {
     const touched = this.uploadFileControl.touched;
     if (touched && !this._prevTouched) {
       this._prevTouched = true;
-      this.uploadedFiles.forEach(f => { f._showErrors = true; });
+      // this.uploadedFiles.forEach(f => { f._showErrors = true; });
     } else if (!touched) {
       this._prevTouched = false;
     }
@@ -553,11 +633,13 @@ ngAfterViewInit(): void {
         originalUrl: null,
         result: null,
         name: file.name,
-        title: '',
-        notes: '',
+        title:      file.name,
+        notes:      '',
         categoryId: '',
-        type: fileType,
-        _showErrors: false,
+        // isAttached: false,
+        fileMetaId: null,
+        type:       fileType,
+        // _showErrors: false,
       };
 
       if (fileType === 'image') {
@@ -656,15 +738,7 @@ ngAfterViewInit(): void {
   }
 
   private revalidateMeta(): void {
-    if (this.uploadedFiles.length === 0) return;
-    const allValid = this.uploadedFiles.every(
-      f => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
-    );
-    if (!allValid) {
-      this.uploadFileControl.setErrors({ requiredMeta: true });
-    } else {
-      this.uploadFileControl.setErrors(null);
-    }
+    this.uploadFileControl.setErrors(null);
   }
 
 
@@ -767,6 +841,88 @@ ngAfterViewInit(): void {
   //   fileInput.value = '';
   //   fileInput.click();
   // }
+
+  // ── Upload dropdown ───────────────────────────────────────────────────────────
+
+  toggleUploadDropdown(e: Event): void {
+    e.stopPropagation();
+    this.showUploadDropdown = !this.showUploadDropdown;
+  }
+
+  openSystemUpload(): void {
+    this.showUploadDropdown = false;
+    this.fileInput.nativeElement.value = '';
+    this.fileInput.nativeElement.click();
+  }
+
+  openAttachFromFiles(): void {
+    this.showUploadDropdown = false;
+    this.iframeLoading = true;
+    this.attachIframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.attachIframeUrl);
+    this.iframeDialogVisible = true;
+  }
+
+  onIframeLoad(event: Event): void {
+    const iframe = event.target as HTMLIFrameElement;
+    setTimeout(() => {
+      try {
+        const body = iframe.contentDocument?.body;
+        if (body) {
+          body.style.setProperty('background', '#fff', 'important');
+          body.style.setProperty('background-color', '#fff', 'important');
+        }
+      } catch {
+        // cross-origin — safe to ignore
+      }
+    }, 100);
+    this.sendMessageToAttachIframe(iframe);
+    this.iframeLoading = false;
+    iframe.style.display = 'block';
+  }
+
+  sendMessageToAttachIframe(iframe: HTMLIFrameElement): void {
+    if (iframe?.contentWindow) {
+      const limit = this.setting('maxFileNo');
+      iframe.contentWindow.postMessage({
+        action: 'filesSharing',
+        attachLimit: limit,
+        elementId: 'headtab, leftMenuToggle',
+        elementModificationClass: 'filesAttachProvision',
+        limit,
+      }, this.attachIframeOrigin);
+    }
+  }
+
+  closeAttachDialog(): void {
+    this.iframeDialogVisible = false;
+    this.iframeLoading = false;
+    this.attachIframeSrc = null;
+  }
+
+  onExpandFile(file: any, event: MouseEvent): void {
+    event.stopPropagation();
+    if (file.type === 'image') {
+      this.onImageSelect(file.result || file.originalUrl?.previewUrl || '');
+    } else if (file.type === 'stl') {
+      this.onOpenSTLFile(file);
+    } else {
+      this.onFileClick(file, file.name);
+    }
+  }
+
+  detectFileTypeFromName(name: string): 'image' | 'csv' | 'text' | 'pdf' | 'excel' | 'word' | 'stl' | 'other' | 'dcm' | 'htl' {
+    const n = (name || '').toLowerCase();
+    if (/\.(png|jpe?g|gif|webp|bmp|svg|tiff?|ico|heif|heic|avif)$/.test(n)) return 'image';
+    if (n.endsWith('.csv'))  return 'csv';
+    if (n.endsWith('.txt'))  return 'text';
+    if (n.endsWith('.pdf'))  return 'pdf';
+    if (/\.(xls|xlsx)$/.test(n)) return 'excel';
+    if (/\.(doc|docx)$/.test(n)) return 'word';
+    if (n.endsWith('.stl'))  return 'stl';
+    if (n.endsWith('.dcm'))  return 'dcm';
+    if (n.endsWith('.htl'))  return 'htl';
+    return 'other';
+  }
 
   openFileDialog() {
     // if (this.uploadedFiles.length > this.setting('maxFileNo')) {
