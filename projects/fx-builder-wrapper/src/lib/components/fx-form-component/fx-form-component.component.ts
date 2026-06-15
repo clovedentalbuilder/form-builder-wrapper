@@ -109,9 +109,10 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
 
   /** Ensures a value destined for a native form control is always a primitive. */
   private safeNativeValue(val: any): any {
-    if (val !== null && typeof val === 'object') {
-      // Covers both plain objects { } and arrays [ ] — neither is patchable
-      // into a native fx element (fx-text-field, fx-select-list, fx-radio, etc.)
+    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+      // Plain objects are not patchable into native fx elements. Arrays are
+      // kept as-is because the FX library accepts arrays for dynamic options
+      // binding (consumers pass option lists via variables).
       return '';
     }
     return val;

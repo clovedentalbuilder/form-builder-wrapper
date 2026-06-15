@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { FxBaseComponent, FxComponent, FxSelectSetting, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
@@ -23,7 +23,7 @@ import { ApiServiceRegistry } from '@instantsys-labs/core'
   templateUrl: './uploader.component.html',
   styleUrl: './uploader.component.css'
 })
-export class UploaderComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck {
+export class UploaderComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck, OnDestroy {
   // public uploadFileControl = new UntypedFormControl();
   public uploadFileControl = new FormControl();
   public uploadedFiles: Array<any> = [];
@@ -564,10 +564,12 @@ ngAfterViewInit(): void {
         this.uploadFileControl.setValue(this.formattedData);
       }
       this.iframeDialogVisible = false;
+      this.removeBodyScrollBlock();
     }
 
     if (event.data?.type === 'CLOSE_MODAL') {
       this.iframeDialogVisible = false;
+      this.removeBodyScrollBlock();
     }
   };
   window.addEventListener('message', this.messageHandler);
@@ -882,13 +884,13 @@ ngAfterViewInit(): void {
 
   sendMessageToAttachIframe(iframe: HTMLIFrameElement): void {
     if (iframe?.contentWindow) {
-      const limit = this.setting('maxFileNo');
+      const remaining = Math.max(0, this.setting('maxFileNo') - this.uploadedFiles.length);
       iframe.contentWindow.postMessage({
         action: 'filesSharing',
-        attachLimit: limit,
+        attachLimit: remaining,
         elementId: 'headtab, leftMenuToggle',
         elementModificationClass: 'filesAttachProvision',
-        limit,
+        limit: remaining,
       }, this.attachIframeOrigin);
     }
   }
@@ -897,6 +899,19 @@ ngAfterViewInit(): void {
     this.iframeDialogVisible = false;
     this.iframeLoading = false;
     this.attachIframeSrc = null;
+    this.removeBodyScrollBlock();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.messageHandler);
+    this.destroy$.next(true);
+    this.destroy$.complete();
+    this.removeBodyScrollBlock();
+  }
+
+  private removeBodyScrollBlock(): void {
+    document.body.classList.remove('p-overflow-hidden');
+    document.body.style.removeProperty('--scrollbar-width');
   }
 
   onExpandFile(file: any, event: MouseEvent): void {
