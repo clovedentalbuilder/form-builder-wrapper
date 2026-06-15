@@ -747,7 +747,7 @@ ngAfterViewInit(): void {
 
   protected settings(): FxSetting[] {
     return [
-      new FxStringSetting({ key: 'upload-text', $title: 'Upload Text', value: 'Upload File' }),
+      new FxStringSetting({ key: 'upload-text', $title: 'Upload Text', value: 'Attach Files' }),
       new FxStringSetting({ key: 'uploaderErrorMessage', $title: 'Error Message', value: 'Please upload at least one file' }),
       new FxSelectSetting({ key: 'multiple-upload', $title: 'Multiple Uploads', value: false }, [{ option: 'Enable', value: true }, { option: 'Disable', value: false }]),
       new FxStringSetting({ key: 'maxFileNo', $title: 'Maximum File Upload Allowed', value: 8 }),
