@@ -53,10 +53,13 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   iframeDialogVisible = false;
   iframeLoading = false;
   attachIframeSrc: SafeResourceUrl | null = null;
+  private get documentListRoute(): string {
+    return localStorage.getItem('isMobileRequest') === 'Y' ? '/document/mobile' : '/document';
+  }
   private get attachIframeUrl(): string {
     return window.location.hostname === 'localhost'
-      ? 'http://localhost:4300/document'
-      : `${window.location.origin}/webappnew/document`;
+      ? `http://localhost:4300${this.documentListRoute}`
+      : `${window.location.origin}/webappnew${this.documentListRoute}`;
   }
   private get attachIframeOrigin(): string {
     try { return new URL(this.attachIframeUrl).origin; } catch { return '*'; }
