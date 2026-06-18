@@ -57,9 +57,9 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
     return localStorage.getItem('isMobileRequest') === 'Y' ? '/document/mobile' : '/document';
   }
   private get attachIframeUrl(): string {
-    return window.location.hostname === 'localhost'
-      ? `http://localhost:4300${this.documentListRoute}`
-      : `${window.location.origin}/webappnew${this.documentListRoute}`;
+    // Dev serves the document app at the origin root (port 4300); production serves it under /webappnew
+    const prefix = window.location.port === '4300' ? '' : '/webappnew';
+    return `${window.location.origin}${prefix}${this.documentListRoute}`;
   }
   private get attachIframeOrigin(): string {
     try { return new URL(this.attachIframeUrl).origin; } catch { return '*'; }
