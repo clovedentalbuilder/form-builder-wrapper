@@ -247,8 +247,8 @@
     [closable]="false"
     [showHeader]="false"
     [(visible)]="iframeDialogVisible"
-    [style]="{ width: '72vw', padding: '4px', 'background-color': '#DEDEDE', height: '600px' }"
-    styleClass="lwoAttachFile-dialog"
+    [style]="{ width: isMobileRequest ? '92vw' : '72vw', padding: '4px', 'background-color': '#DEDEDE', height: '600px' }"
+    [styleClass]="isMobileRequest ? 'lwoAttachFile-dialog is-mobile' : 'lwoAttachFile-dialog'"
     (onHide)="closeAttachDialog()"
   >
     <div class="modal-inset">
