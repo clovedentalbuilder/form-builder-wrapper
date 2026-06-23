@@ -53,8 +53,11 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   iframeDialogVisible = false;
   iframeLoading = false;
   attachIframeSrc: SafeResourceUrl | null = null;
+  get isMobileRequest(): boolean {
+    return localStorage.getItem('isMobileRequest') === 'Y';
+  }
   private get documentListRoute(): string {
-    return localStorage.getItem('isMobileRequest') === 'Y' ? '/document/mobile' : '/document';
+    return this.isMobileRequest ? '/document/mobile' : '/document';
   }
   private get attachIframeUrl(): string {
     // Dev serves the document app at the origin root (port 4300); production serves it under /webappnew

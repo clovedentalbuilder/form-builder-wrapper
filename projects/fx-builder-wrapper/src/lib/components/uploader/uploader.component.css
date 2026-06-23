@@ -148,6 +148,8 @@
   background: unset !important;
   background-color: #DEDEDE !important;
   height: 589px;
+  width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
   border-radius: 8px;
 }
