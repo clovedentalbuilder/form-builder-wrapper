@@ -37,3 +37,12 @@
   /* vertical-align: super; */
   margin-left: 5px;
 }
+
+/* conditional-disable state */
+.dd--disabled {
+  opacity: 0.6;
+}
+.dd--disabled,
+.dd--disabled ::ng-deep .p-dropdown {
+  cursor: not-allowed;
+}

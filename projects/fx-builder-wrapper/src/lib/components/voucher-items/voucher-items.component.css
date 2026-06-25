@@ -1,0 +1,219 @@
+.vi {
+  width: 100%;
+}
+
+/* ── header bar ── */
+.vi__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.vi__bar-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3b6cb4;
+}
+
+.vi__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8762a;
+  background: #ffffff;
+  border: 1px solid #f0c89e;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.vi__add:hover:not(:disabled) { background: #fff6ee; }
+.vi__add:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.vi__empty {
+  padding: 18px;
+  text-align: center;
+  color: #9aa3af;
+  font-size: 13px;
+  border: 1.5px dashed #d6dbe1;
+  border-radius: 10px;
+}
+
+/* ── item box ── */
+.vi__item {
+  background: #fbfcfe;
+  border: 1px solid #e7ebf0;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.vi__item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.vi__item-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #e8762a;
+}
+
+.vi__close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa3af;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.vi__close:hover { background: #fdeaea; color: #d64545; }
+
+/* ── fields grid ── */
+.vi__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 24px;
+  align-items: start;
+  padding: 16px;
+}
+
+.vi__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.vi__label {
+  font-size: 13px;
+  color: #4a5568;
+  margin-bottom: 6px;
+}
+
+.vi__req { color: #e53e3e; }
+
+.vi__input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1f2937;
+  background: #fff;
+  border: 1px solid #d9dee5;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.vi__input:focus {
+  border-color: #f3a05a;
+  box-shadow: 0 0 0 3px rgba(243, 129, 42, 0.12);
+}
+select.vi__input { appearance: auto; }
+
+/* ── upload ── */
+.vi__upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+  border: 1.5px dashed #cdd4dc;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.vi__upload:hover { border-color: #f3a05a; background: #fffaf4; }
+.vi__upload-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #8a94a3;
+  font-size: 14px;
+}
+
+.vi__preview {
+  position: relative;
+  display: inline-block;
+  min-height: 88px;
+}
+.vi__thumb {
+  max-height: 88px;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  object-fit: cover;
+  display: block;
+}
+.vi__thumb-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: #d64545;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vi__err {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #e53e3e;
+}
+
+/* ── footer ── */
+.vi__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 16px 14px;
+}
+
+.vi__checks {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.vi__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+.vi__check input { width: 16px; height: 16px; cursor: pointer; accent-color: #e8762a; }
+
+.vi__created {
+  font-size: 12px;
+  color: #9aa3af;
+}
+.vi__created strong { color: #4b5563; font-weight: 600; }
+
+/* responsive: collapse to single column on small screens */
+@media (max-width: 760px) {
+  .vi__grid { grid-template-columns: 1fr; }
+}

@@ -24,6 +24,11 @@ import { RadioButtonWithOtherComponent } from '../radio-button-with-other/radio-
 import { CheckboxGroupComponent } from '../checkbox-group/checkbox-group.component';
 import { RadioWithChildFieldComponent } from '../radio-with-child-field/radio-with-child-field.component';
 import { DropdownWithChildFieldComponent } from '../dropdown-with-child-field/dropdown-with-child-field.component';
+import { SectionComponent } from '../section/section.component';
+import { StepperComponent } from '../stepper/stepper.component';
+import { RepeatableGroupComponent } from '../repeatable-group/repeatable-group.component';
+import { VoucherItemsComponent } from '../voucher-items/voucher-items.component';
+import { ToggleSwitchComponent } from '../toggle-switch/toggle-switch.component';
 // import { CustomizeDropdownComponent } from '../multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -201,6 +206,11 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       { name: 'Checkbox Group',              key: 'lib-checkbox-group',        component: CheckboxGroupComponent },
       { name: 'Radio with Child Field',      key: 'radio-with-child-field',    component: RadioWithChildFieldComponent },
       { name: 'Dropdown with Child Field',   key: 'dropdown-with-child-field', component: DropdownWithChildFieldComponent },
+      { name: 'Section',                     key: 'lib-section',               component: SectionComponent },
+      { name: 'Stepper',                     key: 'lib-stepper',               component: StepperComponent },
+      { name: 'Repeatable Group',            key: 'lib-repeatable-group',      component: RepeatableGroupComponent },
+      { name: 'Voucher Items',               key: 'lib-voucher-items',         component: VoucherItemsComponent },
+      { name: 'Toggle Switch',               key: 'lib-toggle-switch',         component: ToggleSwitchComponent },
     ];
     
     components.forEach(({ name, key, component }) => {

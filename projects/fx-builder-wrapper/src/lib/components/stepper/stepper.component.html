@@ -1,0 +1,13 @@
+<fx-component [fxData]="fxData" #base>
+  <div class="lib-stepper" [ngClass]="setting('stepperClass')">
+    <div class="lib-stepper__track">
+      <div class="lib-stepper__step"
+           *ngFor="let step of steps; let i = index"
+           [class.lib-stepper__step--active]="i === activeIndex"
+           (click)="goTo(step, i)">
+        <div class="lib-stepper__num">{{ i + 1 }}</div>
+        <div class="lib-stepper__label">{{ step.label }}</div>
+      </div>
+    </div>
+  </div>
+</fx-component>

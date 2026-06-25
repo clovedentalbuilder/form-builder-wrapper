@@ -23,6 +23,11 @@ import { RadioButtonWithOtherComponent } from './components/radio-button-with-ot
 import { CheckboxGroupComponent } from './components/checkbox-group/checkbox-group.component';
 import { RadioWithChildFieldComponent } from './components/radio-with-child-field/radio-with-child-field.component';
 import { DropdownWithChildFieldComponent } from './components/dropdown-with-child-field/dropdown-with-child-field.component';
+import { SectionComponent } from './components/section/section.component';
+import { StepperComponent } from './components/stepper/stepper.component';
+import { RepeatableGroupComponent } from './components/repeatable-group/repeatable-group.component';
+import { VoucherItemsComponent } from './components/voucher-items/voucher-items.component';
+import { ToggleSwitchComponent } from './components/toggle-switch/toggle-switch.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -118,6 +123,21 @@ export class FxBuilderWrapperComponent implements OnInit {
     }
     if (!Boolean(this.fxWrapperService.getComponent('dropdown-with-child-field'))) {
       this.fxWrapperService.registerCustomComponent('Dropdown with Child Field', 'dropdown-with-child-field', DropdownWithChildFieldComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-section'))) {
+      this.fxWrapperService.registerCustomComponent('Section', 'lib-section', SectionComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-stepper'))) {
+      this.fxWrapperService.registerCustomComponent('Stepper', 'lib-stepper', StepperComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-repeatable-group'))) {
+      this.fxWrapperService.registerCustomComponent('Repeatable Group', 'lib-repeatable-group', RepeatableGroupComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-voucher-items'))) {
+      this.fxWrapperService.registerCustomComponent('Voucher Items', 'lib-voucher-items', VoucherItemsComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-toggle-switch'))) {
+      this.fxWrapperService.registerCustomComponent('Toggle Switch', 'lib-toggle-switch', ToggleSwitchComponent);
     }
   };
 

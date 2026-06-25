@@ -1,0 +1,30 @@
+<fx-component [fxData]="fxData" #base></fx-component>
+
+<div class="lib-section">
+  <div class="lib-section__header">
+    <div class="lib-section__badge">{{ stepNumber }}</div>
+    <div class="lib-section__titles">
+      <div class="lib-section__title">{{ setting('heading') }}</div>
+      <div class="lib-section__subtitle" *ngIf="setting('subtitle')">{{ setting('subtitle') }}</div>
+    </div>
+    <div class="lib-section__chip">{{ fieldCount }} {{ fieldCount === 1 ? 'field' : 'fields' }}</div>
+  </div>
+
+  <div class="lib-section__body">
+    <div class="lib-section__grid"
+         [style.grid-template-columns]="gridCols"
+         [dndDropzone]="['COMPONENT', 'LAYOUT']"
+         [dndDragoverClass]="'lib-section__grid--over'"
+         (dndDrop)="addElement($event)">
+      <div class="lib-section__cell" *ngFor="let element of fxData.elements!">
+        <fx-component-resolver [element]="element"
+                               [_formGroup]="fxData.$formGroup"
+                               [parent]="fxData"
+                               [fxForm]="fxData.$fxForm"></fx-component-resolver>
+      </div>
+      <div class="lib-section__placeholder" *ngIf="isEditing && !fxData.elements?.length">
+        <i class="fa fa-hand-pointer"></i> Drag fields here
+      </div>
+    </div>
+  </div>
+</div>
