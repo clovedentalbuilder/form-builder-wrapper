@@ -1,0 +1,16 @@
+<fx-component [fxData]="fxData" #fxComponent>
+  <div class="tg" [class.tg--disabled]="isDisabled">
+    <span class="tg__label" *ngIf="setting('label')">{{ setting('label') }}</span>
+
+    <div class="tg__row">
+      <label class="tg__switch">
+        <input type="checkbox" class="tg__input" [formControl]="toggleControl" />
+        <span class="tg__track"><span class="tg__knob"></span></span>
+      </label>
+
+      <span class="tg__state" [class.tg__state--on]="toggleControl.value">
+        {{ toggleControl.value ? setting('onText') : setting('offText') }}
+      </span>
+    </div>
+  </div>
+</fx-component>

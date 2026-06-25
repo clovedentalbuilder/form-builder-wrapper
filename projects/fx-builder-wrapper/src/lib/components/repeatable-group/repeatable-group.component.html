@@ -1,0 +1,32 @@
+<fx-component [fxData]="fxData" #base *ngIf="!isView"></fx-component>
+
+<div class="rg">
+  <div class="rg__bar">
+    <div class="rg__bar-title">{{ setting('groupTitle') }}</div>
+    <button type="button" class="rg__add" (click)="addMore()" [disabled]="!isView">
+      <i class="fa fa-plus"></i> {{ setting('addButtonText') }}
+    </button>
+  </div>
+
+  <ng-container *ngIf="fxData && fxData.elements && fxData.$fxForm?.$mode">
+    <div class="rg__item" *ngFor="let row of fxData.elements; let i = index; trackBy: trackRow">
+      <div class="rg__item-head">
+        <span class="rg__item-title">{{ setting('itemLabel') }} {{ i + 1 }}</span>
+        <span class="rg__close"
+              *ngIf="isView && fxData.elements.length > 1"
+              (click)="delete(i)"
+              title="Remove">
+          <i class="fa fa-times"></i>
+        </span>
+      </div>
+
+      <div class="rg__item-body">
+        <fx-form [fxForm]="withScope(row)" [formGroup]="getFG(i)" [value]="rowValues[i]" [mode]="mode"></fx-form>
+      </div>
+
+      <div class="rg__item-foot" *ngIf="isView && setting('showCreatedAt') && createdAt(row)">
+        Created At: <strong>{{ createdAt(row) }}</strong>
+      </div>
+    </div>
+  </ng-container>
+</div>

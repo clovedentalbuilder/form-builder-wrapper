@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FxComponent, FxSetting, FxStringSetting, FxSelectSetting, FxValidation, FxValidatorService, FxBaseComponent, FxOptionSetting } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
+import { ConditionalDisableController, conditionalDisableSettings } from '../shared/conditional-disable';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
 import { CommonModule } from '@angular/common';
@@ -17,19 +18,27 @@ import { DropdownModule } from 'primeng/dropdown';
   templateUrl: './dropdown-with-search.component.html',
   styleUrl: './dropdown-with-search.component.css'
 })
-export class DropdownWithSearchComponent extends FxBaseComponent implements OnInit, AfterViewInit{
+export class DropdownWithSearchComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck {
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<Boolean>();
   formObject: object = {};
   searchDropdownMap = new Map<string, any>();
   @ViewChild('fxComponent') fxComponent!: FxComponent;
- 
+
   options: any[] = [];
   isRequired: boolean = false;
+  public isDisabled = false;
 
   public searchDropDownForm: FormGroup = this.fb.group({
     searchSelectedOption: [''],
   });
+
+  // Conditional disable: disables the dropdown when a watched control matches.
+  private disableController = new ConditionalDisableController(
+    () => this.fxData,
+    () => this.searchDropDownForm.get('searchSelectedOption'),
+    (key) => this.setting(key),
+  );
 
   constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private fxBuilderWrapperService: FxBuilderWrapperService, private fxApiService: ApiServiceRegistry) {
     super(cdr)
@@ -37,6 +46,10 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
       this._register(this.searchDropDownForm);
     });
 
+  }
+
+  ngDoCheck(): void {
+    this.isDisabled = this.disableController.update();
   }
 
   ngAfterViewInit(): void {
@@ -106,6 +119,7 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
       new FxSelectSetting({ key: 'isSearchRequired', $title: 'Required', value: 'true' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
       new FxStringSetting({ key: 'multiErrorSearch', $title: 'Error Message', value: 'Please select' }),
       new FxStringSetting({ key: 'placeholderSearch', $title: 'Placeholder', value: 'Select' }),
+      ...conditionalDisableSettings(),
     ];
   }
 

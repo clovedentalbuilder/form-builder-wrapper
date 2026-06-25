@@ -1,5 +1,5 @@
 <fx-component [fxData]="fxData" #fxComponent>
-  <div class="custom-dropdown" [ngClass]="setting('customClassSearch')">
+  <div class="custom-dropdown" [ngClass]="setting('customClassSearch')" [class.dd--disabled]="isDisabled">
     <form [formGroup]="searchDropDownForm" class="flex gap-4 w-full">
       <div class="flex-1 relative">
         <label class="input-label dark:text-gray-300">
