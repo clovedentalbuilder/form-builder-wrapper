@@ -4,6 +4,7 @@ import { FxForm, FxFormComponent } from '@instantsys-labs/fx';
 import { DispatchToClinicComponent } from '../../custom-controls/dispatch-to-clinic/dispatch-to-clinic.component';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { COMPONENT_VALUE_ADAPTERS, findAdapterForValue } from './value-adapter-registry';
+import { buildListingFromForm } from '../shared/listing';
 import { DynamicTableComponent } from '../dynamic-table/dynamic-table.component';
 import { ToggleButtonComponent } from '../toggle-button/toggle-button.component';
 import { UploaderComponent } from '../uploader/uploader.component';
@@ -29,6 +30,10 @@ import { StepperComponent } from '../stepper/stepper.component';
 import { RepeatableGroupComponent } from '../repeatable-group/repeatable-group.component';
 import { VoucherItemsComponent } from '../voucher-items/voucher-items.component';
 import { ToggleSwitchComponent } from '../toggle-switch/toggle-switch.component';
+import { CustomTextboxComponent } from '../custom-textbox/custom-textbox.component';
+import { CustomTextareaComponent } from '../custom-textarea/custom-textarea.component';
+import { DuplicateCheckInputComponent } from '../duplicate-check-input/duplicate-check-input.component';
+import { ImageUploaderComponent } from '../image-uploader/image-uploader.component';
 // import { CustomizeDropdownComponent } from '../multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -49,7 +54,16 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
   @ViewChild('form') form!: FxFormComponent;
   @Input() fxForm!: FxForm;
   @Input() variables: any;
+  /** Current user's granted privileges (e.g. ["htr:trn:off","wd:logs:all"]).
+   *  Consumed by container components to gate editability at the package level. */
+  @Input() privileges: string[] = [];
+  /** Consumer-supplied data bag (e.g. { clinicType: 'dental', region: 'US' }).
+   *  Consumed by container components to gate visibility via rule/code conditions. */
+  @Input() supportingData: any = {};
   @Output() fxFormSubmit = new EventEmitter<any>();
+  /** Ready { label: value } object of fields flagged "Show in Listing",
+   *  computed at the package level and emitted on submit. */
+  @Output() listingSubmit = new EventEmitter<Record<string, any>>();
 
   get normalizedVariables(): any {
     if (!this.variables) return this.variables;
@@ -113,11 +127,10 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
   }
 
   /** Ensures a value destined for a native form control is always a primitive. */
-  private safeNativeValue(val: any): any {
-    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
-      // Plain objects are not patchable into native fx elements. Arrays are
-      // kept as-is because the FX library accepts arrays for dynamic options
-      // binding (consumers pass option lists via variables).
+   private safeNativeValue(val: any): any {
+    if (val !== null && typeof val === 'object') {
+      // Covers both plain objects { } and arrays [ ] — neither is patchable
+      // into a native fx element (fx-text-field, fx-select-list, fx-radio, etc.)
       return '';
     }
     return val;
@@ -163,9 +176,17 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
     if ('variables' in changes) {
       this.fxWrapperService.variables$.next(this.buildAdaptedVariables());
     }
+    if ('privileges' in changes) {
+      this.fxWrapperService.setPrivileges(this.privileges);
+    }
+    if ('supportingData' in changes) {
+      this.fxWrapperService.setSupportingData(this.supportingData);
+    }
   }
 
   public ngOnInit(): void {
+    this.fxWrapperService.setPrivileges(this.privileges);
+    this.fxWrapperService.setSupportingData(this.supportingData);
     // if (!Boolean(this.fxWrapperService.getComponent('dispatch-to-clinic'))) {
     //   this.fxWrapperService.registerCustomComponent('Dispatch To Clinic', 'dispatch-to-clinic', DispatchToClinicComponent);
     // }
@@ -211,6 +232,10 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       { name: 'Repeatable Group',            key: 'lib-repeatable-group',      component: RepeatableGroupComponent },
       { name: 'Voucher Items',               key: 'lib-voucher-items',         component: VoucherItemsComponent },
       { name: 'Toggle Switch',               key: 'lib-toggle-switch',         component: ToggleSwitchComponent },
+      { name: 'Custom Textbox',              key: 'lib-custom-textbox',        component: CustomTextboxComponent },
+      { name: 'Custom Textarea',             key: 'lib-custom-textarea',       component: CustomTextareaComponent },
+      { name: 'Duplicate Check Input',       key: 'lib-duplicate-check-input', component: DuplicateCheckInputComponent },
+      { name: 'Image Uploader',              key: 'lib-image-uploader',        component: ImageUploaderComponent },
     ];
     
     components.forEach(({ name, key, component }) => {
@@ -222,6 +247,9 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
 
   public onSubmit(event: any): void {
     this.fxFormSubmit.emit(event);
+    // Package-level: compute the listing object from flagged fields and emit it.
+    const raw = typeof event?.getRawValue === 'function' ? event.getRawValue() : event;
+    this.listingSubmit.emit(buildListingFromForm(this.fxForm, raw));
   }
 
   public submit(): void {

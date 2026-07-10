@@ -28,6 +28,10 @@ import { StepperComponent } from './components/stepper/stepper.component';
 import { RepeatableGroupComponent } from './components/repeatable-group/repeatable-group.component';
 import { VoucherItemsComponent } from './components/voucher-items/voucher-items.component';
 import { ToggleSwitchComponent } from './components/toggle-switch/toggle-switch.component';
+import { CustomTextboxComponent } from './components/custom-textbox/custom-textbox.component';
+import { CustomTextareaComponent } from './components/custom-textarea/custom-textarea.component';
+import { DuplicateCheckInputComponent } from './components/duplicate-check-input/duplicate-check-input.component';
+import { ImageUploaderComponent } from './components/image-uploader/image-uploader.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -138,6 +142,18 @@ export class FxBuilderWrapperComponent implements OnInit {
     }
     if (!Boolean(this.fxWrapperService.getComponent('lib-toggle-switch'))) {
       this.fxWrapperService.registerCustomComponent('Toggle Switch', 'lib-toggle-switch', ToggleSwitchComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-custom-textbox'))) {
+      this.fxWrapperService.registerCustomComponent('Custom Textbox', 'lib-custom-textbox', CustomTextboxComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-custom-textarea'))) {
+      this.fxWrapperService.registerCustomComponent('Custom Textarea', 'lib-custom-textarea', CustomTextareaComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-duplicate-check-input'))) {
+      this.fxWrapperService.registerCustomComponent('Duplicate Check Input', 'lib-duplicate-check-input', DuplicateCheckInputComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-image-uploader'))) {
+      this.fxWrapperService.registerCustomComponent('Image Uploader', 'lib-image-uploader', ImageUploaderComponent);
     }
   };
 

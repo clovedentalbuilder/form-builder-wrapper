@@ -1,3 +1,15 @@
+/* privilege wrapper: transparent fieldset so it doesn't affect layout */
+.priv-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+.priv-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .lib-section {
   background: #ffffff;
   border: 1px solid #e8eaed;
@@ -5,6 +17,21 @@
   margin-bottom: 16px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.lib-section__priv-btn {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #dbe3ec;
+  background: #ffffff;
+  color: #3b6cb4;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.lib-section__priv-btn:hover {
+  background: #eef4fb;
 }
 
 .lib-section__header {

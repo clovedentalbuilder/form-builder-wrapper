@@ -50,11 +50,13 @@ type Mode = 'build' | 'preview' | 'edit';
         </span>
         <span *ngSwitchCase="'preview'">
           <strong>Preview Mode</strong> &mdash; fill the form and click
-          <strong>Submit</strong>.
+          <strong>Submit</strong>. Privileges passed: <code>{{ privileges.join(', ') }}</code>
+          &mdash; Supporting data: <code>{{ supportingData | json }}</code>
         </span>
         <span *ngSwitchCase="'edit'">
           <strong>Edit Submission</strong> &mdash; form is pre-filled with your
-          last submission. Update and re-submit.
+          last submission. Privileges passed: <code>{{ privileges.join(', ') }}</code>
+          &mdash; Supporting data: <code>{{ supportingData | json }}</code>
         </span>
       </ng-container>
     </div>
@@ -79,9 +81,17 @@ type Mode = 'build' | 'preview' | 'edit';
       <div class="ft-content ft-content--form">
         <fx-form-component
           [fxForm]="savedForm"
+          [privileges]="privileges"
+          [supportingData]="supportingData"
           (fxFormSubmit)="onSubmit($event)"
+          (listingSubmit)="onListing($event)"
           #previewRef
         ></fx-form-component>
+
+        <div class="ft-submitted-banner" *ngIf="listingData">
+          <span class="ft-submitted-label">Listing data &mdash; fields flagged "Show in Listing"</span>
+          <pre class="ft-submitted-json">{{ listingData | json }}</pre>
+        </div>
       </div>
       <div class="ft-footer">
         <button class="ft-btn ft-btn--primary" (click)="previewRef.submit()">
@@ -105,9 +115,17 @@ type Mode = 'build' | 'preview' | 'edit';
         <fx-form-component
           [fxForm]="savedForm"
           [variables]="patchVariables"
+          [privileges]="privileges"
+          [supportingData]="supportingData"
           (fxFormSubmit)="onSubmit($event)"
+          (listingSubmit)="onListing($event)"
           #editRef
         ></fx-form-component>
+
+        <div class="ft-submitted-banner" *ngIf="listingData">
+          <span class="ft-submitted-label">Listing data &mdash; fields flagged "Show in Listing"</span>
+          <pre class="ft-submitted-json">{{ listingData | json }}</pre>
+        </div>
       </div>
       <div class="ft-footer">
         <button class="ft-btn ft-btn--primary" (click)="editRef.submit()">
@@ -294,6 +312,20 @@ export class FormTestComponent implements OnInit {
 
   hasSaved = false;
 
+  // ── Fake privileges passed into the package to test section/group gating ──
+  // Configure a section/repeatable-group's "Required Privileges" with one of
+  // these (e.g. htr:trn:off) → editable; use anything NOT in this list
+  // (e.g. admin:only) → the whole section/group renders disabled.
+  privileges: string[] = ['htr:trn:off', 'wd:logs:all'];
+
+  // ── Fake supporting data passed into the package to test section/group
+  // visibility rules/code (e.g. a Rule condition on key "clinicType" equals
+  // "dental", or a Code condition referencing `supportingData.isVip`).
+  supportingData: any = { clinicType: 'dental', region: 'US', isVip: true };
+
+  // ── Listing object emitted by the package on submit ──
+  listingData: Record<string, any> | null = null;
+
   private apiRegistry = inject(ApiServiceRegistry);
 
   ngOnInit(): void {
@@ -337,6 +369,7 @@ export class FormTestComponent implements OnInit {
     if (!saved) return;
     this.savedForm      = JSON.parse(saved);
     this.patchVariables = null;   // blank form — no pre-fill
+    this.listingData    = null;
     this.mode = 'preview';
   }
 
@@ -348,6 +381,7 @@ export class FormTestComponent implements OnInit {
     // Pre-fill the form with the last submitted data
     const vars = localStorage.getItem(LS_VARS_KEY);
     this.patchVariables = vars ? JSON.parse(vars) : null;
+    this.listingData    = null;
     this.mode = 'edit';
   }
 
@@ -368,8 +402,15 @@ export class FormTestComponent implements OnInit {
       ? event.getRawValue()
       : event;
 
+      console.log('Form submitted (from package):', plainData);
     this.submittedData = plainData;
     localStorage.setItem(LS_VARS_KEY, JSON.stringify(plainData));
+  }
+
+  /** Ready listing object computed by the package and emitted on submit. */
+  onListing(data: Record<string, any>): void {
+    this.listingData = data;
+    console.log('Listing data (from package):', data);
   }
 
   newForm(): void {

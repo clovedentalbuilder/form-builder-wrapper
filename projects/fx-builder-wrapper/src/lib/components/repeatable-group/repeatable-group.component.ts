@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, OnDestroy } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { DndModule } from 'ngx-drag-drop';
@@ -16,6 +16,9 @@ import {
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
+import { RepeatableGroupSettingsPanelComponent } from './repeatable-group-settings-panel.component';
+import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
+import { resolveSiblingControl } from '../shared/conditional-disable';
 
 /**
  * Repeatable group: outer header (title + "Add Item") over a list of boxes.
@@ -36,11 +39,15 @@ import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
  *      submit empty. We normalise value to [] first.
  *   2. Box clones must keep field NAMES (regenerate ids only) so a saved value,
  *      keyed by name, patches back on edit. FxUtils.copyForm renames fields.
+ *
+ * Hidden groups always keep their FormArray registered and value included in
+ * the form — there is no "exclude from form when hidden" option; only visual
+ * visibility is gated.
  */
 @Component({
   selector: 'lib-repeatable-group',
   standalone: true,
-  imports: [CommonModule, DndModule, FxComponent, FxFormComponent],
+  imports: [CommonModule, DndModule, FxComponent, FxFormComponent, RepeatableGroupSettingsPanelComponent],
   templateUrl: './repeatable-group.component.html',
   styleUrl: './repeatable-group.component.css',
 })
@@ -61,6 +68,18 @@ export class RepeatableGroupComponent extends FxBaseComponent implements OnDestr
       new FxStringSetting({ key: 'addButtonText', $title: 'Add Button Text', value: 'Add Item' }),
       new FxStringSetting({ key: 'itemLabel', $title: 'Item Label', value: 'ITEM' }),
       new FxToggleSetting({ key: 'showCreatedAt', $title: 'Show Created At', value: true }),
+      new FxStringSetting({ key: 'showInListing', $title: 'Show In Listing', value: false }),
+      // Visibility gate: a condition list (privilege/supportingData/field rows, freely combined
+      // via any/all) OR custom code — see shared/applicability.ts.
+      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
+      new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
+      new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
+      // Enable/disable gate: same condition-list-or-code shape as visibility.
+      new FxToggleSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: false }),
+      new FxStringSetting({ key: 'enableConditions', $title: 'Enable Conditions', value: '[]' }),
+      new FxStringSetting({ key: 'enableConditionsMatch', $title: 'Enable Conditions Match', value: 'any' }),
+      new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
     ];
   }
 
@@ -74,6 +93,68 @@ export class RepeatableGroupComponent extends FxBaseComponent implements OnDestr
 
   get mode(): FxMode {
     return this.fxData?.$fxForm?.$mode ?? FxMode.VIEW;
+  }
+
+  /** Computes { visible, enabled } from privileges + supportingData + sibling fields. See shared/applicability.ts. */
+  private get applicability(): { visible: boolean; enabled: boolean } {
+    const visibility: GateConfig = {
+      useCode: this.setting('visibilityUseCode') === true,
+      code: this.setting('visibilityCode'),
+      conditions: parseConditions(this.setting('visibilityConditions')),
+      conditionsMatch: this.setting('visibilityConditionsMatch'),
+    };
+    const enable: GateConfig = {
+      useCode: this.setting('enableUseCode') === true,
+      code: this.setting('enableCode'),
+      conditions: parseConditions(this.setting('enableConditions')),
+      conditionsMatch: this.setting('enableConditionsMatch'),
+    };
+    return isApplicable(
+      { visibility, enable },
+      {
+        privileges: this.wrapperService.privileges,
+        supportingData: this.wrapperService.supportingData,
+        resolveField: (name) => resolveSiblingControl(this.fxData, name)?.value,
+      },
+    );
+  }
+
+  /**
+   * Runtime-only: disable the whole group when privileges aren't satisfied.
+   * Always editable in the builder. Native disabled/inert keeps values emitting.
+   */
+  get privilegeDisabled(): boolean {
+    if (!this.isView) return false;
+    return !this.applicability.enabled;
+  }
+
+  /**
+   * Runtime-only: hide the whole group when the visibility rule/code says so.
+   * Always visible in the builder. Uses [hidden] (not *ngIf) so rows stay
+   * registered and keep emitting values while hidden.
+   */
+  get groupHidden(): boolean {
+    if (!this.isView) return false;
+    return !this.applicability.visible;
+  }
+
+  /**
+   * Bound on the component's OWN host element (<lib-repeatable-group>), not just
+   * an inner wrapper — so hiding collapses the whole custom element, including
+   * the settings-panel's projected chrome, not just the fields inside it.
+   */
+  @HostBinding('hidden')
+  get hostHidden(): boolean {
+    return this.groupHidden;
+  }
+
+  @HostBinding('attr.inert')
+  get hostInert(): string | null {
+    return this.groupHidden ? '' : null;
+  }
+
+  onSettingsChanged(_config: any): void {
+    this.detectChanges();
   }
 
   getFG(index: number): FormGroup {

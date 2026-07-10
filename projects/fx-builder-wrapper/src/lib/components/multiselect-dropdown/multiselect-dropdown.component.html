@@ -1,4 +1,8 @@
-<fx-component [fxData]="fxData" #fxComponent>
+<lib-multiselect-dropdown-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
   <div class="custom-dropdown" [ngClass]="setting('customClassMulti')">
     <form [formGroup]="multiselectDropDownForm" class="flex gap-4 w-full">
       <div class="flex-1 relative">
@@ -6,7 +10,7 @@
           {{ setting('select-label-multi') }} <span class="field-required" *ngIf="isRequired">*</span>
         </label>
         <p-multiSelect [options]="options" formControlName="multipleSelectedOption" [optionLabel]="setting('label-key')"
-          [placeholder]="setting('placeholderMulti')" class="multiselect">
+          [placeholder]="setting('placeholderMulti')" [disabled]="fieldDisabled" class="multiselect">
 
           <!-- Custom Dropdown Icon -->
           <ng-template pTemplate="dropdownicon">
@@ -23,4 +27,4 @@
       </div>
     </form>
   </div>
-</fx-component>
+</lib-multiselect-dropdown-settings-panel>

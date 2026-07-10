@@ -2,6 +2,37 @@
   width: 100%;
 }
 
+/* privilege wrapper: transparent fieldset so it doesn't affect layout */
+.priv-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+.priv-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rg__bar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.rg__priv-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #dbe3ec;
+  background: #ffffff;
+  color: #3b6cb4;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.rg__priv-btn:hover {
+  background: #eef4fb;
+}
+
 /* Outer header: title left, add button right */
 .rg__bar {
   display: flex;

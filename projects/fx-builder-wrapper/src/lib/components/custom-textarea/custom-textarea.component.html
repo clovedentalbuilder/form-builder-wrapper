@@ -1,0 +1,23 @@
+<lib-custom-textarea-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
+  <div class="cta-field">
+    <label class="cta-label" *ngIf="setting('label')">
+      {{ setting('label') }}
+      <span class="cta-required" *ngIf="setting('isRequired')">*</span>
+    </label>
+    <textarea
+      class="cta-input"
+      [class.cta-input--error]="errorMessage"
+      [formControl]="control"
+      [placeholder]="setting('placeholder')"
+      [disabled]="fieldDisabled"
+      [rows]="rows"
+      [attr.maxlength]="setting('maxLength') || null"
+    ></textarea>
+    <div class="cta-help" *ngIf="setting('helpText') && !errorMessage">{{ setting('helpText') }}</div>
+    <div class="cta-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+</lib-custom-textarea-settings-panel>

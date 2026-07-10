@@ -1,0 +1,302 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '600px' }"
+  styleClass="dws-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="dws-dialog-header">
+      <i class="pi pi-cog dws-header-icon"></i>
+      <span class="dws-dialog-title">Dropdown with Search Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="dws-settings-body">
+    <!-- Display Settings (ID + Name) -->
+    <div class="dws-section">
+      <div class="dws-section-header"><i class="pi pi-sliders-h"></i><span>Display Settings</span></div>
+      <div class="dws-section-body">
+        <div class="dws-id-row" *ngIf="fxData?.id">
+          <span class="dws-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+          <span class="dws-id-value">{{ fxData!.id }}</span>
+        </div>
+
+        <div class="dws-field">
+          <label class="dws-label">
+            Name <span class="dws-required-star">*</span>
+            <span class="dws-name-hint">used to identify this component (e.g. clinic)</span>
+          </label>
+          <input pInputText formControlName="name" placeholder="e.g. clinic" class="dws-input" />
+          <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="dws-field-error">Name is required.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic -->
+    <div class="dws-section">
+      <div class="dws-section-header"><i class="pi pi-sliders-h"></i><span>Basic</span></div>
+      <div class="dws-section-body">
+        <div class="dws-grid-2">
+          <div class="dws-field">
+            <label class="dws-label">Label</label>
+            <input pInputText formControlName="selectLabelSearch" placeholder="e.g. Clinic" class="dws-input" />
+          </div>
+          <div class="dws-field">
+            <label class="dws-label">Placeholder</label>
+            <input pInputText formControlName="placeholderSearch" class="dws-input" />
+          </div>
+        </div>
+        <div class="dws-grid-2">
+          <div class="dws-field">
+            <label class="dws-label">Label Key</label>
+            <input pInputText formControlName="labelKeySearch" placeholder="e.g. option" class="dws-input" />
+          </div>
+          <div class="dws-field">
+            <label class="dws-label">Value Key</label>
+            <input pInputText formControlName="valueKeySearch" placeholder="e.g. value" class="dws-input" />
+          </div>
+        </div>
+        <div class="dws-field">
+          <label class="dws-label">Custom Class Name</label>
+          <input pInputText formControlName="customClassSearch" class="dws-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="dws-section">
+      <div class="dws-section-header"><i class="pi pi-list"></i><span>Options</span></div>
+      <div class="dws-section-body">
+        <div class="dws-field">
+          <label class="dws-label">Options Source</label>
+          <div class="dws-radio-group">
+            <label class="dws-radio-option"><input type="radio" formControlName="optionsSource" value="manual" /><span>Manual</span></label>
+            <label class="dws-radio-option"><input type="radio" formControlName="optionsSource" value="api" /><span>API</span></label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.value.optionsSource === 'manual'">
+          <div class="dws-options">
+            <div class="dws-option-row" *ngFor="let opt of manualOptions; let i = index">
+              <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Option Label" class="dws-input" />
+              <input pInputText [(ngModel)]="opt.value" [ngModelOptions]="{standalone: true}" placeholder="Option Value" class="dws-input" />
+              <button type="button" class="dws-option-remove" (click)="removeOption(i)" title="Remove option">&times;</button>
+            </div>
+            <button type="button" class="dws-option-add" (click)="addOption()">+ Add Option</button>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="settingsForm.value.optionsSource === 'api'">
+          <div class="dws-grid-2">
+            <div class="dws-field">
+              <label class="dws-label">API URL</label>
+              <input pInputText formControlName="searchSelectOptionAPIURL" placeholder="e.g. /api/options" class="dws-input" />
+            </div>
+            <div class="dws-field">
+              <label class="dws-label">Service</label>
+              <select formControlName="serviceSearchName" class="dws-input">
+                <option value="">Select service</option>
+                <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
+              </select>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Validation -->
+    <div class="dws-section">
+      <div class="dws-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
+      <div class="dws-section-body">
+        <div class="dws-field">
+          <label class="dws-label">Required</label>
+          <div class="dws-radio-group">
+            <label class="dws-radio-option"><input type="radio" formControlName="isSearchRequired" value="true" /><span>Yes</span></label>
+            <label class="dws-radio-option"><input type="radio" formControlName="isSearchRequired" value="false" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="dws-field" *ngIf="settingsForm.value.isSearchRequired === 'true'">
+          <label class="dws-label">Error Message</label>
+          <input pInputText formControlName="multiErrorSearch" class="dws-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Visibility -->
+    <div class="dws-section">
+      <div class="dws-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+      <div class="dws-section-body">
+        <div class="dws-field">
+          <label class="dws-label">Driven By</label>
+          <div class="dws-radio-group">
+            <label class="dws-radio-option"><input type="radio" formControlName="visibilityUseCode" value="false" /><span>Conditions (no-code)</span></label>
+            <label class="dws-radio-option"><input type="radio" formControlName="visibilityUseCode" value="true" /><span>Custom Code</span></label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.value.visibilityUseCode === 'false'">
+          <div class="dws-field" *ngIf="visibilityConditions.length > 1">
+            <label class="dws-label">Match</label>
+            <div class="dws-radio-group">
+              <label class="dws-radio-option"><input type="radio" formControlName="visibilityConditionsMatch" value="any" /><span>Any condition</span></label>
+              <label class="dws-radio-option"><input type="radio" formControlName="visibilityConditionsMatch" value="all" /><span>All conditions</span></label>
+            </div>
+          </div>
+
+          <div class="dws-conditions">
+            <div class="dws-condition-row" *ngFor="let cond of visibilityConditions; let i = index">
+              <select [(ngModel)]="cond.source" [ngModelOptions]="{standalone: true}" class="dws-input">
+                <option value="privilege">Privilege</option>
+                <option value="supportingData">Supporting Data</option>
+                <option value="field">Another Field's Value</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder(cond.source)" class="dws-input" />
+              <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="dws-input">
+                <option value="equals">Equals</option>
+                <option value="notEquals">Not Equals</option>
+                <option value="in">In (comma list)</option>
+                <option value="notIn">Not In (comma list)</option>
+                <option value="truthy">Is Truthy / Has It</option>
+                <option value="falsy">Is Falsy / Doesn't Have It</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="dws-input" />
+              <button type="button" class="dws-condition-remove" (click)="removeCondition(visibilityConditions, i)" title="Remove condition">&times;</button>
+            </div>
+            <button type="button" class="dws-condition-add" (click)="addCondition(visibilityConditions)">+ Add Condition</button>
+          </div>
+          <small class="dws-hint">Visible when the condition(s) above match. Mix privilege, supporting-data, and other-field conditions freely — they combine via Match above.</small>
+        </ng-container>
+
+        <ng-container *ngIf="settingsForm.value.visibilityUseCode === 'true'">
+          <div class="dws-field">
+            <label class="dws-label">JavaScript Code</label>
+            <textarea
+              formControlName="visibilityCode"
+              class="dws-input dws-code"
+              rows="5"
+              placeholder="return privileges.includes('htr:trn:off') || supportingData.isVip === true || getFieldValue('otherField') === 'x';"
+            ></textarea>
+            <small class="dws-hint">
+              Function body — <code>privileges</code> (string[]), <code>supportingData</code> (object), and <code>getFieldValue(name)</code> are in scope. Must <code>return</code> a boolean.
+            </small>
+          </div>
+        </ng-container>
+
+        <div class="dws-field">
+          <label class="dws-label">When Hidden</label>
+          <div class="dws-radio-group">
+            <label class="dws-radio-option"><input type="radio" formControlName="excludeControlsWhenHidden" value="false" /><span>Keep value (include in form)</span></label>
+            <label class="dws-radio-option"><input type="radio" formControlName="excludeControlsWhenHidden" value="true" /><span>Exclude from form</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enable / Disable -->
+    <div class="dws-section">
+      <div class="dws-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+      <div class="dws-section-body">
+        <div class="dws-field">
+          <label class="dws-label">Legacy Rule <span class="dws-legacy-badge">still applied</span></label>
+          <div class="dws-grid-2">
+            <input pInputText formControlName="disableWhenControl" placeholder="Disable When — Control Name" class="dws-input" />
+            <input pInputText formControlName="disableWhenValue" placeholder="Disable When — Value(s)" class="dws-input" />
+          </div>
+          <small class="dws-hint">Pre-existing single-rule disable (comma-separated values, OR match). Leave blank to retire it in favor of the conditions below.</small>
+        </div>
+
+        <div class="dws-field">
+          <label class="dws-label">Driven By</label>
+          <div class="dws-radio-group">
+            <label class="dws-radio-option"><input type="radio" formControlName="enableUseCode" value="false" /><span>Conditions (no-code)</span></label>
+            <label class="dws-radio-option"><input type="radio" formControlName="enableUseCode" value="true" /><span>Custom Code</span></label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.value.enableUseCode === 'false'">
+          <div class="dws-field" *ngIf="enableConditions.length > 1">
+            <label class="dws-label">Match</label>
+            <div class="dws-radio-group">
+              <label class="dws-radio-option"><input type="radio" formControlName="enableConditionsMatch" value="any" /><span>Any condition</span></label>
+              <label class="dws-radio-option"><input type="radio" formControlName="enableConditionsMatch" value="all" /><span>All conditions</span></label>
+            </div>
+          </div>
+
+          <div class="dws-conditions">
+            <div class="dws-condition-row" *ngFor="let cond of enableConditions; let i = index">
+              <select [(ngModel)]="cond.source" [ngModelOptions]="{standalone: true}" class="dws-input">
+                <option value="privilege">Privilege</option>
+                <option value="supportingData">Supporting Data</option>
+                <option value="field">Another Field's Value</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder(cond.source)" class="dws-input" />
+              <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="dws-input">
+                <option value="equals">Equals</option>
+                <option value="notEquals">Not Equals</option>
+                <option value="in">In (comma list)</option>
+                <option value="notIn">Not In (comma list)</option>
+                <option value="truthy">Is Truthy / Has It</option>
+                <option value="falsy">Is Falsy / Doesn't Have It</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="dws-input" />
+              <button type="button" class="dws-condition-remove" (click)="removeCondition(enableConditions, i)" title="Remove condition">&times;</button>
+            </div>
+            <button type="button" class="dws-condition-add" (click)="addCondition(enableConditions)">+ Add Condition</button>
+          </div>
+          <small class="dws-hint">Editable when the condition(s) above match (combined with the legacy rule above via OR). Mix privilege, supporting-data, and other-field conditions freely.</small>
+        </ng-container>
+
+        <ng-container *ngIf="settingsForm.value.enableUseCode === 'true'">
+          <div class="dws-field">
+            <label class="dws-label">JavaScript Code</label>
+            <textarea
+              formControlName="enableCode"
+              class="dws-input dws-code"
+              rows="5"
+              placeholder="return privileges.includes('htr:trn:off') || supportingData.isVip === true || getFieldValue('otherField') === 'x';"
+            ></textarea>
+            <small class="dws-hint">
+              Function body — <code>privileges</code> (string[]), <code>supportingData</code> (object), and <code>getFieldValue(name)</code> are in scope. Must <code>return</code> a boolean.
+            </small>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dws-dialog-footer">
+      <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+      <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the field stays interactive. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

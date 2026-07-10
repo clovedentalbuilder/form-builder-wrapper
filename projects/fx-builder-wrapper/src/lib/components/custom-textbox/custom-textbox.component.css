@@ -1,0 +1,47 @@
+.ctb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 12px;
+}
+.ctb-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.ctb-required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+.ctb-input {
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ctb-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+.ctb-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+.ctb-input--error {
+  border-color: #dc2626;
+}
+.ctb-help {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.ctb-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}

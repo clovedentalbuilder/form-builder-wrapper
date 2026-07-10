@@ -1,0 +1,411 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  styleClass="cfs-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="cfs-dialog-header">
+      <i class="pi pi-cog cfs-header-icon"></i>
+      <span class="cfs-dialog-title">Textbox Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="cfs-settings-body">
+
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="cfs-tabs">
+      <button type="button" class="cfs-tab" [class.cfs-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="cfs-tab" [class.cfs-tab--active]="activeTab === 'validations'" (click)="activeTab = 'validations'">
+        <i class="pi pi-check-square"></i> Validations
+      </button>
+      <button type="button" class="cfs-tab" [class.cfs-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+
+      <!-- Display Settings (ID + Name) -->
+      <div class="cfs-section">
+        <div class="cfs-section-header"><i class="pi pi-hashtag"></i><span>Display Settings</span></div>
+        <div class="cfs-section-body">
+          <div class="cfs-id-row" *ngIf="fxData?.id">
+            <span class="cfs-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+            <span class="cfs-id-value">{{ fxData!.id }}</span>
+          </div>
+
+          <div class="cfs-field">
+            <label class="cfs-label">
+              Name <span class="cfs-required-star">*</span>
+              <span class="cfs-name-hint">used to identify this component (e.g. first_name)</span>
+            </label>
+            <input pInputText formControlName="name" placeholder="e.g. first_name" class="cfs-input" />
+            <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="cfs-field-error">Name is required.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Basic -->
+      <div class="cfs-section">
+        <div class="cfs-section-header"><i class="pi pi-pencil"></i><span>Basic</span></div>
+        <div class="cfs-section-body">
+          <div class="cfs-field">
+            <label class="cfs-label">Label</label>
+            <input pInputText formControlName="label" placeholder="e.g. First Name" class="cfs-input" />
+          </div>
+          <div class="cfs-field">
+            <label class="cfs-label">Placeholder</label>
+            <input pInputText formControlName="placeholder" placeholder="e.g. Enter first name" class="cfs-input" />
+          </div>
+          <div class="cfs-field">
+            <label class="cfs-label">Help Text</label>
+            <input pInputText formControlName="helpText" class="cfs-input" />
+          </div>
+          <div class="cfs-field">
+            <label class="cfs-label">Show In Listing</label>
+            <div class="cfs-radio-group">
+              <label class="cfs-radio-option"><input type="radio" formControlName="showInListing" value="true" /><span>Yes</span></label>
+              <label class="cfs-radio-option"><input type="radio" formControlName="showInListing" value="false" /><span>No</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Validations tab                        -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'validations'">
+
+      <!-- Validation -->
+      <div class="cfs-section">
+        <div class="cfs-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
+        <div class="cfs-section-body">
+          <div class="cfs-grid-2">
+            <div class="cfs-field">
+              <label class="cfs-label">Required</label>
+              <div class="cfs-radio-group">
+                <label class="cfs-radio-option"><input type="radio" formControlName="isRequired" value="true" /><span>Yes</span></label>
+                <label class="cfs-radio-option"><input type="radio" formControlName="isRequired" value="false" /><span>No</span></label>
+              </div>
+            </div>
+            <div class="cfs-field" *ngIf="settingsForm.value.isRequired === 'true'">
+              <label class="cfs-label">Required Message</label>
+              <input pInputText formControlName="requiredMessage" class="cfs-input" />
+            </div>
+          </div>
+
+          <div class="cfs-grid-2">
+            <div class="cfs-field">
+              <label class="cfs-label">Min Length</label>
+              <input pInputText type="number" formControlName="minLength" class="cfs-input" />
+            </div>
+            <div class="cfs-field">
+              <label class="cfs-label">Min Length Message</label>
+              <input pInputText formControlName="minLengthMessage" class="cfs-input" />
+            </div>
+          </div>
+
+          <div class="cfs-field">
+            <label class="cfs-label">Max Length</label>
+            <input pInputText type="number" formControlName="maxLength" class="cfs-input" />
+            <small class="cfs-hint">Typing is capped at this length, so no error message is needed.</small>
+          </div>
+
+          <div class="cfs-grid-2">
+            <div class="cfs-field">
+              <label class="cfs-label">Pattern (Regex)</label>
+              <input pInputText formControlName="pattern" placeholder="e.g. ^[a-zA-Z]+$" class="cfs-input" />
+            </div>
+            <div class="cfs-field">
+              <label class="cfs-label">Pattern Message</label>
+              <input pInputText formControlName="patternMessage" class="cfs-input" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visibility -->
+      <div class="cfs-section">
+        <div class="cfs-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+        <div class="cfs-section-body">
+          <!-- Privilege -->
+          <div class="cfs-subsection">
+            <div class="cfs-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="cfs-add-btn" (click)="addCondition(visibilityPrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cfs-conditions" *ngIf="visibilityPrivilegeConditions.length">
+              <div class="cfs-condition-row cfs-condition-row--privilege" *ngFor="let cond of visibilityPrivilegeConditions; let i = index">
+                <label class="cfs-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cfs-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="cfs-input" />
+                <button type="button" class="cfs-condition-remove" (click)="removeCondition(visibilityPrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cfs-empty-hint" *ngIf="!visibilityPrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="cfs-subsection">
+            <div class="cfs-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="cfs-add-btn" (click)="addCondition(visibilitySupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cfs-conditions" *ngIf="visibilitySupportingDataConditions.length">
+              <div class="cfs-condition-row cfs-condition-row--triple" *ngFor="let cond of visibilitySupportingDataConditions; let i = index">
+                <label class="cfs-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="cfs-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cfs-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cfs-input" />
+                <button type="button" class="cfs-condition-remove" (click)="removeCondition(visibilitySupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cfs-empty-hint" *ngIf="!visibilitySupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="cfs-subsection">
+            <div class="cfs-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="cfs-add-btn" (click)="addCondition(visibilityFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cfs-conditions" *ngIf="visibilityFieldConditions.length">
+              <div class="cfs-condition-row cfs-condition-row--triple" *ngFor="let cond of visibilityFieldConditions; let i = index">
+                <label class="cfs-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="cfs-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cfs-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cfs-input" />
+                <button type="button" class="cfs-condition-remove" (click)="removeCondition(visibilityFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cfs-empty-hint" *ngIf="!visibilityFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="cfs-hint">Visible when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always visible.</small>
+        </div>
+      </div>
+
+      <!-- Enable / Disable -->
+      <div class="cfs-section">
+        <div class="cfs-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+        <div class="cfs-section-body">
+          <!-- Privilege -->
+          <div class="cfs-subsection">
+            <div class="cfs-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="cfs-add-btn" (click)="addCondition(enablePrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cfs-conditions" *ngIf="enablePrivilegeConditions.length">
+              <div class="cfs-condition-row cfs-condition-row--privilege" *ngFor="let cond of enablePrivilegeConditions; let i = index">
+                <label class="cfs-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cfs-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="cfs-input" />
+                <button type="button" class="cfs-condition-remove" (click)="removeCondition(enablePrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cfs-empty-hint" *ngIf="!enablePrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="cfs-subsection">
+            <div class="cfs-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="cfs-add-btn" (click)="addCondition(enableSupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cfs-conditions" *ngIf="enableSupportingDataConditions.length">
+              <div class="cfs-condition-row cfs-condition-row--triple" *ngFor="let cond of enableSupportingDataConditions; let i = index">
+                <label class="cfs-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="cfs-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cfs-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cfs-input" />
+                <button type="button" class="cfs-condition-remove" (click)="removeCondition(enableSupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cfs-empty-hint" *ngIf="!enableSupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="cfs-subsection">
+            <div class="cfs-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="cfs-add-btn" (click)="addCondition(enableFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cfs-conditions" *ngIf="enableFieldConditions.length">
+              <div class="cfs-condition-row cfs-condition-row--triple" *ngFor="let cond of enableFieldConditions; let i = index">
+                <label class="cfs-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="cfs-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cfs-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cfs-input" />
+                <button type="button" class="cfs-condition-remove" (click)="removeCondition(enableFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cfs-empty-hint" *ngIf="!enableFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="cfs-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="cfs-section">
+        <div class="cfs-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="cfs-section-body">
+
+          <div class="cfs-import-tabs">
+            <button type="button" class="cfs-import-tab" [class.cfs-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="cfs-import-tab" [class.cfs-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="cfs-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload cfs-drop-icon"></i>
+                <span class="cfs-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file cfs-drop-icon cfs-drop-icon--ready"></i>
+                <span class="cfs-drop-label cfs-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="cfs-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="cfs-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "name": "field_name", "label": "First Name", "placeholder": "...", ... }'
+                class="cfs-input cfs-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="cfs-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="cfs-import-apply-row">
+            <span class="cfs-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites the Basic Config and Validations tabs (not saved until you click Save Settings).</span>
+            <button type="button" class="cfs-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="cfs-how-to-card">
+            <div class="cfs-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="cfs-how-to-step"><span class="cfs-step-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="cfs-how-to-step"><span class="cfs-step-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="cfs-how-to-step"><span class="cfs-step-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="cfs-dialog-footer cfs-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="cfs-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the field stays interactive. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

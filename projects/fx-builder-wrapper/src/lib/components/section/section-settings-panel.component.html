@@ -1,0 +1,350 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  styleClass="sec-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="sec-dialog-header">
+      <i class="pi pi-cog sec-header-icon"></i>
+      <span class="sec-dialog-title">Section Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="sec-settings-body">
+
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="sec-tabs">
+      <button type="button" class="sec-tab" [class.sec-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="sec-tab" [class.sec-tab--active]="activeTab === 'validations'" (click)="activeTab = 'validations'">
+        <i class="pi pi-check-square"></i> Validations
+      </button>
+      <button type="button" class="sec-tab" [class.sec-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+      <div class="sec-section">
+        <div class="sec-section-header"><i class="pi pi-sliders-h"></i><span>Basic</span></div>
+        <div class="sec-section-body">
+          <div class="sec-grid-2">
+            <div class="sec-field">
+              <label class="sec-label">Section Title</label>
+              <input pInputText formControlName="heading" placeholder="e.g. Basic Info" class="sec-input" />
+            </div>
+            <div class="sec-field">
+              <label class="sec-label">Columns</label>
+              <input pInputText type="number" formControlName="columns" min="1" max="4" class="sec-input" />
+            </div>
+          </div>
+          <div class="sec-field">
+            <label class="sec-label">Subtitle</label>
+            <input pInputText formControlName="subtitle" placeholder="e.g. Core identity & pricing" class="sec-input" />
+          </div>
+          <div class="sec-field">
+            <label class="sec-label">Anchor Key</label>
+            <input pInputText formControlName="anchorKey" placeholder="e.g. basic-info" class="sec-input" />
+            <small class="sec-hint">Stable id the Stepper targets for scroll. Falls back to the title if blank.</small>
+          </div>
+          <div class="sec-field">
+            <label class="sec-label">Show In Listing</label>
+            <div class="sec-radio-group">
+              <label class="sec-radio-option"><input type="radio" formControlName="showInListing" value="true" /><span>Yes</span></label>
+              <label class="sec-radio-option"><input type="radio" formControlName="showInListing" value="false" /><span>No</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Validations tab                        -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'validations'">
+
+      <!-- Visibility -->
+      <div class="sec-section">
+        <div class="sec-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+        <div class="sec-section-body">
+
+          <!-- Privilege -->
+          <div class="sec-subsection">
+            <div class="sec-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="sec-add-btn" (click)="addCondition(visibilityPrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="sec-conditions" *ngIf="visibilityPrivilegeConditions.length">
+              <div class="sec-condition-row sec-condition-row--privilege" *ngFor="let cond of visibilityPrivilegeConditions; let i = index">
+                <label class="sec-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="sec-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="sec-input" />
+                <button type="button" class="sec-condition-remove" (click)="removeCondition(visibilityPrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="sec-empty-hint" *ngIf="!visibilityPrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="sec-subsection">
+            <div class="sec-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="sec-add-btn" (click)="addCondition(visibilitySupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="sec-conditions" *ngIf="visibilitySupportingDataConditions.length">
+              <div class="sec-condition-row sec-condition-row--triple" *ngFor="let cond of visibilitySupportingDataConditions; let i = index">
+                <label class="sec-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="sec-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="sec-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="sec-input" />
+                <button type="button" class="sec-condition-remove" (click)="removeCondition(visibilitySupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="sec-empty-hint" *ngIf="!visibilitySupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="sec-subsection">
+            <div class="sec-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="sec-add-btn" (click)="addCondition(visibilityFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="sec-conditions" *ngIf="visibilityFieldConditions.length">
+              <div class="sec-condition-row sec-condition-row--triple" *ngFor="let cond of visibilityFieldConditions; let i = index">
+                <label class="sec-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="sec-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="sec-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="sec-input" />
+                <button type="button" class="sec-condition-remove" (click)="removeCondition(visibilityFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="sec-empty-hint" *ngIf="!visibilityFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="sec-hint">Visible when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always visible.</small>
+        </div>
+      </div>
+
+      <!-- Enable / Disable -->
+      <div class="sec-section">
+        <div class="sec-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+        <div class="sec-section-body">
+
+          <!-- Privilege -->
+          <div class="sec-subsection">
+            <div class="sec-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="sec-add-btn" (click)="addCondition(enablePrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="sec-conditions" *ngIf="enablePrivilegeConditions.length">
+              <div class="sec-condition-row sec-condition-row--privilege" *ngFor="let cond of enablePrivilegeConditions; let i = index">
+                <label class="sec-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="sec-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="sec-input" />
+                <button type="button" class="sec-condition-remove" (click)="removeCondition(enablePrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="sec-empty-hint" *ngIf="!enablePrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="sec-subsection">
+            <div class="sec-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="sec-add-btn" (click)="addCondition(enableSupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="sec-conditions" *ngIf="enableSupportingDataConditions.length">
+              <div class="sec-condition-row sec-condition-row--triple" *ngFor="let cond of enableSupportingDataConditions; let i = index">
+                <label class="sec-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="sec-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="sec-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="sec-input" />
+                <button type="button" class="sec-condition-remove" (click)="removeCondition(enableSupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="sec-empty-hint" *ngIf="!enableSupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="sec-subsection">
+            <div class="sec-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="sec-add-btn" (click)="addCondition(enableFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="sec-conditions" *ngIf="enableFieldConditions.length">
+              <div class="sec-condition-row sec-condition-row--triple" *ngFor="let cond of enableFieldConditions; let i = index">
+                <label class="sec-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="sec-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="sec-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="sec-input" />
+                <button type="button" class="sec-condition-remove" (click)="removeCondition(enableFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="sec-empty-hint" *ngIf="!enableFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="sec-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="sec-section">
+        <div class="sec-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="sec-section-body">
+
+          <div class="sec-import-tabs">
+            <button type="button" class="sec-import-tab" [class.sec-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="sec-import-tab" [class.sec-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="sec-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload sec-drop-icon"></i>
+                <span class="sec-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file sec-drop-icon sec-drop-icon--ready"></i>
+                <span class="sec-drop-label sec-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="sec-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="sec-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "heading": "Basic Info", "subtitle": "...", "columns": 2, ... }'
+                class="sec-input sec-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="sec-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="sec-import-apply-row">
+            <span class="sec-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites the Basic Config and Validations tabs (not saved until you click Save Settings).</span>
+            <button type="button" class="sec-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="sec-how-to-card">
+            <div class="sec-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="sec-how-to-step"><span class="sec-step-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="sec-how-to-step"><span class="sec-step-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="sec-how-to-step"><span class="sec-step-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="sec-dialog-footer sec-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="sec-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the
+     drop zone / child fields inside stay interactive; only the toolbar is clickable. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

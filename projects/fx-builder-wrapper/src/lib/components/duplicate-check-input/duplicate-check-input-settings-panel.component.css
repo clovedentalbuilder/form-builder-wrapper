@@ -1,0 +1,282 @@
+/* ── Builder chrome ── (non-blocking so the field stays usable) */
+lib-duplicate-check-input-settings-panel .fx-element {
+  position: relative;
+  display: block;
+}
+lib-duplicate-check-input-settings-panel .fx-element .fx-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay {
+  opacity: 1;
+}
+lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 25px;
+  pointer-events: auto;
+}
+
+/* ── Dialog chrome (self-contained — no PrimeNG theme is loaded globally) ── */
+.dcs-settings-dialog.p-dialog {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+}
+.dcs-settings-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  padding: 0.9rem 1.25rem;
+  border-bottom: none;
+}
+.dcs-settings-dialog .p-dialog-title {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.dcs-settings-dialog .p-dialog-header-icon {
+  color: rgba(255, 255, 255, 0.75);
+  border-radius: 6px;
+}
+.dcs-settings-dialog .p-dialog-header-icon:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.dcs-settings-dialog .p-dialog-content {
+  padding: 1.125rem;
+  background: #f1f5f9;
+}
+.dcs-settings-dialog .p-dialog-footer {
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.75rem 1.125rem;
+}
+.dcs-settings-dialog .p-dialog-footer .p-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  border: 1.5px solid transparent;
+}
+.dcs-settings-dialog .p-dialog-footer .p-button.p-button-outlined,
+.dcs-settings-dialog .p-dialog-footer .p-button.p-button-secondary {
+  background: #fff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+.dcs-settings-dialog .p-dialog-footer .p-button.p-button-outlined:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+.dcs-settings-dialog .p-dialog-footer .p-button.p-button-primary {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+.dcs-settings-dialog .p-dialog-footer .p-button.p-button-primary:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+}
+
+/* ── Dialog header (custom content) ── */
+.dcs-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.dcs-header-icon {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+}
+.dcs-dialog-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ── Body ── */
+.dcs-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.dcs-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.dcs-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: #eff6ff;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #dbeafe;
+}
+.dcs-section-header i {
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+.dcs-section-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.dcs-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+  align-items: start;
+}
+.dcs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.dcs-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+}
+.dcs-input.p-inputtext,
+.dcs-input {
+  font-size: 0.85rem;
+  border-radius: 7px;
+  border: 1px solid #d1d5db;
+  padding: 0.45rem 0.7rem;
+  width: 100%;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dcs-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+.dcs-hint {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+.dcs-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.dcs-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #374151;
+  cursor: pointer;
+}
+.dcs-radio-option input[type='radio'] {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  cursor: pointer;
+}
+.dcs-conditions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.dcs-condition-row {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+.dcs-code {
+  font-family: 'Cascadia Code', 'Courier New', monospace;
+  font-size: 0.78rem;
+  resize: vertical;
+}
+.dcs-condition-remove {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.dcs-condition-remove:hover {
+  background: #fee2e2;
+}
+.dcs-condition-add {
+  align-self: flex-start;
+  border: 1px dashed #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 7px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dcs-condition-add:hover {
+  background: #dbeafe;
+}
+.dcs-required-star { color: #ef4444; font-weight: 700; margin-left: 2px; }
+.dcs-name-hint      { font-size: 0.68rem; font-weight: 400; color: #9ca3af; font-style: italic; margin-left: 0.4rem; }
+.dcs-id-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+.dcs-id-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.dcs-id-badge i { font-size: 0.65rem; }
+.dcs-id-value {
+  font-size: 0.72rem;
+  font-family: 'Courier New', Courier, monospace;
+  color: #334155;
+  word-break: break-all;
+}
+.dcs-field-error {
+  font-size: 0.72rem;
+  color: #b91c1c;
+  margin-top: 0.1rem;
+}
+.dcs-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}

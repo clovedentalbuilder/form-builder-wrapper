@@ -1,0 +1,397 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '620px' }"
+  styleClass="dcs-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="dcs-dialog-header">
+      <i class="pi pi-cog dcs-header-icon"></i>
+      <span class="dcs-dialog-title">Duplicate Check Input Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="dcs-settings-body">
+    <!-- Display Settings (ID + Name) -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-sliders-h"></i><span>Display Settings</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-id-row" *ngIf="fxData?.id">
+          <span class="dcs-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+          <span class="dcs-id-value">{{ fxData!.id }}</span>
+        </div>
+
+        <div class="dcs-field">
+          <label class="dcs-label">
+            Name <span class="dcs-required-star">*</span>
+            <span class="dcs-name-hint">used to identify this component (e.g. email)</span>
+          </label>
+          <input pInputText formControlName="name" placeholder="e.g. email" class="dcs-input" />
+          <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="dcs-field-error">Name is required.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-sliders-h"></i><span>Basic</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-field">
+          <label class="dcs-label">Label</label>
+          <input pInputText formControlName="label" placeholder="e.g. Email Address" class="dcs-input" />
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Placeholder</label>
+          <input pInputText formControlName="placeholder" class="dcs-input" />
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Help Text</label>
+          <input pInputText formControlName="helpText" class="dcs-input" />
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Custom Class Name</label>
+          <input pInputText formControlName="customClass" class="dcs-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Check Mode -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-search"></i><span>Check Mode</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-field">
+          <label class="dcs-label">Mode</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="checkMode" value="auto" /><span>Auto (debounce as you type)</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="checkMode" value="manual" /><span>Manual (search button)</span></label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.value.checkMode === 'auto'">
+          <div class="dcs-grid-2">
+            <div class="dcs-field">
+              <label class="dcs-label">Debounce Time (ms)</label>
+              <input pInputText type="number" formControlName="debounceTime" class="dcs-input" />
+            </div>
+            <div class="dcs-field">
+              <label class="dcs-label">Min Characters Before Checking</label>
+              <input pInputText type="number" formControlName="minCharsToCheck" class="dcs-input" />
+            </div>
+          </div>
+          <small class="dcs-hint">Waits for the user to stop typing (debounce) and only checks the API when the value actually changed (distinct).</small>
+        </ng-container>
+
+        <ng-container *ngIf="settingsForm.value.checkMode === 'manual'">
+          <div class="dcs-field">
+            <label class="dcs-label">Search Button Label</label>
+            <input pInputText formControlName="searchButtonLabel" class="dcs-input" />
+          </div>
+          <small class="dcs-hint">The API is only called when the user clicks the search button next to the input.</small>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- API -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-cloud"></i><span>API</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-grid-2">
+          <div class="dcs-field">
+            <label class="dcs-label">Service</label>
+            <select formControlName="serviceName" class="dcs-input">
+              <option value="">Select service</option>
+              <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+          <div class="dcs-field">
+            <label class="dcs-label">HTTP Method</label>
+            <div class="dcs-radio-group">
+              <label class="dcs-radio-option"><input type="radio" formControlName="httpMethod" value="GET" /><span>GET</span></label>
+              <label class="dcs-radio-option"><input type="radio" formControlName="httpMethod" value="POST" /><span>POST</span></label>
+            </div>
+          </div>
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">API URL</label>
+          <input pInputText formControlName="apiUrl" placeholder="e.g. /users/exists" class="dcs-input" />
+        </div>
+        <div class="dcs-grid-2">
+          <div class="dcs-field">
+            <label class="dcs-label">Param / Body Key</label>
+            <input pInputText formControlName="paramKey" placeholder="e.g. email" class="dcs-input" />
+            <small class="dcs-hint">Key the typed value is sent under (query param for GET, body field for POST).</small>
+          </div>
+          <div class="dcs-field">
+            <label class="dcs-label">Response Path</label>
+            <input pInputText formControlName="responsePath" placeholder="e.g. data.exists" class="dcs-input" />
+            <small class="dcs-hint">Dot path into the JSON response holding the exists flag.</small>
+          </div>
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Extra Static Params (JSON)</label>
+          <input pInputText formControlName="extraParams" placeholder='e.g. {"tenantId": "123"}' class="dcs-input" />
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Result Meaning</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="invertResult" value="false" /><span>Truthy = duplicate exists</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="invertResult" value="true" /><span>Truthy = available (invert)</span></label>
+          </div>
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">On API Error</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="onApiError" value="allow" /><span>Allow (treat as valid)</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="onApiError" value="block" /><span>Block (mark invalid)</span></label>
+          </div>
+        </div>
+        <div class="dcs-field" *ngIf="settingsForm.value.onApiError === 'block'">
+          <label class="dcs-label">API Error Message</label>
+          <input pInputText formControlName="apiErrorMessage" class="dcs-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-comment"></i><span>Messages</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-field">
+          <label class="dcs-label">Duplicate Message</label>
+          <input pInputText formControlName="duplicateMessage" class="dcs-input" />
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Checking Message</label>
+          <input pInputText formControlName="checkingMessage" class="dcs-input" />
+        </div>
+        <div class="dcs-field">
+          <label class="dcs-label">Show Available Message</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="showAvailableMessage" value="true" /><span>Yes</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="showAvailableMessage" value="false" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="dcs-field" *ngIf="settingsForm.value.showAvailableMessage === 'true'">
+          <label class="dcs-label">Available Message</label>
+          <input pInputText formControlName="availableMessage" class="dcs-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-field">
+          <label class="dcs-label">Required</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="isRequired" value="true" /><span>Yes</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="isRequired" value="false" /><span>No</span></label>
+          </div>
+        </div>
+        <div class="dcs-field" *ngIf="settingsForm.value.isRequired === 'true'">
+          <label class="dcs-label">Required Message</label>
+          <input pInputText formControlName="requiredMessage" class="dcs-input" />
+        </div>
+
+        <div class="dcs-grid-2">
+          <div class="dcs-field">
+            <label class="dcs-label">Min Length</label>
+            <input pInputText type="number" formControlName="minLength" class="dcs-input" />
+          </div>
+          <div class="dcs-field">
+            <label class="dcs-label">Max Length</label>
+            <input pInputText type="number" formControlName="maxLength" class="dcs-input" />
+          </div>
+        </div>
+        <div class="dcs-grid-2" *ngIf="settingsForm.value.minLength || settingsForm.value.maxLength">
+          <div class="dcs-field">
+            <label class="dcs-label">Min Length Message</label>
+            <input pInputText formControlName="minLengthMessage" class="dcs-input" />
+          </div>
+          <div class="dcs-field">
+            <label class="dcs-label">Max Length Message</label>
+            <input pInputText formControlName="maxLengthMessage" class="dcs-input" />
+          </div>
+        </div>
+
+        <div class="dcs-field">
+          <label class="dcs-label">Pattern (Regex)</label>
+          <input pInputText formControlName="pattern" placeholder="e.g. ^[a-zA-Z0-9]+$" class="dcs-input" />
+        </div>
+        <div class="dcs-field" *ngIf="settingsForm.value.pattern">
+          <label class="dcs-label">Pattern Message</label>
+          <input pInputText formControlName="patternMessage" class="dcs-input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Visibility -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-field">
+          <label class="dcs-label">Driven By</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="visibilityUseCode" value="false" /><span>Conditions (no-code)</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="visibilityUseCode" value="true" /><span>Custom Code</span></label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.value.visibilityUseCode === 'false'">
+          <div class="dcs-field" *ngIf="visibilityConditions.length > 1">
+            <label class="dcs-label">Match</label>
+            <div class="dcs-radio-group">
+              <label class="dcs-radio-option"><input type="radio" formControlName="visibilityConditionsMatch" value="any" /><span>Any condition</span></label>
+              <label class="dcs-radio-option"><input type="radio" formControlName="visibilityConditionsMatch" value="all" /><span>All conditions</span></label>
+            </div>
+          </div>
+
+          <div class="dcs-conditions">
+            <div class="dcs-condition-row" *ngFor="let cond of visibilityConditions; let i = index">
+              <select [(ngModel)]="cond.source" [ngModelOptions]="{standalone: true}" class="dcs-input">
+                <option value="privilege">Privilege</option>
+                <option value="supportingData">Supporting Data</option>
+                <option value="field">Another Field's Value</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder(cond.source)" class="dcs-input" />
+              <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="dcs-input">
+                <option value="equals">Equals</option>
+                <option value="notEquals">Not Equals</option>
+                <option value="in">In (comma list)</option>
+                <option value="notIn">Not In (comma list)</option>
+                <option value="truthy">Is Truthy / Has It</option>
+                <option value="falsy">Is Falsy / Doesn't Have It</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="dcs-input" />
+              <button type="button" class="dcs-condition-remove" (click)="removeCondition(visibilityConditions, i)" title="Remove condition">&times;</button>
+            </div>
+            <button type="button" class="dcs-condition-add" (click)="addCondition(visibilityConditions)">+ Add Condition</button>
+          </div>
+          <small class="dcs-hint">Visible when the condition(s) above match. Mix privilege, supporting-data, and other-field conditions freely — they combine via Match above.</small>
+        </ng-container>
+
+        <ng-container *ngIf="settingsForm.value.visibilityUseCode === 'true'">
+          <div class="dcs-field">
+            <label class="dcs-label">JavaScript Code</label>
+            <textarea
+              formControlName="visibilityCode"
+              class="dcs-input dcs-code"
+              rows="5"
+              placeholder="return privileges.includes('htr:trn:off') || supportingData.isVip === true || getFieldValue('otherField') === 'x';"
+            ></textarea>
+            <small class="dcs-hint">
+              Function body — <code>privileges</code> (string[]), <code>supportingData</code> (object), and <code>getFieldValue(name)</code> are in scope. Must <code>return</code> a boolean.
+            </small>
+          </div>
+        </ng-container>
+
+        <div class="dcs-field">
+          <label class="dcs-label">When Hidden</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="excludeControlsWhenHidden" value="false" /><span>Keep value (include in form)</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="excludeControlsWhenHidden" value="true" /><span>Exclude from form</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enable / Disable -->
+    <div class="dcs-section">
+      <div class="dcs-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+      <div class="dcs-section-body">
+        <div class="dcs-field">
+          <label class="dcs-label">Driven By</label>
+          <div class="dcs-radio-group">
+            <label class="dcs-radio-option"><input type="radio" formControlName="enableUseCode" value="false" /><span>Conditions (no-code)</span></label>
+            <label class="dcs-radio-option"><input type="radio" formControlName="enableUseCode" value="true" /><span>Custom Code</span></label>
+          </div>
+        </div>
+
+        <ng-container *ngIf="settingsForm.value.enableUseCode === 'false'">
+          <div class="dcs-field" *ngIf="enableConditions.length > 1">
+            <label class="dcs-label">Match</label>
+            <div class="dcs-radio-group">
+              <label class="dcs-radio-option"><input type="radio" formControlName="enableConditionsMatch" value="any" /><span>Any condition</span></label>
+              <label class="dcs-radio-option"><input type="radio" formControlName="enableConditionsMatch" value="all" /><span>All conditions</span></label>
+            </div>
+          </div>
+
+          <div class="dcs-conditions">
+            <div class="dcs-condition-row" *ngFor="let cond of enableConditions; let i = index">
+              <select [(ngModel)]="cond.source" [ngModelOptions]="{standalone: true}" class="dcs-input">
+                <option value="privilege">Privilege</option>
+                <option value="supportingData">Supporting Data</option>
+                <option value="field">Another Field's Value</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder(cond.source)" class="dcs-input" />
+              <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="dcs-input">
+                <option value="equals">Equals</option>
+                <option value="notEquals">Not Equals</option>
+                <option value="in">In (comma list)</option>
+                <option value="notIn">Not In (comma list)</option>
+                <option value="truthy">Is Truthy / Has It</option>
+                <option value="falsy">Is Falsy / Doesn't Have It</option>
+              </select>
+              <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="dcs-input" />
+              <button type="button" class="dcs-condition-remove" (click)="removeCondition(enableConditions, i)" title="Remove condition">&times;</button>
+            </div>
+            <button type="button" class="dcs-condition-add" (click)="addCondition(enableConditions)">+ Add Condition</button>
+          </div>
+          <small class="dcs-hint">Editable when the condition(s) above match. Mix privilege, supporting-data, and other-field conditions freely — they combine via Match above.</small>
+        </ng-container>
+
+        <ng-container *ngIf="settingsForm.value.enableUseCode === 'true'">
+          <div class="dcs-field">
+            <label class="dcs-label">JavaScript Code</label>
+            <textarea
+              formControlName="enableCode"
+              class="dcs-input dcs-code"
+              rows="5"
+              placeholder="return privileges.includes('htr:trn:off') || supportingData.isVip === true || getFieldValue('otherField') === 'x';"
+            ></textarea>
+            <small class="dcs-hint">
+              Function body — <code>privileges</code> (string[]), <code>supportingData</code> (object), and <code>getFieldValue(name)</code> are in scope. Must <code>return</code> a boolean.
+            </small>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dcs-dialog-footer">
+      <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+      <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the field stays interactive. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

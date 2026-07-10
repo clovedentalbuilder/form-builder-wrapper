@@ -1,0 +1,43 @@
+<lib-duplicate-check-input-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
+  <div class="dci-field" [ngClass]="setting('customClass')">
+    <label class="dci-label" *ngIf="setting('label')">
+      {{ setting('label') }}
+      <span class="dci-required" *ngIf="setting('isRequired')">*</span>
+    </label>
+
+    <div class="dci-input-row">
+      <div class="dci-input-wrap">
+        <input
+          type="text"
+          class="dci-input"
+          [class.dci-input--error]="errorMessage"
+          [class.dci-input--success]="state === 'available' && !errorMessage"
+          [formControl]="control"
+          [placeholder]="setting('placeholder')"
+          [disabled]="fieldDisabled"
+          (blur)="control.markAsTouched()"
+        />
+        <i class="dci-spinner" *ngIf="isChecking"></i>
+      </div>
+
+      <button
+        type="button"
+        class="dci-search-btn"
+        *ngIf="checkMode === 'manual'"
+        [disabled]="fieldDisabled || isChecking || !control.value"
+        (click)="onSearchClick()"
+      >
+        {{ isChecking ? '...' : setting('searchButtonLabel') }}
+      </button>
+    </div>
+
+    <div class="dci-help" *ngIf="setting('helpText') && !errorMessage && !statusMessage">{{ setting('helpText') }}</div>
+    <div class="dci-status dci-status--checking" *ngIf="statusMessage && state === 'checking'">{{ statusMessage }}</div>
+    <div class="dci-status dci-status--success" *ngIf="statusMessage && state === 'available'">{{ statusMessage }}</div>
+    <div class="dci-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+</lib-duplicate-check-input-settings-panel>

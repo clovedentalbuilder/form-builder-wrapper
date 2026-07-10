@@ -1,0 +1,89 @@
+.img-upl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 12px;
+}
+.img-upl-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.img-upl-required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+.img-upl-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.img-upl-dropzone {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 84px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.img-upl-dropzone:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.img-upl-dropzone:hover svg rect,
+.img-upl-dropzone:hover svg circle,
+.img-upl-dropzone:hover svg path {
+  stroke: #3b82f6;
+  fill: #3b82f6;
+}
+.img-upl-dropzone-text {
+  font-weight: 500;
+}
+.img-upl-thumb {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+.img-upl-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  display: block;
+}
+.img-upl-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(15, 23, 42, 0.6);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.img-upl-remove:hover {
+  background: rgba(220, 38, 38, 0.85);
+}
+.img-upl-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}

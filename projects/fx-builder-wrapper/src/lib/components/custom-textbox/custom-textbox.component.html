@@ -1,0 +1,23 @@
+<lib-custom-textbox-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
+  <div class="ctb-field">
+    <label class="ctb-label" *ngIf="setting('label')">
+      {{ setting('label') }}
+      <span class="ctb-required" *ngIf="setting('isRequired')">*</span>
+    </label>
+    <input
+      type="text"
+      class="ctb-input"
+      [class.ctb-input--error]="errorMessage"
+      [formControl]="control"
+      [placeholder]="setting('placeholder')"
+      [disabled]="fieldDisabled"
+      [attr.maxlength]="setting('maxLength') || null"
+    />
+    <div class="ctb-help" *ngIf="setting('helpText') && !errorMessage">{{ setting('helpText') }}</div>
+    <div class="ctb-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+</lib-custom-textbox-settings-panel>

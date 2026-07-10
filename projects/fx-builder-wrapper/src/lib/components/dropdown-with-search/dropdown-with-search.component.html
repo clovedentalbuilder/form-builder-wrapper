@@ -1,12 +1,16 @@
-<fx-component [fxData]="fxData" #fxComponent>
+<lib-dropdown-with-search-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
   <div class="custom-dropdown" [ngClass]="setting('customClassSearch')" [class.dd--disabled]="isDisabled">
     <form [formGroup]="searchDropDownForm" class="flex gap-4 w-full">
       <div class="flex-1 relative">
         <label class="input-label dark:text-gray-300">
           {{ setting('select-label-search') }} <span class="field-required" *ngIf="isRequired">*</span>
         </label>
-        <p-dropdown [options]="options" formControlName="searchSelectedOption" [optionLabel]="setting('label-key-search')" [filter]="true" [showClear]="true" 
-          [placeholder]="setting('placeholderSearch')" class="multiselect" [optionValue]="setting('value-key-search')">
+        <p-dropdown [options]="options" formControlName="searchSelectedOption" [optionLabel]="setting('label-key-search')" [filter]="true" [showClear]="true"
+          [placeholder]="setting('placeholderSearch')" [disabled]="fieldDisabled" class="multiselect" [optionValue]="setting('value-key-search')">
 
           <!-- Custom Dropdown Icon -->
           <ng-template pTemplate="dropdownicon">
@@ -25,4 +29,4 @@
       </div>
     </form>
   </div>
-</fx-component>
+</lib-dropdown-with-search-settings-panel>

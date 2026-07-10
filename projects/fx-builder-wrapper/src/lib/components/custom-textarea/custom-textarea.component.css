@@ -1,0 +1,49 @@
+.cta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 12px;
+}
+.cta-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.cta-required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+.cta-input {
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.cta-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+.cta-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+.cta-input--error {
+  border-color: #dc2626;
+}
+.cta-help {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.cta-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
