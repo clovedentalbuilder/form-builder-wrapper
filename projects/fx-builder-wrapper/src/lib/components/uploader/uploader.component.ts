@@ -483,7 +483,7 @@ ngAfterViewInit(): void {
         return this.isUploaderRequired ? { required: true } : null;
       }
       const allValid = files.every(
-        (f: any) => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+        (f: any) => f.categoryId?.toString().trim()
       );
       return allValid ? null : { requiredMeta: true };
     });
@@ -658,7 +658,7 @@ ngAfterViewInit(): void {
   private revalidateMeta(): void {
     if (this.uploadedFiles.length === 0) return;
     const allValid = this.uploadedFiles.every(
-      f => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+      f => f.categoryId?.toString().trim()
     );
     if (!allValid) {
       this.uploadFileControl.setErrors({ requiredMeta: true });
