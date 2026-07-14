@@ -1,4 +1,4 @@
-<fx-component [fxData]="fxData" #base>
+<lib-stepper-settings-panel [fxData]="fxData" (configuration)="onSettingsChanged($event)" #base>
   <div class="lib-stepper" [ngClass]="setting('stepperClass')">
     <div class="lib-stepper__track">
       <div class="lib-stepper__step"
@@ -10,4 +10,4 @@
       </div>
     </div>
   </div>
-</fx-component>
+</lib-stepper-settings-panel>

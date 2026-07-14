@@ -5,26 +5,43 @@ import { FxComponent, FxMode } from '@instantsys-labs/fx';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { Condition, ConditionSource, parseConditions } from '../shared/applicability';
+import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
 
 export interface ManualOption {
   option: string;
   value: string;
 }
 
+type SettingsTab = 'basic' | 'validations' | 'import';
+type ImportMode = 'upload' | 'paste';
+
 /**
  * Custom settings panel for the (pre-existing, production) Dropdown with
- * Search field — same chrome pattern as Section/Repeatable Group/custom
- * Textbox. Replaces the generic <fx-component> settings dialog.
+ * Search field — same chrome/tab pattern as lib-custom-textarea (Basic
+ * Config / Validations / Import tabs, three-way-split Privilege/Supporting
+ * Data/Other Field's Value condition sections, Export Config in the footer).
  *
  * BACKWARD COMPATIBILITY: every existing setting key (itemsSearchOption,
  * select-label-search, label-key-search, value-key-search,
  * searchSelectOptionAPIURL, serviceSearchName, isSearchRequired,
- * multiErrorSearch, placeholderSearch, customClassSearch, plus the legacy
- * disableWhenControl/disableWhenValue conditional-disable pair) is unchanged —
- * only the editing UI moved here. The legacy "Disable When" rule is kept
- * fully editable below (still applied at runtime via ConditionalDisableController,
- * OR'd with the new Enable/Disable gate) so already-configured fields keep working.
+ * multiErrorSearch, placeholderSearch, customClassSearch) is unchanged.
+ *
+ * This panel deliberately does NOT expose (read, write, or show a control
+ * for) the legacy disableWhenControl/disableWhenValue pair, the Enable/
+ * Disable condition gate (enableUseCode/enableConditions/enableCode), or
+ * "Exclude Form Control When Hidden" (excludeControlsWhenHidden) — none are
+ * needed for this field. Crucially, this panel never WRITES those keys
+ * either, so any already-configured production field's values for them are
+ * left completely untouched (not reset/cleared) when re-saved through this
+ * dialog — DropdownWithSearchComponent's own settings()/ConditionalDisableController
+ * still declare and evaluate them at runtime exactly as before, only the
+ * editing UI is gone.
+ *
+ * "Enable Search" (isSearchEnabled) toggles the dropdown's built-in filter
+ * box — defaults to Yes (search visible), same Yes/No FxSelectSetting shape
+ * as isSearchRequired (a string, not FxToggleSetting, so a saved "No" isn't
+ * silently reverted back to the "Yes" class default by the fx library's
+ * deepMergeObjects — see DropdownWithSearchComponent.settings()).
  */
 @Component({
   selector: 'lib-dropdown-with-search-settings-panel',
@@ -40,9 +57,17 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
   visible = false;
   protected override readonly FxMode = FxMode;
 
+  activeTab: SettingsTab = 'basic';
+
   manualOptions: ManualOption[] = [];
-  visibilityConditions: Condition[] = [];
-  enableConditions: Condition[] = [];
+  visibilityPrivilegeConditions: Condition[] = [];
+  visibilitySupportingDataConditions: Condition[] = [];
+  visibilityFieldConditions: Condition[] = [];
+
+  importMode: ImportMode = 'upload';
+  jsonInput = '';
+  jsonImportError = '';
+  uploadedFileName = '';
 
   readonly serviceOptions = [
     { label: 'User Service', value: 'user_service' },
@@ -57,6 +82,7 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
     valueKeySearch: new FormControl<string>('value'),
     placeholderSearch: new FormControl<string>('Select'),
     customClassSearch: new FormControl<string>(''),
+    isSearchEnabled: new FormControl<'true' | 'false'>('true'),
 
     optionsSource: new FormControl<'manual' | 'api'>('manual'),
     searchSelectOptionAPIURL: new FormControl<string>(''),
@@ -65,18 +91,8 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
     isSearchRequired: new FormControl<'true' | 'false'>('true'),
     multiErrorSearch: new FormControl<string>('Please select'),
 
-    // Legacy conditional-disable (pre-existing) — kept editable for backward compat.
-    disableWhenControl: new FormControl<string>(''),
-    disableWhenValue: new FormControl<string>(''),
-
     visibilityUseCode: new FormControl<'true' | 'false'>('false'),
-    visibilityConditionsMatch: new FormControl<'any' | 'all'>('any'),
     visibilityCode: new FormControl<string>(''),
-    excludeControlsWhenHidden: new FormControl<'true' | 'false'>('false'),
-
-    enableUseCode: new FormControl<'true' | 'false'>('false'),
-    enableConditionsMatch: new FormControl<'any' | 'all'>('any'),
-    enableCode: new FormControl<string>(''),
   });
 
   /** Strips the auto-appended id fragment (e.g. "-ae7f1950") from a freshly-dropped field's name for editing. */
@@ -94,6 +110,7 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
       valueKeySearch: this.read('value-key-search', 'value'),
       placeholderSearch: this.read('placeholderSearch', 'Select'),
       customClassSearch: this.read('customClassSearch', ''),
+      isSearchEnabled: this.read('isSearchEnabled', 'true'),
 
       optionsSource: apiUrl ? 'api' : 'manual',
       searchSelectOptionAPIURL: apiUrl,
@@ -102,21 +119,22 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
       isSearchRequired: this.read('isSearchRequired', 'true'),
       multiErrorSearch: this.read('multiErrorSearch', 'Please select'),
 
-      disableWhenControl: this.read('disableWhenControl', ''),
-      disableWhenValue: this.read('disableWhenValue', ''),
-
       visibilityUseCode: this.read('visibilityUseCode', false) ? 'true' : 'false',
-      visibilityConditionsMatch: this.read('visibilityConditionsMatch', 'any'),
       visibilityCode: this.read('visibilityCode', ''),
-      excludeControlsWhenHidden: this.read('excludeControlsWhenHidden', false) ? 'true' : 'false',
-
-      enableUseCode: this.read('enableUseCode', false) ? 'true' : 'false',
-      enableConditionsMatch: this.read('enableConditionsMatch', 'any'),
-      enableCode: this.read('enableCode', ''),
     });
+
     this.manualOptions = this.readOptions('itemsSearchOption');
-    this.visibilityConditions = parseConditions(this.read('visibilityConditions', '[]'));
-    this.enableConditions = parseConditions(this.read('enableConditions', '[]'));
+
+    this.splitIntoSections(
+      parseConditions(this.read('visibilityConditions', '[]')),
+      (p, s, f) => { this.visibilityPrivilegeConditions = p; this.visibilitySupportingDataConditions = s; this.visibilityFieldConditions = f; },
+    );
+
+    this.activeTab = 'basic';
+    this.importMode = 'upload';
+    this.jsonInput = '';
+    this.jsonImportError = '';
+    this.uploadedFileName = '';
     this.visible = true;
   }
 
@@ -133,6 +151,7 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
     this.write('value-key-search', raw.valueKeySearch);
     this.write('placeholderSearch', raw.placeholderSearch);
     this.write('customClassSearch', raw.customClassSearch);
+    this.write('isSearchEnabled', raw.isSearchEnabled);
 
     this.write('searchSelectOptionAPIURL', raw.optionsSource === 'api' ? raw.searchSelectOptionAPIURL : '');
     this.write('serviceSearchName', raw.serviceSearchName);
@@ -141,19 +160,14 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
     this.write('isSearchRequired', raw.isSearchRequired);
     this.write('multiErrorSearch', raw.multiErrorSearch);
 
-    this.write('disableWhenControl', raw.disableWhenControl);
-    this.write('disableWhenValue', raw.disableWhenValue);
+    // Custom-code gating is hidden in this panel for now — force it off so re-saving
+    // an old field (that may have had it on) falls back to conditions-only.
+    this.write('visibilityUseCode', false);
+    this.write('visibilityCode', '');
+    this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 
-    this.write('visibilityUseCode', raw.visibilityUseCode === 'true');
-    this.write('visibilityConditionsMatch', raw.visibilityConditionsMatch);
-    this.write('visibilityCode', raw.visibilityCode);
-    this.write('visibilityConditions', JSON.stringify(this.cleanConditions(this.visibilityConditions)));
-    this.write('excludeControlsWhenHidden', raw.excludeControlsWhenHidden === 'true');
-
-    this.write('enableUseCode', raw.enableUseCode === 'true');
-    this.write('enableConditionsMatch', raw.enableConditionsMatch);
-    this.write('enableCode', raw.enableCode);
-    this.write('enableConditions', JSON.stringify(this.cleanConditions(this.enableConditions)));
+    // Legacy disableWhenControl/disableWhenValue, the Enable/Disable condition gate, and
+    // excludeControlsWhenHidden are intentionally never read or written here — see class doc.
 
     this.configuration.emit(raw);
     this.visible = false;
@@ -171,8 +185,8 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
     this.manualOptions.splice(index, 1);
   }
 
-  addCondition(list: Condition[]): void {
-    list.push({ source: 'supportingData', key: '', operator: 'equals', value: '' });
+  addCondition(list: Condition[], source: ConditionSource): void {
+    list.push({ source, key: '', operator: source === 'privilege' ? 'truthy' : 'equals', value: '', grouped: false });
   }
 
   removeCondition(list: Condition[], index: number): void {
@@ -181,19 +195,103 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
 
   conditionKeyPlaceholder(source: ConditionSource): string {
     switch (source) {
-      case 'privilege': return 'Privilege Name';
       case 'field': return 'Other Field Name';
       case 'supportingData':
       default: return 'Supporting Data Key';
     }
   }
 
+  // ── JSON import / export ─────────────────────────────────────────────────
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadedFileName = file.name;
+    this.jsonImportError = '';
+    const reader = new FileReader();
+    reader.onload = (e) => { this.jsonInput = (e.target?.result as string) ?? ''; };
+    reader.readAsText(file);
+  }
+
+  importFromJson(): void {
+    this.jsonImportError = '';
+    if (!this.jsonInput.trim()) {
+      this.jsonImportError = this.importMode === 'upload' ? 'Please select a .json file first.' : 'Please paste a JSON configuration.';
+      return;
+    }
+    let parsed: any;
+    try {
+      parsed = JSON.parse(this.jsonInput);
+    } catch {
+      this.jsonImportError = 'Invalid JSON — please check the format and try again.';
+      return;
+    }
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      this.jsonImportError = 'JSON must be a configuration object, not an array or primitive.';
+      return;
+    }
+
+    this.settingsForm.patchValue({
+      name: parsed.name ?? this.settingsForm.value.name,
+      selectLabelSearch: parsed.selectLabelSearch ?? '',
+      labelKeySearch: parsed.labelKeySearch ?? 'option',
+      valueKeySearch: parsed.valueKeySearch ?? 'value',
+      placeholderSearch: parsed.placeholderSearch ?? 'Select',
+      customClassSearch: parsed.customClassSearch ?? '',
+      isSearchEnabled: parsed.isSearchEnabled ?? 'true',
+
+      optionsSource: parsed.optionsSource ?? 'manual',
+      searchSelectOptionAPIURL: parsed.searchSelectOptionAPIURL ?? '',
+      serviceSearchName: parsed.serviceSearchName ?? '',
+
+      isSearchRequired: parsed.isSearchRequired ?? 'true',
+      multiErrorSearch: parsed.multiErrorSearch ?? 'Please select',
+    });
+
+    this.manualOptions = Array.isArray(parsed.manualOptions)
+      ? parsed.manualOptions.map((o: any) => ({ option: String(o?.option ?? ''), value: String(o?.value ?? '') }))
+      : this.manualOptions;
+
+    this.splitIntoSections(
+      Array.isArray(parsed.visibilityConditions) ? parsed.visibilityConditions : [],
+      (p, s, f) => { this.visibilityPrivilegeConditions = p; this.visibilitySupportingDataConditions = s; this.visibilityFieldConditions = f; },
+    );
+
+    this.activeTab = 'basic';
+    this.jsonInput = '';
+    this.uploadedFileName = '';
+    this.jsonImportError = '';
+  }
+
+  exportCurrentConfig(): void {
+    const raw = this.settingsForm.getRawValue();
+    const config = {
+      ...raw,
+      manualOptions: this.cleanOptions(this.manualOptions),
+      visibilityConditions: this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions),
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dropdown-with-search-${raw.name || 'export'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   private cleanOptions(list: ManualOption[]): ManualOption[] {
     return list.filter((o) => String(o?.option ?? '').trim() || String(o?.value ?? '').trim());
   }
 
-  private cleanConditions(list: Condition[]): Condition[] {
-    return list.filter((c) => String(c?.key ?? '').trim());
+  private splitIntoSections(list: Condition[], assign: (privilege: Condition[], supportingData: Condition[], field: Condition[]) => void): void {
+    const privilege = list.filter((c) => c?.source === 'privilege');
+    const supportingData = list.filter((c) => c?.source === 'supportingData');
+    const field = list.filter((c) => c?.source !== 'privilege' && c?.source !== 'supportingData');
+    assign(privilege, supportingData, field);
+  }
+
+  private combineSections(privilege: Condition[], supportingData: Condition[], field: Condition[]): Condition[] {
+    return [...privilege, ...supportingData, ...field].filter(isConditionConfigured);
   }
 
   /** itemsSearchOption stores its live list on `.options`, not `.value` — see class doc. */

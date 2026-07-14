@@ -333,3 +333,255 @@ lib-dropdown-with-search-settings-panel .fx-element:hover .fx-overlay .fx-action
   justify-content: flex-end;
   gap: 0.625rem;
 }
+.dws-dialog-footer--split {
+  justify-content: space-between;
+}
+.dws-footer-actions {
+  display: flex;
+  gap: 0.625rem;
+}
+
+/* ── Tab bar ── segmented-control track, active tab rendered as a gradient
+   pill matching the dialog header/primary-button gradient. ── */
+.dws-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: #eef1f6;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.3rem;
+}
+.dws-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.dws-tab i {
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+.dws-tab:hover:not(.dws-tab--active) {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+}
+.dws-tab--active {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.dws-tab--active i {
+  transform: scale(1.05);
+}
+.dws-tab:active {
+  transform: scale(0.97);
+}
+
+/* ── Condition subsections (Privilege / Supporting Data / Other Field's Value) ── */
+.dws-subsection {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.dws-subsection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+}
+.dws-subsection-header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dws-subsection-header i {
+  color: #3b82f6;
+  font-size: 0.75rem;
+}
+.dws-subsection > .dws-conditions,
+.dws-subsection > .dws-empty-hint {
+  padding: 0.65rem 0.75rem;
+}
+.dws-empty-hint {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+.dws-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px dashed #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 7px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dws-add-btn:hover {
+  background: #dbeafe;
+}
+.dws-condition-row--privilege {
+  grid-template-columns: auto 1fr 2fr auto;
+}
+.dws-condition-row--triple {
+  grid-template-columns: auto 1fr 1fr 1fr auto;
+}
+.dws-condition-and {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+.dws-condition-and input[type='checkbox'] {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  cursor: pointer;
+}
+.dws-field--divider {
+  padding-top: 0.875rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ── Import tab ── */
+.dws-import-tabs {
+  display: flex;
+  gap: 0.4rem;
+}
+.dws-import-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.dws-import-tab--active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+.dws-file-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 1.5rem;
+  cursor: pointer;
+  text-align: center;
+  background: #f8fafc;
+  transition: border-color 0.15s, background 0.15s;
+}
+.dws-file-drop-zone:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+.dws-drop-icon {
+  font-size: 1.75rem;
+  color: #94a3b8;
+}
+.dws-drop-icon--ready {
+  color: #16a34a;
+}
+.dws-drop-label {
+  font-size: 0.82rem;
+  color: #475569;
+}
+.dws-drop-label--ready {
+  color: #16a34a;
+  font-weight: 600;
+}
+.dws-import-apply-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.dws-import-apply-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: #fff;
+  border-radius: 7px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dws-import-apply-btn:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+}
+.dws-how-to-card {
+  border: 1px solid #dbeafe;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.dws-how-to-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+.dws-how-to-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #475569;
+}
+.dws-step-num {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

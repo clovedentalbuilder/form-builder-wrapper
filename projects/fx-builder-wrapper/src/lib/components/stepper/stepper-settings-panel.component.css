@@ -1,9 +1,9 @@
 /* ── Builder chrome ── (non-blocking so the field stays usable) */
-lib-duplicate-check-input-settings-panel .fx-element {
+lib-stepper-settings-panel .fx-element {
   position: relative;
   display: block;
 }
-lib-duplicate-check-input-settings-panel .fx-element .fx-overlay {
+lib-stepper-settings-panel .fx-element .fx-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -12,10 +12,10 @@ lib-duplicate-check-input-settings-panel .fx-element .fx-overlay {
   pointer-events: none;
   opacity: 0;
 }
-lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay {
+lib-stepper-settings-panel .fx-element:hover .fx-overlay {
   opacity: 1;
 }
-lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actions {
+lib-stepper-settings-panel .fx-element:hover .fx-overlay .fx-actions {
   position: absolute;
   top: 0;
   right: 0;
@@ -24,40 +24,40 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
 }
 
 /* ── Dialog chrome (self-contained — no PrimeNG theme is loaded globally) ── */
-.dcs-settings-dialog.p-dialog {
+.stp-settings-dialog.p-dialog {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
   background: #ffffff;
 }
-.dcs-settings-dialog .p-dialog-header {
+.stp-settings-dialog .p-dialog-header {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   padding: 0.9rem 1.25rem;
   border-bottom: none;
 }
-.dcs-settings-dialog .p-dialog-title {
+.stp-settings-dialog .p-dialog-title {
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
 }
-.dcs-settings-dialog .p-dialog-header-icon {
+.stp-settings-dialog .p-dialog-header-icon {
   color: rgba(255, 255, 255, 0.75);
   border-radius: 6px;
 }
-.dcs-settings-dialog .p-dialog-header-icon:hover {
+.stp-settings-dialog .p-dialog-header-icon:hover {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
-.dcs-settings-dialog .p-dialog-content {
+.stp-settings-dialog .p-dialog-content {
   padding: 1.125rem;
   background: #f1f5f9;
 }
-.dcs-settings-dialog .p-dialog-footer {
+.stp-settings-dialog .p-dialog-footer {
   background: #fff;
   border-top: 1px solid #e2e8f0;
   padding: 0.75rem 1.125rem;
 }
-.dcs-settings-dialog .p-dialog-footer .p-button {
+.stp-settings-dialog .p-dialog-footer .p-button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -69,57 +69,58 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   transition: background 0.18s, box-shadow 0.18s;
   border: 1.5px solid transparent;
 }
-.dcs-settings-dialog .p-dialog-footer .p-button.p-button-outlined,
-.dcs-settings-dialog .p-dialog-footer .p-button.p-button-secondary {
+.stp-settings-dialog .p-dialog-footer .p-button.p-button-outlined,
+.stp-settings-dialog .p-dialog-footer .p-button.p-button-secondary {
   background: #fff;
   border-color: #cbd5e1;
   color: #475569;
 }
-.dcs-settings-dialog .p-dialog-footer .p-button.p-button-outlined:hover {
+.stp-settings-dialog .p-dialog-footer .p-button.p-button-outlined:hover {
   background: #f1f5f9;
   border-color: #94a3b8;
 }
-.dcs-settings-dialog .p-dialog-footer .p-button.p-button-primary {
+.stp-settings-dialog .p-dialog-footer .p-button.p-button-primary {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
-.dcs-settings-dialog .p-dialog-footer .p-button.p-button-primary:hover {
+.stp-settings-dialog .p-dialog-footer .p-button.p-button-primary:hover {
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
 }
 
 /* ── Dialog header (custom content) ── */
-.dcs-dialog-header {
+.stp-dialog-header {
   display: flex;
   align-items: center;
   gap: 0.6rem;
 }
-.dcs-header-icon {
+.stp-header-icon {
   color: rgba(255, 255, 255, 0.9);
   font-size: 1rem;
 }
-.dcs-dialog-title {
+.stp-dialog-title {
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
 }
 
 /* ── Body ── */
-.dcs-settings-body {
+.stp-settings-body {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
 }
-.dcs-section {
+.stp-section {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
-.dcs-section-header {
+.stp-section-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.45rem;
   font-size: 0.7rem;
   font-weight: 700;
@@ -130,34 +131,38 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   padding: 0.55rem 1rem;
   border-bottom: 1px solid #dbeafe;
 }
-.dcs-section-header i {
+.stp-section-header > span:first-of-type,
+.stp-section-header i:first-child {
+  display: inline-flex;
+  align-items: center;
+}
+.stp-section-header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.stp-section-header i {
   font-size: 0.75rem;
   color: #3b82f6;
 }
-.dcs-section-body {
+.stp-section-body {
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
 }
-.dcs-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.875rem;
-  align-items: start;
-}
-.dcs-field {
+.stp-field {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 }
-.dcs-label {
+.stp-label {
   font-size: 0.78rem;
   font-weight: 600;
   color: #374151;
 }
-.dcs-input.p-inputtext,
-.dcs-input {
+.stp-input.p-inputtext,
+.stp-input {
   font-size: 0.85rem;
   border-radius: 7px;
   border: 1px solid #d1d5db;
@@ -168,129 +173,42 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.dcs-input:focus {
+.stp-input:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
   outline: none;
 }
-.dcs-hint {
+.stp-hint {
   font-size: 0.68rem;
   color: #94a3b8;
   font-style: italic;
 }
-.dcs-radio-group {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-.dcs-radio-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  color: #374151;
-  cursor: pointer;
-}
-.dcs-radio-option input[type='radio'] {
-  appearance: auto !important;
-  -webkit-appearance: auto !important;
-  width: 14px !important;
-  height: 14px !important;
-  margin: 0 !important;
-  cursor: pointer;
-}
-.dcs-conditions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.dcs-condition-row {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr 1fr auto;
-  gap: 0.5rem;
-  align-items: center;
-}
-.dcs-code {
-  font-family: 'Cascadia Code', 'Courier New', monospace;
-  font-size: 0.78rem;
-  resize: vertical;
-}
-.dcs-condition-remove {
-  border: 1px solid #fecaca;
-  background: #fef2f2;
-  color: #dc2626;
-  border-radius: 7px;
-  width: 32px;
-  height: 32px;
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.dcs-condition-remove:hover {
-  background: #fee2e2;
-}
-.dcs-condition-add {
-  align-self: flex-start;
-  border: 1px dashed #93c5fd;
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-radius: 7px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.dcs-condition-add:hover {
-  background: #dbeafe;
-}
-.dcs-required-star { color: #ef4444; font-weight: 700; margin-left: 2px; }
-.dcs-name-hint      { font-size: 0.68rem; font-weight: 400; color: #9ca3af; font-style: italic; margin-left: 0.4rem; }
-.dcs-id-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.3rem 0.6rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-}
-.dcs-id-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.dcs-id-badge i { font-size: 0.65rem; }
-.dcs-id-value {
-  font-size: 0.72rem;
-  font-family: 'Courier New', Courier, monospace;
-  color: #334155;
-  word-break: break-all;
-}
-.dcs-field-error {
+.stp-field-error {
   font-size: 0.72rem;
   color: #b91c1c;
   margin-top: 0.1rem;
 }
-.dcs-dialog-footer {
+.stp-code {
+  font-family: 'Cascadia Code', 'Courier New', monospace;
+  font-size: 0.78rem;
+  resize: vertical;
+}
+.stp-dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.625rem;
 }
-.dcs-dialog-footer--split {
+.stp-dialog-footer--split {
   justify-content: space-between;
 }
-.dcs-footer-actions {
+.stp-footer-actions {
   display: flex;
   gap: 0.625rem;
 }
 
 /* ── Tab bar ── segmented-control track, active tab rendered as a gradient
    pill matching the dialog header/primary-button gradient. ── */
-.dcs-tabs {
+.stp-tabs {
   display: flex;
   gap: 0.25rem;
   background: #eef1f6;
@@ -298,7 +216,7 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   border-radius: 12px;
   padding: 0.3rem;
 }
-.dcs-tab {
+.stp-tab {
   flex: 1;
   display: inline-flex;
   align-items: center;
@@ -314,64 +232,28 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
-.dcs-tab i {
+.stp-tab i {
   font-size: 0.85rem;
   transition: transform 0.2s ease;
 }
-.dcs-tab:hover:not(.dcs-tab--active) {
+.stp-tab:hover:not(.stp-tab--active) {
   background: rgba(59, 130, 246, 0.1);
   color: #1d4ed8;
 }
-.dcs-tab--active {
+.stp-tab--active {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: #fff;
   box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
-.dcs-tab--active i {
+.stp-tab--active i {
   transform: scale(1.05);
 }
-.dcs-tab:active {
+.stp-tab:active {
   transform: scale(0.97);
 }
 
-/* ── Condition subsections (Privilege / Supporting Data / Other Field's Value) ── */
-.dcs-subsection {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.dcs-subsection-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #374151;
-}
-.dcs-subsection-header span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.dcs-subsection-header i {
-  color: #3b82f6;
-  font-size: 0.75rem;
-}
-.dcs-subsection > .dcs-conditions,
-.dcs-subsection > .dcs-empty-hint {
-  padding: 0.65rem 0.75rem;
-}
-.dcs-empty-hint {
-  display: block;
-  font-size: 0.72rem;
-  color: #94a3b8;
-  font-style: italic;
-}
-.dcs-add-btn {
+/* ── Steps tab ── */
+.stp-add-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -383,45 +265,63 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
 }
-.dcs-add-btn:hover {
+.stp-add-btn:hover {
   background: #dbeafe;
 }
-.dcs-condition-row--privilege {
-  grid-template-columns: auto 1fr 2fr auto;
+.stp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
-.dcs-condition-row--triple {
-  grid-template-columns: auto 1fr 1fr 1fr auto;
+.stp-step-row {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
 }
-.dcs-condition-and {
+.stp-step-num {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.3rem 0.4rem;
-  border: 1px solid #d1d5db;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.stp-step-remove {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
   border-radius: 7px;
-  background: #f8fafc;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
 }
-.dcs-condition-and input[type='checkbox'] {
-  appearance: auto !important;
-  -webkit-appearance: auto !important;
-  width: 14px !important;
-  height: 14px !important;
-  margin: 0 !important;
-  cursor: pointer;
+.stp-step-remove:hover {
+  background: #fee2e2;
 }
-.dcs-field--divider {
-  padding-top: 0.875rem;
-  border-top: 1px solid #e2e8f0;
+.stp-empty-hint {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-style: italic;
 }
 
 /* ── Import tab ── */
-.dcs-import-tabs {
+.stp-import-tabs {
   display: flex;
   gap: 0.4rem;
 }
-.dcs-import-tab {
+.stp-import-tab {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -434,12 +334,12 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   border-radius: 7px;
   cursor: pointer;
 }
-.dcs-import-tab--active {
+.stp-import-tab--active {
   background: #eff6ff;
   border-color: #93c5fd;
   color: #1d4ed8;
 }
-.dcs-file-drop-zone {
+.stp-file-drop-zone {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -452,33 +352,33 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   background: #f8fafc;
   transition: border-color 0.15s, background 0.15s;
 }
-.dcs-file-drop-zone:hover {
+.stp-file-drop-zone:hover {
   border-color: #93c5fd;
   background: #eff6ff;
 }
-.dcs-drop-icon {
+.stp-drop-icon {
   font-size: 1.75rem;
   color: #94a3b8;
 }
-.dcs-drop-icon--ready {
+.stp-drop-icon--ready {
   color: #16a34a;
 }
-.dcs-drop-label {
+.stp-drop-label {
   font-size: 0.82rem;
   color: #475569;
 }
-.dcs-drop-label--ready {
+.stp-drop-label--ready {
   color: #16a34a;
   font-weight: 600;
 }
-.dcs-import-apply-row {
+.stp-import-apply-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
-.dcs-import-apply-btn {
+.stp-import-apply-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -492,10 +392,10 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   cursor: pointer;
   white-space: nowrap;
 }
-.dcs-import-apply-btn:hover {
+.stp-import-apply-btn:hover {
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
 }
-.dcs-how-to-card {
+.stp-how-to-card {
   border: 1px solid #dbeafe;
   background: #f8fafc;
   border-radius: 8px;
@@ -504,7 +404,7 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   flex-direction: column;
   gap: 0.5rem;
 }
-.dcs-how-to-title {
+.stp-how-to-title {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -512,14 +412,14 @@ lib-duplicate-check-input-settings-panel .fx-element:hover .fx-overlay .fx-actio
   font-weight: 700;
   color: #1d4ed8;
 }
-.dcs-how-to-step {
+.stp-how-to-step {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.78rem;
   color: #475569;
 }
-.dcs-step-num {
+.stp-howto-num {
   flex: 0 0 auto;
   width: 18px;
   height: 18px;

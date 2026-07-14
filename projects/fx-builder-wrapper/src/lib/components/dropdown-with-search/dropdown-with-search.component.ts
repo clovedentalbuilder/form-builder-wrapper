@@ -134,9 +134,12 @@ export class DropdownWithSearchComponent extends FxBaseComponent implements OnIn
       new FxSelectSetting({ key: 'serviceSearchName', $title: 'Service', value: '' }, [{ option: 'User Service', value: 'user_service' }, { option: 'Patient Service', value: 'patient_service' }, { option: 'Workflow Service', value: 'workflow_service' }]),
       new FxSelectSetting({ key: 'isSearchRequired', $title: 'Required', value: 'true' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
       new FxStringSetting({ key: 'multiErrorSearch', $title: 'Error Message', value: 'Please select' }),
+      // String-valued (not FxToggleSetting) so a saved "false" isn't silently reverted back to the
+      // "true" class default by the fx library's deepMergeObjects (it treats a falsy saved value
+      // as "unset" whenever the class default is truthy). Same trick already used for isSearchRequired above.
+      new FxSelectSetting({ key: 'isSearchEnabled', $title: 'Enable Search', value: 'true' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
       new FxStringSetting({ key: 'placeholderSearch', $title: 'Placeholder', value: 'Select' }),
-      ...conditionalDisableSettings(),
-
+      
       // Visibility gate: a condition list (privilege/supportingData/field rows, freely
       // combined via any/all) OR custom code — see shared/applicability.ts.
       new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),

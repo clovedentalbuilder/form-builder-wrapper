@@ -9,7 +9,7 @@
         <label class="input-label dark:text-gray-300">
           {{ setting('select-label-search') }} <span class="field-required" *ngIf="isRequired">*</span>
         </label>
-        <p-dropdown [options]="options" formControlName="searchSelectedOption" [optionLabel]="setting('label-key-search')" [filter]="true" [showClear]="true"
+        <p-dropdown [options]="options" formControlName="searchSelectedOption" [optionLabel]="setting('label-key-search')" [filter]="setting('isSearchEnabled') !== 'false'" [showClear]="false"
           [placeholder]="setting('placeholderSearch')" [disabled]="fieldDisabled" class="multiselect" [optionValue]="setting('value-key-search')">
 
           <!-- Custom Dropdown Icon -->

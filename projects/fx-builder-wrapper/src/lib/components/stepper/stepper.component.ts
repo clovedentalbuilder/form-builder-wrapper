@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import {
   FxBaseComponent,
-  FxComponent,
-  FxJsonSetting,
   FxSetting,
   FxStringSetting,
   FxUtils,
   FxValidation,
 } from '@instantsys-labs/fx';
+import { StepperSettingsPanelComponent } from './stepper-settings-panel.component';
 
 interface StepperStep {
   label: string;
@@ -16,18 +15,19 @@ interface StepperStep {
 }
 
 /**
- * Configurable stepper. Steps are defined explicitly via a JSON setting
- * (each { label, target }); `target` matches a Section box's "Anchor Key"
- * (or its title). Clicking a step scrolls to that section's rendered DOM node
- * via FxUtils.scrollToElement (getElementById + scrollIntoView).
+ * Configurable stepper. Steps are edited in the custom StepperSettingsPanelComponent
+ * as structured rows (Step Label + Anchor via Add/Remove Step), never as raw
+ * JSON — `target` matches a Section box's "Anchor Key" (or its title).
+ * Clicking a step scrolls to that section's rendered DOM node via
+ * FxUtils.scrollToElement (getElementById + scrollIntoView).
  *
- * If the JSON is empty/invalid, steps are auto-derived from the sibling
+ * If no steps are configured, steps are auto-derived from the sibling
  * Section boxes so the stepper still works before being configured.
  */
 @Component({
   selector: 'lib-stepper',
   standalone: true,
-  imports: [CommonModule, FxComponent],
+  imports: [CommonModule, StepperSettingsPanelComponent],
   templateUrl: './stepper.component.html',
   styleUrl: './stepper.component.css',
 })
@@ -41,14 +41,13 @@ export class StepperComponent extends FxBaseComponent implements AfterViewInit, 
 
   protected settings(): FxSetting[] {
     return [
-      new FxJsonSetting({
+      new FxStringSetting({
         key: 'steps',
-        $title: 'Steps (JSON)',
-        $description: 'Array of { "label": "...", "target": "<section anchor key or title>" }.',
-        value: [
+        $title: 'Steps',
+        value: JSON.stringify([
           { label: 'Basic Info', target: 'basic-info' },
           { label: 'Sitting & Duration', target: 'sitting-duration' },
-        ],
+        ]),
       }),
       new FxStringSetting({ key: 'stepperClass', $title: 'Custom Class', value: '' }),
     ];
@@ -56,6 +55,10 @@ export class StepperComponent extends FxBaseComponent implements AfterViewInit, 
 
   protected validations(): FxValidation[] {
     return [];
+  }
+
+  onSettingsChanged(_config: any): void {
+    this.detectChanges();
   }
 
   /** Steps from the JSON setting; falls back to auto-derived from sibling sections. */

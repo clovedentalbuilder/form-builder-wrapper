@@ -1,0 +1,171 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  styleClass="stp-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="stp-dialog-header">
+      <i class="pi pi-cog stp-header-icon"></i>
+      <span class="stp-dialog-title">Stepper Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="stp-settings-body">
+
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="stp-tabs">
+      <button type="button" class="stp-tab" [class.stp-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="stp-tab" [class.stp-tab--active]="activeTab === 'steps'" (click)="activeTab = 'steps'">
+        <i class="pi pi-list"></i> Steps
+      </button>
+      <button type="button" class="stp-tab" [class.stp-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+      <div class="stp-section">
+        <div class="stp-section-header"><i class="pi pi-sliders-h"></i><span>Basic</span></div>
+        <div class="stp-section-body">
+          <div class="stp-field">
+            <label class="stp-label">Custom Class</label>
+            <input pInputText formControlName="stepperClass" placeholder="e.g. my-stepper-style" class="stp-input" />
+            <small class="stp-hint">Optional CSS class applied to the stepper's root element.</small>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Steps tab                               -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'steps'">
+      <div class="stp-section">
+        <div class="stp-section-header">
+          <i class="pi pi-list"></i><span>Steps</span>
+          <button type="button" class="stp-add-btn" (click)="addStep()"><i class="pi pi-plus"></i> Add Step</button>
+        </div>
+        <div class="stp-section-body">
+          <div class="stp-steps" *ngIf="steps.length">
+            <div class="stp-step-row" *ngFor="let step of steps; let i = index">
+              <div class="stp-step-num">{{ i + 1 }}</div>
+              <input pInputText [(ngModel)]="step.label" [ngModelOptions]="{standalone: true}" placeholder="Step Label" class="stp-input" />
+              <input pInputText [(ngModel)]="step.target" [ngModelOptions]="{standalone: true}" placeholder="Anchor (section anchor key or title)" class="stp-input" />
+              <button type="button" class="stp-step-remove" (click)="removeStep(i)" title="Remove step">&times;</button>
+            </div>
+          </div>
+          <small class="stp-empty-hint" *ngIf="!steps.length">No steps added yet. Click <strong>Add Step</strong> to add one.</small>
+          <small class="stp-hint">Anchor should match a Section box's Anchor Key (or its title). Leave blank to fall back to the section at that position.</small>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="stp-section">
+        <div class="stp-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="stp-section-body">
+
+          <div class="stp-import-tabs">
+            <button type="button" class="stp-import-tab" [class.stp-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="stp-import-tab" [class.stp-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="stp-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload stp-drop-icon"></i>
+                <span class="stp-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file stp-drop-icon stp-drop-icon--ready"></i>
+                <span class="stp-drop-label stp-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="stp-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="stp-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "stepperClass": "", "steps": [{ "label": "Basic Info", "target": "basic-info" }] }'
+                class="stp-input stp-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="stp-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="stp-import-apply-row">
+            <span class="stp-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites Basic Config and Steps (not saved until you click Save Settings).</span>
+            <button type="button" class="stp-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="stp-how-to-card">
+            <div class="stp-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="stp-how-to-step"><span class="stp-howto-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="stp-how-to-step"><span class="stp-howto-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="stp-how-to-step"><span class="stp-howto-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="stp-dialog-footer stp-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="stp-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the field stays interactive. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

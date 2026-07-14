@@ -5,15 +5,35 @@ import { FxComponent, FxMode } from '@instantsys-labs/fx';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { Condition, ConditionSource, parseConditions } from '../shared/applicability';
+import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+
+type SettingsTab = 'basic' | 'validations' | 'import';
+type ImportMode = 'upload' | 'paste';
 
 /**
- * Custom settings panel for the Duplicate Check Input field (same chrome
- * pattern as Section/Repeatable Group/Custom Textbox/Dropdown with Search).
- * Configures the API call used to check for an existing value, the check
- * mode (auto-as-you-type vs. manual search button), all messages, plus
- * validation and the enable/visibility gates — writing directly to
- * fxData.settings.
+ * Custom settings panel for the Duplicate Check Input field — same chrome/tab
+ * pattern as lib-custom-textarea: three tabs (Basic Config — display/label/
+ * check-mode/API/messages, Validations, Import), Export Config in the
+ * footer. Configures the API call used to check for an existing value, the
+ * check mode (auto-as-you-type vs. manual search button), and all messages,
+ * in addition to validation and the enable/visibility gates — writing
+ * directly to fxData.settings.
+ *
+ * Visibility/Enable conditions are grouped into three fixed sections —
+ * Privilege, Supporting Data, Other Field's Value — each with its own
+ * "+ Add" in the section header, instead of a single mixed list with a
+ * per-row source picker (same as lib-custom-textarea/lib-section). Custom-
+ * code gating is hidden here for now (the underlying gate.useCode support in
+ * shared/applicability.ts is untouched — this panel just no longer offers a
+ * way to configure it, and forces it off on save so re-saving an old field
+ * falls back to conditions).
+ *
+ * "Exclude Form Control When Hidden" (excludeControlsWhenHidden) is
+ * intentionally never read, written, or shown here — DuplicateCheckInputComponent's
+ * own settings()/ngDoCheck/FieldControlIncludeController still declare and evaluate
+ * it at runtime exactly as before, so any already-configured production field's
+ * value is left completely untouched (not reset) when re-saved through this dialog;
+ * only the editing UI is gone.
  */
 @Component({
   selector: 'lib-duplicate-check-input-settings-panel',
@@ -29,8 +49,19 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
   visible = false;
   protected override readonly FxMode = FxMode;
 
-  visibilityConditions: Condition[] = [];
-  enableConditions: Condition[] = [];
+  activeTab: SettingsTab = 'basic';
+
+  visibilityPrivilegeConditions: Condition[] = [];
+  visibilitySupportingDataConditions: Condition[] = [];
+  visibilityFieldConditions: Condition[] = [];
+  enablePrivilegeConditions: Condition[] = [];
+  enableSupportingDataConditions: Condition[] = [];
+  enableFieldConditions: Condition[] = [];
+
+  importMode: ImportMode = 'upload';
+  jsonInput = '';
+  jsonImportError = '';
+  uploadedFileName = '';
 
   readonly serviceOptions = [
     { label: 'User Service', value: 'user_service' },
@@ -73,15 +104,6 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
     maxLengthMessage: new FormControl<string>('Value is too long'),
     pattern: new FormControl<string>(''),
     patternMessage: new FormControl<string>('Invalid format'),
-
-    enableUseCode: new FormControl<'true' | 'false'>('false'),
-    enableConditionsMatch: new FormControl<'any' | 'all'>('any'),
-    enableCode: new FormControl<string>(''),
-
-    visibilityUseCode: new FormControl<'true' | 'false'>('false'),
-    visibilityConditionsMatch: new FormControl<'any' | 'all'>('any'),
-    visibilityCode: new FormControl<string>(''),
-    excludeControlsWhenHidden: new FormControl<'true' | 'false'>('false'),
   });
 
   /** Strips the auto-appended id fragment (e.g. "-ae7f1950") from a freshly-dropped field's name for editing. */
@@ -126,18 +148,22 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
       maxLengthMessage: this.read('maxLengthMessage', 'Value is too long'),
       pattern: this.read('pattern', ''),
       patternMessage: this.read('patternMessage', 'Invalid format'),
-
-      enableUseCode: this.read('enableUseCode', false) ? 'true' : 'false',
-      enableConditionsMatch: this.read('enableConditionsMatch', 'any'),
-      enableCode: this.read('enableCode', ''),
-
-      visibilityUseCode: this.read('visibilityUseCode', false) ? 'true' : 'false',
-      visibilityConditionsMatch: this.read('visibilityConditionsMatch', 'any'),
-      visibilityCode: this.read('visibilityCode', ''),
-      excludeControlsWhenHidden: this.read('excludeControlsWhenHidden', false) ? 'true' : 'false',
     });
-    this.visibilityConditions = parseConditions(this.read('visibilityConditions', '[]'));
-    this.enableConditions = parseConditions(this.read('enableConditions', '[]'));
+
+    this.splitIntoSections(
+      parseConditions(this.read('visibilityConditions', '[]')),
+      (p, s, f) => { this.visibilityPrivilegeConditions = p; this.visibilitySupportingDataConditions = s; this.visibilityFieldConditions = f; },
+    );
+    this.splitIntoSections(
+      parseConditions(this.read('enableConditions', '[]')),
+      (p, s, f) => { this.enablePrivilegeConditions = p; this.enableSupportingDataConditions = s; this.enableFieldConditions = f; },
+    );
+
+    this.activeTab = 'basic';
+    this.importMode = 'upload';
+    this.jsonInput = '';
+    this.jsonImportError = '';
+    this.uploadedFileName = '';
     this.visible = true;
   }
 
@@ -182,17 +208,17 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
     this.write('maxLengthMessage', raw.maxLengthMessage);
     this.write('pattern', raw.pattern);
     this.write('patternMessage', raw.patternMessage);
+    // excludeControlsWhenHidden is intentionally never written here — see class doc.
 
-    this.write('enableUseCode', raw.enableUseCode === 'true');
-    this.write('enableConditionsMatch', raw.enableConditionsMatch);
-    this.write('enableCode', raw.enableCode);
-    this.write('enableConditions', JSON.stringify(this.cleanConditions(this.enableConditions)));
+    // Custom-code gating is hidden in this panel for now — force it off so re-saving
+    // an old field (that may have had it on) falls back to conditions-only.
+    this.write('enableUseCode', false);
+    this.write('enableCode', '');
+    this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
 
-    this.write('visibilityUseCode', raw.visibilityUseCode === 'true');
-    this.write('visibilityConditionsMatch', raw.visibilityConditionsMatch);
-    this.write('visibilityCode', raw.visibilityCode);
-    this.write('visibilityConditions', JSON.stringify(this.cleanConditions(this.visibilityConditions)));
-    this.write('excludeControlsWhenHidden', raw.excludeControlsWhenHidden === 'true');
+    this.write('visibilityUseCode', false);
+    this.write('visibilityCode', '');
+    this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 
     this.configuration.emit(raw);
     this.visible = false;
@@ -202,8 +228,8 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
     this.visible = false;
   }
 
-  addCondition(list: Condition[]): void {
-    list.push({ source: 'supportingData', key: '', operator: 'equals', value: '' });
+  addCondition(list: Condition[], source: ConditionSource): void {
+    list.push({ source, key: '', operator: source === 'privilege' ? 'truthy' : 'equals', value: '', grouped: false });
   }
 
   removeCondition(list: Condition[], index: number): void {
@@ -212,15 +238,119 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
 
   conditionKeyPlaceholder(source: ConditionSource): string {
     switch (source) {
-      case 'privilege': return 'Privilege Name';
       case 'field': return 'Other Field Name';
       case 'supportingData':
       default: return 'Supporting Data Key';
     }
   }
 
-  private cleanConditions(list: Condition[]): Condition[] {
-    return list.filter((c) => String(c?.key ?? '').trim());
+  // ── JSON import / export ─────────────────────────────────────────────────
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadedFileName = file.name;
+    this.jsonImportError = '';
+    const reader = new FileReader();
+    reader.onload = (e) => { this.jsonInput = (e.target?.result as string) ?? ''; };
+    reader.readAsText(file);
+  }
+
+  importFromJson(): void {
+    this.jsonImportError = '';
+    if (!this.jsonInput.trim()) {
+      this.jsonImportError = this.importMode === 'upload' ? 'Please select a .json file first.' : 'Please paste a JSON configuration.';
+      return;
+    }
+    let parsed: any;
+    try {
+      parsed = JSON.parse(this.jsonInput);
+    } catch {
+      this.jsonImportError = 'Invalid JSON — please check the format and try again.';
+      return;
+    }
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      this.jsonImportError = 'JSON must be a configuration object, not an array or primitive.';
+      return;
+    }
+
+    this.settingsForm.patchValue({
+      name: parsed.name ?? this.settingsForm.value.name,
+      label: parsed.label ?? 'Label',
+      placeholder: parsed.placeholder ?? '',
+      helpText: parsed.helpText ?? '',
+      customClass: parsed.customClass ?? '',
+
+      checkMode: parsed.checkMode ?? 'auto',
+      debounceTime: parsed.debounceTime ?? '500',
+      minCharsToCheck: parsed.minCharsToCheck ?? '1',
+      searchButtonLabel: parsed.searchButtonLabel ?? 'Search',
+
+      serviceName: parsed.serviceName ?? '',
+      apiUrl: parsed.apiUrl ?? '',
+      httpMethod: parsed.httpMethod ?? 'GET',
+      paramKey: parsed.paramKey ?? 'value',
+      extraParams: parsed.extraParams ?? '{}',
+      responsePath: parsed.responsePath ?? 'exists',
+      invertResult: parsed.invertResult ?? 'false',
+      onApiError: parsed.onApiError ?? 'allow',
+      apiErrorMessage: parsed.apiErrorMessage ?? 'Unable to verify right now. Please try again.',
+
+      duplicateMessage: parsed.duplicateMessage ?? 'This value already exists',
+      checkingMessage: parsed.checkingMessage ?? 'Checking...',
+      showAvailableMessage: parsed.showAvailableMessage ?? 'true',
+      availableMessage: parsed.availableMessage ?? 'Available',
+
+      isRequired: parsed.isRequired ?? 'false',
+      requiredMessage: parsed.requiredMessage ?? 'This field is required',
+      minLength: parsed.minLength ?? '',
+      minLengthMessage: parsed.minLengthMessage ?? 'Value is too short',
+      maxLength: parsed.maxLength ?? '',
+      maxLengthMessage: parsed.maxLengthMessage ?? 'Value is too long',
+      pattern: parsed.pattern ?? '',
+      patternMessage: parsed.patternMessage ?? 'Invalid format',
+    });
+
+    this.splitIntoSections(
+      Array.isArray(parsed.visibilityConditions) ? parsed.visibilityConditions : [],
+      (p, s, f) => { this.visibilityPrivilegeConditions = p; this.visibilitySupportingDataConditions = s; this.visibilityFieldConditions = f; },
+    );
+    this.splitIntoSections(
+      Array.isArray(parsed.enableConditions) ? parsed.enableConditions : [],
+      (p, s, f) => { this.enablePrivilegeConditions = p; this.enableSupportingDataConditions = s; this.enableFieldConditions = f; },
+    );
+
+    this.activeTab = 'basic';
+    this.jsonInput = '';
+    this.uploadedFileName = '';
+    this.jsonImportError = '';
+  }
+
+  exportCurrentConfig(): void {
+    const raw = this.settingsForm.getRawValue();
+    const config = {
+      ...raw,
+      visibilityConditions: this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions),
+      enableConditions: this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions),
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `duplicate-check-input-${raw.name || 'export'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private splitIntoSections(list: Condition[], assign: (privilege: Condition[], supportingData: Condition[], field: Condition[]) => void): void {
+    const privilege = list.filter((c) => c?.source === 'privilege');
+    const supportingData = list.filter((c) => c?.source === 'supportingData');
+    const field = list.filter((c) => c?.source !== 'privilege' && c?.source !== 'supportingData');
+    assign(privilege, supportingData, field);
+  }
+
+  private combineSections(privilege: Condition[], supportingData: Condition[], field: Condition[]): Condition[] {
+    return [...privilege, ...supportingData, ...field].filter(isConditionConfigured);
   }
 
   private read(key: string, def: any): any {
