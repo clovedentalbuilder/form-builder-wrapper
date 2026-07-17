@@ -383,6 +383,32 @@ lib-repeatable-group-settings-panel .fx-element:hover .fx-overlay .fx-actions {
   color: #b91c1c;
   margin-top: 0.1rem;
 }
+.rgp-required-star { color: #ef4444; font-weight: 700; margin-left: 2px; }
+.rgp-name-hint      { font-size: 0.68rem; font-weight: 400; color: #9ca3af; font-style: italic; margin-left: 0.4rem; }
+.rgp-id-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+.rgp-id-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.rgp-id-badge i { font-size: 0.65rem; }
+.rgp-id-value {
+  font-size: 0.72rem;
+  font-family: 'Courier New', Courier, monospace;
+  color: #334155;
+  word-break: break-all;
+}
 
 /* ── Import tab ── */
 .rgp-import-tabs {

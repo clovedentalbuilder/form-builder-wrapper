@@ -9,7 +9,7 @@
         <label class="input-label dark:text-gray-300">
           {{ setting('select-label-multi') }} <span class="field-required" *ngIf="isRequired">*</span>
         </label>
-        <p-multiSelect [options]="options" formControlName="multipleSelectedOption" [optionLabel]="setting('label-key')"
+        <p-multiSelect appendTo="body" [options]="options" formControlName="multipleSelectedOption" [optionLabel]="setting('label-key')"
           [placeholder]="setting('placeholderMulti')" [disabled]="fieldDisabled" class="multiselect">
 
           <!-- Custom Dropdown Icon -->

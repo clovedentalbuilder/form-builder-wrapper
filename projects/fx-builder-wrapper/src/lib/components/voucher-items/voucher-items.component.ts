@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, OnDestroy } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import {
   FxBaseComponent,
-  FxComponent,
   FxMode,
   FxSetting,
   FxStringSetting,
@@ -12,6 +11,9 @@ import {
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
+import { VoucherItemsSettingsPanelComponent } from './voucher-items-settings-panel.component';
+import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
+import { resolveSiblingControl } from '../shared/conditional-disable';
 
 interface VoucherItem {
   type: string;
@@ -37,7 +39,7 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 @Component({
   selector: 'lib-voucher-items',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FxComponent],
+  imports: [CommonModule, ReactiveFormsModule, VoucherItemsSettingsPanelComponent],
   templateUrl: './voucher-items.component.html',
   styleUrl: './voucher-items.component.css',
 })
@@ -61,6 +63,14 @@ export class VoucherItemsComponent extends FxBaseComponent implements OnDestroy 
       new FxStringSetting({ key: 'minItems', $title: 'Minimum Items', value: 1 }),
       new FxStringSetting({ key: 'maxItems', $title: 'Maximum Items (0 = unlimited)', value: 0 }),
       new FxToggleSetting({ key: 'showCreatedAt', $title: 'Show Created At', value: true }),
+
+      // Visibility gate: a condition list (privilege/supportingData/field rows, freely
+      // combined via any/all) OR custom code — see shared/applicability.ts. No separate
+      // Enable/Disable gate — this component intentionally only supports Visibility.
+      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
+      new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
+      new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
     ];
   }
 
@@ -72,6 +82,49 @@ export class VoucherItemsComponent extends FxBaseComponent implements OnDestroy 
 
   get isView(): boolean {
     return this.fxData?.$fxForm?.$mode === FxMode.VIEW;
+  }
+
+  /** Computes visibility from privileges + supportingData + another field's live value. See shared/applicability.ts. */
+  private get applicability(): { visible: boolean } {
+    const visibility: GateConfig = {
+      useCode: this.setting('visibilityUseCode') === true,
+      code: this.setting('visibilityCode'),
+      conditions: parseConditions(this.setting('visibilityConditions')),
+      conditionsMatch: this.setting('visibilityConditionsMatch'),
+    };
+    return isApplicable(
+      { visibility },
+      {
+        privileges: this.wrapperService.privileges,
+        supportingData: this.wrapperService.supportingData,
+        resolveField: (name) => resolveSiblingControl(this.fxData, name)?.value,
+      },
+    );
+  }
+
+  /** Runtime-only: always visible in the builder. */
+  get groupHidden(): boolean {
+    if (!this.isView) return false;
+    return !this.applicability.visible;
+  }
+
+  /**
+   * Bound on the component's OWN host element (<lib-voucher-items>), not just an
+   * inner wrapper — so hiding collapses the whole custom element, including the
+   * settings-panel's projected chrome, not just the items inside it.
+   */
+  @HostBinding('hidden')
+  get hostHidden(): boolean {
+    return this.groupHidden;
+  }
+
+  @HostBinding('attr.inert')
+  get hostInert(): string | null {
+    return this.groupHidden ? '' : null;
+  }
+
+  onSettingsChanged(_config: any): void {
+    this.detectChanges();
   }
 
   get typeOptions(): string[] {

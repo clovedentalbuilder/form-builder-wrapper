@@ -1,5 +1,6 @@
 import { AbstractControl } from '@angular/forms';
 import { FxSetting, FxStringSetting } from '@instantsys-labs/fx';
+import { findAdapterForValue } from '../fx-form-component/value-adapter-registry';
 
 /**
  * Shared "conditional disable" behaviour: disable a field's control whenever a
@@ -28,13 +29,31 @@ export function conditionalDisableSettings(): FxSetting[] {
   ];
 }
 
-/** Find a control by name in the field's own group, then the root form group. */
-export function resolveSiblingControl(fxData: any, name: string): AbstractControl | null {
+/**
+ * Find a control by name in the field's own group, then the root form group.
+ *
+ * Every caller here (Visibility/Enable "Other Field's Value" conditions via
+ * shared/applicability.ts's resolveField, and this file's own
+ * ConditionalDisableController) only ever reads the result's `.value` — so
+ * some custom components (dropdown-with-search, multiselect-dropdown,
+ * duplicate-check-input, checkbox, date-picker, ...) register a whole
+ * sub-FormGroup under the field's name instead of a plain FormControl,
+ * meaning `.value` is a wrapper object like `{ searchSelectedOption: 'yes' }`
+ * rather than the primitive a condition/rule is written against. When the
+ * resolved control's value matches a known COMPONENT_VALUE_ADAPTERS shape
+ * (the same registry FxFormWrapperComponent uses for save/load migration),
+ * this returns a lightweight `{ value }` stand-in exposing the extracted
+ * primitive instead of the real control — transparent to every `?.value`
+ * call site, and requires no changes to individual component files.
+ */
+export function resolveSiblingControl(fxData: any, name: string): AbstractControl | { value: any } | null {
   if (!name) return null;
   const own = fxData?.$formGroup?.get(name);
-  if (own) return own;
   const root = fxData?.$fxForm?.$this?.formGroup;
-  return root?.get(name) ?? null;
+  const control = own ?? root?.get(name) ?? null;
+  if (!control) return null;
+  const adapter = findAdapterForValue(control.value);
+  return adapter ? { value: adapter.extractPrimitive(control.value) } : control;
 }
 
 function looseEq(a: any, target: string): boolean {

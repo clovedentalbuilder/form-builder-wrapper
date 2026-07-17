@@ -11,47 +11,33 @@ type SettingsTab = 'basic' | 'validations' | 'import';
 type ImportMode = 'upload' | 'paste';
 
 /**
- * Custom settings panel for the Repeatable Group container — same chrome/tab
- * pattern as lib-custom-textarea. Three tabs: Basic Config (titles/labels/
- * listing), Validations (Visibility + Enable/Disable gates — Repeatable
- * Group has no field-level validation of its own, but keeps the same tab
- * layout for consistency across the library), and Import (JSON import;
- * export lives in the footer).
+ * Custom settings panel for the Voucher / Coupon Items group — same chrome/tab
+ * pattern as lib-repeatable-group. Three tabs: Basic Config (display/name,
+ * titles/labels/item limits/listing), Validations (Visibility gate ONLY —
+ * this component intentionally has no Enable/Disable gate), and Import (JSON
+ * import; export lives in the footer).
  *
- * Visibility/Enable conditions are grouped into three fixed sections —
- * Privilege, Supporting Data, Other Field's Value — each with its own
- * "+ Add" in the section header, instead of a single mixed list with a
- * per-row source picker. Custom-code gating is hidden here for now (the
- * underlying gate.useCode support in shared/applicability.ts is untouched —
- * this panel just no longer offers a way to configure it, and forces it off
- * on save so re-saving an old field falls back to conditions).
+ * Visibility conditions are grouped into three fixed sections — Privilege,
+ * Supporting Data, Other Field's Value — each with its own "+ Add" in the
+ * section header, instead of a single mixed list with a per-row source
+ * picker. Custom-code gating is hidden here for now (the underlying
+ * gate.useCode support in shared/applicability.ts is untouched — this panel
+ * just no longer offers a way to configure it, and forces it off on save so
+ * re-saving an old field falls back to conditions).
  *
- * There's no list-wide any/all "Match" anymore either — each condition row
- * has its own plain checkbox (Condition.grouped, no visible label): checked
- * rows are AND-ed together into one clause, which is then OR-ed against
- * every unchecked row individually. See shared/applicability.ts's
- * evaluateConditions for the exact rule.
- *
- * There's also no more "Exclude Form Control When Hidden" option — hidden
- * groups always keep their value in the form now (see RepeatableGroupComponent).
- *
- * Condition lists are stored as JSON-string settings, so they're edited here
- * as plain arrays and (de)serialized on open/save.
- *
- * Basic Config's Display Settings section exposes fxData.id (read-only) and
- * fxData.name (editable, required) — needed so multiple Repeatable Groups on
- * the same form can be told apart/addressed, same as every other field-level
- * settings panel in this library.
+ * Display Settings (ID + Name) is included because VoucherItemsComponent's
+ * submitted value is keyed by fxData.name (see applyPatch's `vars[this.fxData?.name]`),
+ * so multiple Voucher Items groups on the same form need to be told apart.
  */
 @Component({
-  selector: 'lib-repeatable-group-settings-panel',
+  selector: 'lib-voucher-items-settings-panel',
   standalone: true,
   imports: [CommonModule, DialogModule, ButtonModule, InputTextModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './repeatable-group-settings-panel.component.html',
-  styleUrl: './repeatable-group-settings-panel.component.css',
+  templateUrl: './voucher-items-settings-panel.component.html',
+  styleUrl: './voucher-items-settings-panel.component.css',
   encapsulation: ViewEncapsulation.None,
 })
-export class RepeatableGroupSettingsPanelComponent extends FxComponent {
+export class VoucherItemsSettingsPanelComponent extends FxComponent {
   @Output() configuration = new EventEmitter<any>();
 
   visible = false;
@@ -62,9 +48,6 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
   visibilityPrivilegeConditions: Condition[] = [];
   visibilitySupportingDataConditions: Condition[] = [];
   visibilityFieldConditions: Condition[] = [];
-  enablePrivilegeConditions: Condition[] = [];
-  enableSupportingDataConditions: Condition[] = [];
-  enableFieldConditions: Condition[] = [];
 
   importMode: ImportMode = 'upload';
   jsonInput = '';
@@ -73,11 +56,13 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
 
   settingsForm = new FormGroup({
     name: new FormControl<string>('', Validators.required),
-    groupTitle: new FormControl<string>('ITEMS'),
+    groupTitle: new FormControl<string>('COUPON / VOUCHER ITEMS'),
     addButtonText: new FormControl<string>('Add Item'),
     itemLabel: new FormControl<string>('ITEM'),
+    typeOptions: new FormControl<string>('Coupon,Voucher'),
+    minItems: new FormControl<number>(1),
+    maxItems: new FormControl<number>(0),
     showCreatedAt: new FormControl<'true' | 'false'>('true'),
-    showInListing: new FormControl<'true' | 'false'>('false'),
   });
 
   /** Strips the auto-appended id fragment (e.g. "-ae7f1950") from a freshly-dropped field's name for editing. */
@@ -89,20 +74,18 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
   openDialog(): void {
     this.settingsForm.patchValue({
       name: this.cleanName(this.fxData?.name),
-      groupTitle: this.read('groupTitle', 'ITEMS'),
+      groupTitle: this.read('groupTitle', 'COUPON / VOUCHER ITEMS'),
       addButtonText: this.read('addButtonText', 'Add Item'),
       itemLabel: this.read('itemLabel', 'ITEM'),
+      typeOptions: this.read('typeOptions', 'Coupon,Voucher'),
+      minItems: this.read('minItems', 1),
+      maxItems: this.read('maxItems', 0),
       showCreatedAt: this.read('showCreatedAt', true) ? 'true' : 'false',
-      showInListing: this.read('showInListing', false) ? 'true' : 'false',
     });
 
     this.splitIntoSections(
       parseConditions(this.read('visibilityConditions', '[]')),
       (p, s, f) => { this.visibilityPrivilegeConditions = p; this.visibilitySupportingDataConditions = s; this.visibilityFieldConditions = f; },
-    );
-    this.splitIntoSections(
-      parseConditions(this.read('enableConditions', '[]')),
-      (p, s, f) => { this.enablePrivilegeConditions = p; this.enableSupportingDataConditions = s; this.enableFieldConditions = f; },
     );
 
     this.activeTab = 'basic';
@@ -124,18 +107,16 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
     this.write('groupTitle', raw.groupTitle);
     this.write('addButtonText', raw.addButtonText);
     this.write('itemLabel', raw.itemLabel);
+    this.write('typeOptions', raw.typeOptions);
+    this.write('minItems', raw.minItems);
+    this.write('maxItems', raw.maxItems);
     this.write('showCreatedAt', raw.showCreatedAt === 'true');
-    this.write('showInListing', raw.showInListing === 'true');
 
     // Custom-code gating is hidden in this panel for now — force it off so re-saving
     // an old field (that may have had it on) falls back to conditions-only.
     this.write('visibilityUseCode', false);
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
-
-    this.write('enableUseCode', false);
-    this.write('enableCode', '');
-    this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
 
     this.configuration.emit(raw);
     this.visible = false;
@@ -193,20 +174,18 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
 
     this.settingsForm.patchValue({
       name: parsed.name ?? this.settingsForm.value.name,
-      groupTitle: parsed.groupTitle ?? 'ITEMS',
+      groupTitle: parsed.groupTitle ?? 'COUPON / VOUCHER ITEMS',
       addButtonText: parsed.addButtonText ?? 'Add Item',
       itemLabel: parsed.itemLabel ?? 'ITEM',
+      typeOptions: parsed.typeOptions ?? 'Coupon,Voucher',
+      minItems: parsed.minItems ?? 1,
+      maxItems: parsed.maxItems ?? 0,
       showCreatedAt: parsed.showCreatedAt ?? 'true',
-      showInListing: parsed.showInListing ?? 'false',
     });
 
     this.splitIntoSections(
       Array.isArray(parsed.visibilityConditions) ? parsed.visibilityConditions : [],
       (p, s, f) => { this.visibilityPrivilegeConditions = p; this.visibilitySupportingDataConditions = s; this.visibilityFieldConditions = f; },
-    );
-    this.splitIntoSections(
-      Array.isArray(parsed.enableConditions) ? parsed.enableConditions : [],
-      (p, s, f) => { this.enablePrivilegeConditions = p; this.enableSupportingDataConditions = s; this.enableFieldConditions = f; },
     );
 
     this.activeTab = 'basic';
@@ -220,13 +199,12 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
     const config = {
       ...raw,
       visibilityConditions: this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions),
-      enableConditions: this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions),
     };
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `repeatable-group-${raw.name || 'export'}.json`;
+    a.download = `voucher-items-${raw.name || 'export'}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }

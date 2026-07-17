@@ -4,7 +4,7 @@
   [closable]="true"
   [draggable]="false"
   [resizable]="false"
-  [style]="{ width: '600px' }"
+  [style]="{ width: '640px' }"
   styleClass="mds-settings-dialog"
   (onHide)="closeDialog()"
 >
@@ -16,249 +16,383 @@
   </ng-template>
 
   <form [formGroup]="settingsForm" class="mds-settings-body">
-    <!-- Display Settings (ID + Name) -->
-    <div class="mds-section">
-      <div class="mds-section-header"><i class="pi pi-sliders-h"></i><span>Display Settings</span></div>
-      <div class="mds-section-body">
-        <div class="mds-id-row" *ngIf="fxData?.id">
-          <span class="mds-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
-          <span class="mds-id-value">{{ fxData!.id }}</span>
-        </div>
 
-        <div class="mds-field">
-          <label class="mds-label">
-            Name <span class="mds-required-star">*</span>
-            <span class="mds-name-hint">used to identify this component (e.g. services)</span>
-          </label>
-          <input pInputText formControlName="name" placeholder="e.g. services" class="mds-input" />
-          <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="mds-field-error">Name is required.</small>
-        </div>
-      </div>
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="mds-tabs">
+      <button type="button" class="mds-tab" [class.mds-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="mds-tab" [class.mds-tab--active]="activeTab === 'validations'" (click)="activeTab = 'validations'">
+        <i class="pi pi-check-square"></i> Validations
+      </button>
+      <button type="button" class="mds-tab" [class.mds-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
     </div>
 
-    <!-- Basic -->
-    <div class="mds-section">
-      <div class="mds-section-header"><i class="pi pi-sliders-h"></i><span>Basic</span></div>
-      <div class="mds-section-body">
-        <div class="mds-grid-2">
-          <div class="mds-field">
-            <label class="mds-label">Label</label>
-            <input pInputText formControlName="selectLabelMulti" placeholder="e.g. Services" class="mds-input" />
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+
+      <!-- Display Settings (ID + Name) -->
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-hashtag"></i><span>Display Settings</span></div>
+        <div class="mds-section-body">
+          <div class="mds-id-row" *ngIf="fxData?.id">
+            <span class="mds-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+            <span class="mds-id-value">{{ fxData!.id }}</span>
           </div>
+
           <div class="mds-field">
-            <label class="mds-label">Label Key</label>
-            <input pInputText formControlName="labelKey" placeholder="e.g. option" class="mds-input" />
-          </div>
-        </div>
-        <div class="mds-grid-2">
-          <div class="mds-field">
-            <label class="mds-label">Placeholder</label>
-            <input pInputText formControlName="placeholderMulti" class="mds-input" />
-          </div>
-          <div class="mds-field">
-            <label class="mds-label">Custom Class Name</label>
-            <input pInputText formControlName="customClassMulti" class="mds-input" />
+            <label class="mds-label">
+              Name <span class="mds-required-star">*</span>
+              <span class="mds-name-hint">used to identify this component (e.g. services)</span>
+            </label>
+            <input pInputText formControlName="name" placeholder="e.g. services" class="mds-input" />
+            <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="mds-field-error">Name is required.</small>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Options -->
-    <div class="mds-section">
-      <div class="mds-section-header"><i class="pi pi-list"></i><span>Options</span></div>
-      <div class="mds-section-body">
-        <div class="mds-field">
-          <label class="mds-label">Options Source</label>
-          <div class="mds-radio-group">
-            <label class="mds-radio-option"><input type="radio" formControlName="optionsSource" value="manual" /><span>Manual</span></label>
-            <label class="mds-radio-option"><input type="radio" formControlName="optionsSource" value="api" /><span>API</span></label>
-          </div>
-        </div>
-
-        <ng-container *ngIf="settingsForm.value.optionsSource === 'manual'">
-          <div class="mds-options">
-            <div class="mds-option-row" *ngFor="let opt of manualOptions; let i = index">
-              <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Option Label" class="mds-input" />
-              <input pInputText [(ngModel)]="opt.value" [ngModelOptions]="{standalone: true}" placeholder="Option Value" class="mds-input" />
-              <button type="button" class="mds-option-remove" (click)="removeOption(i)" title="Remove option">&times;</button>
-            </div>
-            <button type="button" class="mds-option-add" (click)="addOption()">+ Add Option</button>
-          </div>
-        </ng-container>
-
-        <ng-container *ngIf="settingsForm.value.optionsSource === 'api'">
+      <!-- Basic -->
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-align-left"></i><span>Basic</span></div>
+        <div class="mds-section-body">
           <div class="mds-grid-2">
             <div class="mds-field">
-              <label class="mds-label">API URL</label>
-              <input pInputText formControlName="multiSelectOptionAPIURL" placeholder="e.g. /api/options" class="mds-input" />
+              <label class="mds-label">Label</label>
+              <input pInputText formControlName="selectLabelMulti" placeholder="e.g. Services" class="mds-input" />
             </div>
             <div class="mds-field">
-              <label class="mds-label">Service</label>
-              <select formControlName="serviceMultiName" class="mds-input">
-                <option value="">Select service</option>
-                <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
-              </select>
+              <label class="mds-label">Label Key</label>
+              <input pInputText formControlName="labelKey" placeholder="e.g. option" class="mds-input" />
             </div>
           </div>
-        </ng-container>
-      </div>
-    </div>
-
-    <!-- Validation -->
-    <div class="mds-section">
-      <div class="mds-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
-      <div class="mds-section-body">
-        <div class="mds-field">
-          <label class="mds-label">Required</label>
-          <div class="mds-radio-group">
-            <label class="mds-radio-option"><input type="radio" formControlName="isMultiRequired" value="true" /><span>Yes</span></label>
-            <label class="mds-radio-option"><input type="radio" formControlName="isMultiRequired" value="false" /><span>No</span></label>
+          <div class="mds-grid-2">
+            <div class="mds-field">
+              <label class="mds-label">Placeholder</label>
+              <input pInputText formControlName="placeholderMulti" class="mds-input" />
+            </div>
+            <div class="mds-field">
+              <label class="mds-label">Custom Class Name</label>
+              <input pInputText formControlName="customClassMulti" class="mds-input" />
+            </div>
           </div>
-        </div>
-        <div class="mds-field" *ngIf="settingsForm.value.isMultiRequired === 'true'">
-          <label class="mds-label">Error Message</label>
-          <input pInputText formControlName="multiErrorMessage" class="mds-input" />
         </div>
       </div>
-    </div>
 
-    <!-- Visibility -->
-    <div class="mds-section">
-      <div class="mds-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
-      <div class="mds-section-body">
-        <div class="mds-field">
-          <label class="mds-label">Driven By</label>
-          <div class="mds-radio-group">
-            <label class="mds-radio-option"><input type="radio" formControlName="visibilityUseCode" value="false" /><span>Conditions (no-code)</span></label>
-            <label class="mds-radio-option"><input type="radio" formControlName="visibilityUseCode" value="true" /><span>Custom Code</span></label>
-          </div>
-        </div>
-
-        <ng-container *ngIf="settingsForm.value.visibilityUseCode === 'false'">
-          <div class="mds-field" *ngIf="visibilityConditions.length > 1">
-            <label class="mds-label">Match</label>
-            <div class="mds-radio-group">
-              <label class="mds-radio-option"><input type="radio" formControlName="visibilityConditionsMatch" value="any" /><span>Any condition</span></label>
-              <label class="mds-radio-option"><input type="radio" formControlName="visibilityConditionsMatch" value="all" /><span>All conditions</span></label>
-            </div>
-          </div>
-
-          <div class="mds-conditions">
-            <div class="mds-condition-row" *ngFor="let cond of visibilityConditions; let i = index">
-              <select [(ngModel)]="cond.source" [ngModelOptions]="{standalone: true}" class="mds-input">
-                <option value="privilege">Privilege</option>
-                <option value="supportingData">Supporting Data</option>
-                <option value="field">Another Field's Value</option>
-              </select>
-              <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder(cond.source)" class="mds-input" />
-              <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
-                <option value="equals">Equals</option>
-                <option value="notEquals">Not Equals</option>
-                <option value="in">In (comma list)</option>
-                <option value="notIn">Not In (comma list)</option>
-                <option value="truthy">Is Truthy / Has It</option>
-                <option value="falsy">Is Falsy / Doesn't Have It</option>
-              </select>
-              <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="mds-input" />
-              <button type="button" class="mds-condition-remove" (click)="removeCondition(visibilityConditions, i)" title="Remove condition">&times;</button>
-            </div>
-            <button type="button" class="mds-condition-add" (click)="addCondition(visibilityConditions)">+ Add Condition</button>
-          </div>
-          <small class="mds-hint">Visible when the condition(s) above match. Mix privilege, supporting-data, and other-field conditions freely — they combine via Match above.</small>
-        </ng-container>
-
-        <ng-container *ngIf="settingsForm.value.visibilityUseCode === 'true'">
+      <!-- Options -->
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-list"></i><span>Options</span></div>
+        <div class="mds-section-body">
           <div class="mds-field">
-            <label class="mds-label">JavaScript Code</label>
-            <textarea
-              formControlName="visibilityCode"
-              class="mds-input mds-code"
-              rows="5"
-              placeholder="return privileges.includes('htr:trn:off') || supportingData.isVip === true || getFieldValue('otherField') === 'x';"
-            ></textarea>
-            <small class="mds-hint">
-              Function body — <code>privileges</code> (string[]), <code>supportingData</code> (object), and <code>getFieldValue(name)</code> are in scope. Must <code>return</code> a boolean.
-            </small>
-          </div>
-        </ng-container>
-
-        <div class="mds-field">
-          <label class="mds-label">When Hidden</label>
-          <div class="mds-radio-group">
-            <label class="mds-radio-option"><input type="radio" formControlName="excludeControlsWhenHidden" value="false" /><span>Keep value (include in form)</span></label>
-            <label class="mds-radio-option"><input type="radio" formControlName="excludeControlsWhenHidden" value="true" /><span>Exclude from form</span></label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Enable / Disable -->
-    <div class="mds-section">
-      <div class="mds-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
-      <div class="mds-section-body">
-        <div class="mds-field">
-          <label class="mds-label">Driven By</label>
-          <div class="mds-radio-group">
-            <label class="mds-radio-option"><input type="radio" formControlName="enableUseCode" value="false" /><span>Conditions (no-code)</span></label>
-            <label class="mds-radio-option"><input type="radio" formControlName="enableUseCode" value="true" /><span>Custom Code</span></label>
-          </div>
-        </div>
-
-        <ng-container *ngIf="settingsForm.value.enableUseCode === 'false'">
-          <div class="mds-field" *ngIf="enableConditions.length > 1">
-            <label class="mds-label">Match</label>
+            <label class="mds-label">Options Source</label>
             <div class="mds-radio-group">
-              <label class="mds-radio-option"><input type="radio" formControlName="enableConditionsMatch" value="any" /><span>Any condition</span></label>
-              <label class="mds-radio-option"><input type="radio" formControlName="enableConditionsMatch" value="all" /><span>All conditions</span></label>
+              <label class="mds-radio-option"><input type="radio" formControlName="optionsSource" value="manual" /><span>Manual</span></label>
+              <label class="mds-radio-option"><input type="radio" formControlName="optionsSource" value="api" /><span>API</span></label>
             </div>
           </div>
 
-          <div class="mds-conditions">
-            <div class="mds-condition-row" *ngFor="let cond of enableConditions; let i = index">
-              <select [(ngModel)]="cond.source" [ngModelOptions]="{standalone: true}" class="mds-input">
-                <option value="privilege">Privilege</option>
-                <option value="supportingData">Supporting Data</option>
-                <option value="field">Another Field's Value</option>
-              </select>
-              <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder(cond.source)" class="mds-input" />
-              <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
-                <option value="equals">Equals</option>
-                <option value="notEquals">Not Equals</option>
-                <option value="in">In (comma list)</option>
-                <option value="notIn">Not In (comma list)</option>
-                <option value="truthy">Is Truthy / Has It</option>
-                <option value="falsy">Is Falsy / Doesn't Have It</option>
-              </select>
-              <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="mds-input" />
-              <button type="button" class="mds-condition-remove" (click)="removeCondition(enableConditions, i)" title="Remove condition">&times;</button>
+          <ng-container *ngIf="settingsForm.value.optionsSource === 'manual'">
+            <div class="mds-options">
+              <div class="mds-option-row" *ngFor="let opt of manualOptions; let i = index">
+                <input pInputText [(ngModel)]="opt.option" [ngModelOptions]="{standalone: true}" placeholder="Option Label" class="mds-input" />
+                <input pInputText [(ngModel)]="opt.value" [ngModelOptions]="{standalone: true}" placeholder="Option Value" class="mds-input" />
+                <button type="button" class="mds-option-remove" (click)="removeOption(i)" title="Remove option">&times;</button>
+              </div>
+              <button type="button" class="mds-option-add" (click)="addOption()">+ Add Option</button>
             </div>
-            <button type="button" class="mds-condition-add" (click)="addCondition(enableConditions)">+ Add Condition</button>
-          </div>
-          <small class="mds-hint">Editable when the condition(s) above match. Mix privilege, supporting-data, and other-field conditions freely — they combine via Match above.</small>
-        </ng-container>
+          </ng-container>
 
-        <ng-container *ngIf="settingsForm.value.enableUseCode === 'true'">
-          <div class="mds-field">
-            <label class="mds-label">JavaScript Code</label>
-            <textarea
-              formControlName="enableCode"
-              class="mds-input mds-code"
-              rows="5"
-              placeholder="return privileges.includes('htr:trn:off') || supportingData.isVip === true || getFieldValue('otherField') === 'x';"
-            ></textarea>
-            <small class="mds-hint">
-              Function body — <code>privileges</code> (string[]), <code>supportingData</code> (object), and <code>getFieldValue(name)</code> are in scope. Must <code>return</code> a boolean.
-            </small>
-          </div>
-        </ng-container>
+          <ng-container *ngIf="settingsForm.value.optionsSource === 'api'">
+            <div class="mds-grid-2">
+              <div class="mds-field">
+                <label class="mds-label">API URL</label>
+                <input pInputText formControlName="multiSelectOptionAPIURL" placeholder="e.g. /api/options" class="mds-input" />
+              </div>
+              <div class="mds-field">
+                <label class="mds-label">Service</label>
+                <select formControlName="serviceMultiName" class="mds-input">
+                  <option value="">Select service</option>
+                  <option *ngFor="let s of serviceOptions" [value]="s.value">{{ s.label }}</option>
+                </select>
+              </div>
+            </div>
+          </ng-container>
+        </div>
       </div>
-    </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Validations tab                        -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'validations'">
+
+      <!-- Validation -->
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
+        <div class="mds-section-body">
+          <div class="mds-field">
+            <label class="mds-label">Required</label>
+            <div class="mds-radio-group">
+              <label class="mds-radio-option"><input type="radio" formControlName="isMultiRequired" value="true" /><span>Yes</span></label>
+              <label class="mds-radio-option"><input type="radio" formControlName="isMultiRequired" value="false" /><span>No</span></label>
+            </div>
+          </div>
+          <div class="mds-field" *ngIf="settingsForm.value.isMultiRequired === 'true'">
+            <label class="mds-label">Error Message</label>
+            <input pInputText formControlName="multiErrorMessage" class="mds-input" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Visibility -->
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+        <div class="mds-section-body">
+          <!-- Privilege -->
+          <div class="mds-subsection">
+            <div class="mds-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="mds-add-btn" (click)="addCondition(visibilityPrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="mds-conditions" *ngIf="visibilityPrivilegeConditions.length">
+              <div class="mds-condition-row mds-condition-row--privilege" *ngFor="let cond of visibilityPrivilegeConditions; let i = index">
+                <label class="mds-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="mds-input" />
+                <button type="button" class="mds-condition-remove" (click)="removeCondition(visibilityPrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="mds-empty-hint" *ngIf="!visibilityPrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="mds-subsection">
+            <div class="mds-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="mds-add-btn" (click)="addCondition(visibilitySupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="mds-conditions" *ngIf="visibilitySupportingDataConditions.length">
+              <div class="mds-condition-row mds-condition-row--triple" *ngFor="let cond of visibilitySupportingDataConditions; let i = index">
+                <label class="mds-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="mds-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="mds-input" />
+                <button type="button" class="mds-condition-remove" (click)="removeCondition(visibilitySupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="mds-empty-hint" *ngIf="!visibilitySupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="mds-subsection">
+            <div class="mds-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="mds-add-btn" (click)="addCondition(visibilityFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="mds-conditions" *ngIf="visibilityFieldConditions.length">
+              <div class="mds-condition-row mds-condition-row--triple" *ngFor="let cond of visibilityFieldConditions; let i = index">
+                <label class="mds-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="mds-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="mds-input" />
+                <button type="button" class="mds-condition-remove" (click)="removeCondition(visibilityFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="mds-empty-hint" *ngIf="!visibilityFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="mds-hint">Visible when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always visible.</small>
+        </div>
+      </div>
+
+      <!-- Enable / Disable -->
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+        <div class="mds-section-body">
+          <!-- Privilege -->
+          <div class="mds-subsection">
+            <div class="mds-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="mds-add-btn" (click)="addCondition(enablePrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="mds-conditions" *ngIf="enablePrivilegeConditions.length">
+              <div class="mds-condition-row mds-condition-row--privilege" *ngFor="let cond of enablePrivilegeConditions; let i = index">
+                <label class="mds-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="mds-input" />
+                <button type="button" class="mds-condition-remove" (click)="removeCondition(enablePrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="mds-empty-hint" *ngIf="!enablePrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="mds-subsection">
+            <div class="mds-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="mds-add-btn" (click)="addCondition(enableSupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="mds-conditions" *ngIf="enableSupportingDataConditions.length">
+              <div class="mds-condition-row mds-condition-row--triple" *ngFor="let cond of enableSupportingDataConditions; let i = index">
+                <label class="mds-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="mds-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="mds-input" />
+                <button type="button" class="mds-condition-remove" (click)="removeCondition(enableSupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="mds-empty-hint" *ngIf="!enableSupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="mds-subsection">
+            <div class="mds-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="mds-add-btn" (click)="addCondition(enableFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="mds-conditions" *ngIf="enableFieldConditions.length">
+              <div class="mds-condition-row mds-condition-row--triple" *ngFor="let cond of enableFieldConditions; let i = index">
+                <label class="mds-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="mds-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="mds-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="mds-input" />
+                <button type="button" class="mds-condition-remove" (click)="removeCondition(enableFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="mds-empty-hint" *ngIf="!enableFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="mds-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="mds-section">
+        <div class="mds-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="mds-section-body">
+
+          <div class="mds-import-tabs">
+            <button type="button" class="mds-import-tab" [class.mds-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="mds-import-tab" [class.mds-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="mds-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload mds-drop-icon"></i>
+                <span class="mds-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file mds-drop-icon mds-drop-icon--ready"></i>
+                <span class="mds-drop-label mds-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="mds-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="mds-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "name": "field_name", "selectLabelMulti": "Services", ... }'
+                class="mds-input mds-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="mds-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="mds-import-apply-row">
+            <span class="mds-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites the Basic Config and Validations tabs (not saved until you click Save Settings).</span>
+            <button type="button" class="mds-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="mds-how-to-card">
+            <div class="mds-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="mds-how-to-step"><span class="mds-step-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="mds-how-to-step"><span class="mds-step-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="mds-how-to-step"><span class="mds-step-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
   </form>
 
   <ng-template pTemplate="footer">
-    <div class="mds-dialog-footer">
-      <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
-      <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+    <div class="mds-dialog-footer mds-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="mds-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
     </div>
   </ng-template>
 </p-dialog>

@@ -1,0 +1,296 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  styleClass="vip-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="vip-dialog-header">
+      <i class="pi pi-cog vip-header-icon"></i>
+      <span class="vip-dialog-title">Voucher Items Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="vip-settings-body">
+
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="vip-tabs">
+      <button type="button" class="vip-tab" [class.vip-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="vip-tab" [class.vip-tab--active]="activeTab === 'validations'" (click)="activeTab = 'validations'">
+        <i class="pi pi-eye"></i> Validations
+      </button>
+      <button type="button" class="vip-tab" [class.vip-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+
+      <!-- Display Settings (ID + Name) -->
+      <div class="vip-section">
+        <div class="vip-section-header"><i class="pi pi-hashtag"></i><span>Display Settings</span></div>
+        <div class="vip-section-body">
+          <div class="vip-id-row" *ngIf="fxData?.id">
+            <span class="vip-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+            <span class="vip-id-value">{{ fxData!.id }}</span>
+          </div>
+
+          <div class="vip-field">
+            <label class="vip-label">
+              Name <span class="vip-required-star">*</span>
+              <span class="vip-name-hint">used to identify this component (e.g. voucher_items)</span>
+            </label>
+            <input pInputText formControlName="name" placeholder="e.g. voucher_items" class="vip-input" />
+            <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="vip-field-error">Name is required.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Basic -->
+      <div class="vip-section">
+        <div class="vip-section-header"><i class="pi pi-align-left"></i><span>Basic</span></div>
+        <div class="vip-section-body">
+          <div class="vip-grid-2">
+            <div class="vip-field">
+              <label class="vip-label">Group Title</label>
+              <input pInputText formControlName="groupTitle" placeholder="e.g. COUPON / VOUCHER ITEMS" class="vip-input" />
+            </div>
+            <div class="vip-field">
+              <label class="vip-label">Add Button Text</label>
+              <input pInputText formControlName="addButtonText" placeholder="e.g. Add Item" class="vip-input" />
+            </div>
+          </div>
+          <div class="vip-grid-2">
+            <div class="vip-field">
+              <label class="vip-label">Item Label</label>
+              <input pInputText formControlName="itemLabel" placeholder="e.g. ITEM" class="vip-input" />
+            </div>
+            <div class="vip-field">
+              <label class="vip-label">Type Options (comma-separated)</label>
+              <input pInputText formControlName="typeOptions" placeholder="e.g. Coupon,Voucher" class="vip-input" />
+            </div>
+          </div>
+          <div class="vip-grid-2">
+            <div class="vip-field">
+              <label class="vip-label">Minimum Items</label>
+              <input pInputText type="number" formControlName="minItems" min="0" class="vip-input" />
+            </div>
+            <div class="vip-field">
+              <label class="vip-label">Maximum Items</label>
+              <input pInputText type="number" formControlName="maxItems" min="0" class="vip-input" />
+              <small class="vip-hint">0 = unlimited.</small>
+            </div>
+          </div>
+          <div class="vip-field">
+            <label class="vip-label">Show Created At</label>
+            <div class="vip-radio-group">
+              <label class="vip-radio-option"><input type="radio" formControlName="showCreatedAt" value="true" /><span>Yes</span></label>
+              <label class="vip-radio-option"><input type="radio" formControlName="showCreatedAt" value="false" /><span>No</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Validations tab (Visibility only)      -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'validations'">
+
+      <!-- Visibility -->
+      <div class="vip-section">
+        <div class="vip-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+        <div class="vip-section-body">
+          <!-- Privilege -->
+          <div class="vip-subsection">
+            <div class="vip-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="vip-add-btn" (click)="addCondition(visibilityPrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="vip-conditions" *ngIf="visibilityPrivilegeConditions.length">
+              <div class="vip-condition-row vip-condition-row--privilege" *ngFor="let cond of visibilityPrivilegeConditions; let i = index">
+                <label class="vip-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="vip-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="vip-input" />
+                <button type="button" class="vip-condition-remove" (click)="removeCondition(visibilityPrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="vip-empty-hint" *ngIf="!visibilityPrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="vip-subsection">
+            <div class="vip-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="vip-add-btn" (click)="addCondition(visibilitySupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="vip-conditions" *ngIf="visibilitySupportingDataConditions.length">
+              <div class="vip-condition-row vip-condition-row--triple" *ngFor="let cond of visibilitySupportingDataConditions; let i = index">
+                <label class="vip-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="vip-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="vip-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="vip-input" />
+                <button type="button" class="vip-condition-remove" (click)="removeCondition(visibilitySupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="vip-empty-hint" *ngIf="!visibilitySupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="vip-subsection">
+            <div class="vip-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="vip-add-btn" (click)="addCondition(visibilityFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="vip-conditions" *ngIf="visibilityFieldConditions.length">
+              <div class="vip-condition-row vip-condition-row--triple" *ngFor="let cond of visibilityFieldConditions; let i = index">
+                <label class="vip-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="vip-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="vip-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="vip-input" />
+                <button type="button" class="vip-condition-remove" (click)="removeCondition(visibilityFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="vip-empty-hint" *ngIf="!visibilityFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="vip-hint">Visible when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always visible.</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="vip-section">
+        <div class="vip-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="vip-section-body">
+
+          <div class="vip-import-tabs">
+            <button type="button" class="vip-import-tab" [class.vip-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="vip-import-tab" [class.vip-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="vip-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload vip-drop-icon"></i>
+                <span class="vip-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file vip-drop-icon vip-drop-icon--ready"></i>
+                <span class="vip-drop-label vip-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="vip-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="vip-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "name": "voucher_items", "groupTitle": "COUPON / VOUCHER ITEMS", ... }'
+                class="vip-input vip-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="vip-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="vip-import-apply-row">
+            <span class="vip-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites the Basic Config and Validations tabs (not saved until you click Save Settings).</span>
+            <button type="button" class="vip-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="vip-how-to-card">
+            <div class="vip-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="vip-how-to-step"><span class="vip-step-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="vip-how-to-step"><span class="vip-step-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="vip-how-to-step"><span class="vip-step-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="vip-dialog-footer vip-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="vip-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Non-blocking overlay: only the toolbar is clickable. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

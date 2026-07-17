@@ -34,6 +34,27 @@
     <!-- Basic Config tab                       -->
     <!-- ══════════════════════════════════════ -->
     <ng-container *ngIf="activeTab === 'basic'">
+
+      <!-- Display Settings (ID + Name) -->
+      <div class="rgp-section">
+        <div class="rgp-section-header"><i class="pi pi-hashtag"></i><span>Display Settings</span></div>
+        <div class="rgp-section-body">
+          <div class="rgp-id-row" *ngIf="fxData?.id">
+            <span class="rgp-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+            <span class="rgp-id-value">{{ fxData!.id }}</span>
+          </div>
+
+          <div class="rgp-field">
+            <label class="rgp-label">
+              Name <span class="rgp-required-star">*</span>
+              <span class="rgp-name-hint">used to identify this component (e.g. coupon_items)</span>
+            </label>
+            <input pInputText formControlName="name" placeholder="e.g. coupon_items" class="rgp-input" />
+            <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="rgp-field-error">Name is required.</small>
+          </div>
+        </div>
+      </div>
+
       <div class="rgp-section">
         <div class="rgp-section-header"><i class="pi pi-sliders-h"></i><span>Basic</span></div>
         <div class="rgp-section-body">
