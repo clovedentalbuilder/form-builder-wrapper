@@ -147,7 +147,7 @@
   padding: 0 !important;
   background: unset !important;
   background-color: #DEDEDE !important;
-  height: 589px;
+  height: 85vh;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
@@ -159,7 +159,7 @@
 }
 
 .lwoAttachFile-dialog .modal-body {
-  height: 589px !important;
+  height: calc(85vh - 11px) !important;
   max-height: unset;
   padding: 0;
   overflow: hidden;
