@@ -247,12 +247,12 @@
     [closable]="false"
     [showHeader]="false"
     [(visible)]="iframeDialogVisible"
-    [style]="{ width: isMobileRequest ? '92vw' : '72vw', padding: '4px', 'background-color': '#DEDEDE', height: '85vh' }"
+    [style]="{ width: isMobileRequest ? '92vw' : '72vw', padding: '4px', 'background-color': '#DEDEDE', height: calc(85vh - 4px) }"
     [styleClass]="isMobileRequest ? 'lwoAttachFile-dialog is-mobile' : 'lwoAttachFile-dialog'"
     (onHide)="closeAttachDialog()"
   >
     <div class="modal-inset">
-      <div class="modal-body" style="height: 85vh; padding: 0; overflow: hidden;">
+      <div class="modal-body" style="height: calc(85vh - 4px); padding: 0; overflow: hidden;">
         <div class="attach-iframe-loader" *ngIf="iframeLoading">
           <i class="pi pi-spin pi-spinner"></i>
           <span>Loading...</span>
