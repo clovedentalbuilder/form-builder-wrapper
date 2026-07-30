@@ -82,6 +82,11 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   stlFileVisible: boolean = false;
   stlFileUpload: any = null;
 
+  // Posted to the files iframe. Filled at the only two entry points — the edit-time patch and the
+  // iframe's SELECTED_FILES_RESPONSE — and pruned in deleteFile() when the user removes a file.
+  alreadyAttachFile: any[] = []; // already uploaded, came in with the saved data
+  pendingAttachFile: any[] = []; // attached from the iframe in this session, not saved yet
+
   uploadedImages: { [key: string]: { result: string, file: File | null }[] } = {};
   deletedFiles: any[] = [];
   uploadedFilesMap: { [key: string]: any[] } = {};
@@ -490,6 +495,7 @@ ngAfterViewInit(): void {
         };
       });
     if (formatted.length > 0) {
+      this.alreadyAttachFile = [...this.alreadyAttachFile, ...formatted];
       this.uploadedFiles = [...this.uploadedFiles, ...formatted];
       this.formattedData.uploadedFiles = this.uploadedFiles;
       this.uploadFileControl.setValue(this.formattedData);
@@ -565,6 +571,7 @@ ngAfterViewInit(): void {
             // _showErrors: false,
           };
         });
+        this.pendingAttachFile = [...this.pendingAttachFile, ...newFiles];
         this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
         this.formattedData.uploadedFiles = this.uploadedFiles;
         this.uploadFileControl.setValue(this.formattedData);
@@ -726,6 +733,12 @@ ngAfterViewInit(): void {
 
     // Remove the file from uploadedFiles using filter for immutability
     this.uploadedFiles = this.uploadedFiles.filter((_, i) => i !== index);
+
+    // Drop it from the attach lists too, so a file removed after attaching stops being posted
+    if (deletedFile?.fileMetaId) {
+      this.alreadyAttachFile = this.alreadyAttachFile.filter(f => f?.fileMetaId !== deletedFile.fileMetaId);
+      this.pendingAttachFile = this.pendingAttachFile.filter(f => f?.fileMetaId !== deletedFile.fileMetaId);
+    }
 
     // Update formattedData
     this.formattedData = {
@@ -897,6 +910,8 @@ ngAfterViewInit(): void {
         elementId: 'headtab, leftMenuToggle',
         elementModificationClass: 'filesAttachProvision',
         limit: remaining,
+        alreadyAttachFile: this.alreadyAttachFile,
+        pendingAttachFile: this.pendingAttachFile || [],
       }, this.attachIframeOrigin);
     }
   }
