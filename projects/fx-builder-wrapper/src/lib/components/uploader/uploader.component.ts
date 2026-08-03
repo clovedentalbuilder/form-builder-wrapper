@@ -556,7 +556,7 @@ ngAfterViewInit(): void {
             },
             result:      item.fileUrl,       // pre-signed URL for display
             name:        fileName,
-            title:       item.title || fileName || '',
+            title:       (item.title || fileName || '').substring(0, 26),
             notes:       item.notes || '',
             categoryId:  item.categoryId || '',
             // isAttached:  true,
