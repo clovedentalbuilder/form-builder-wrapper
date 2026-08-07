@@ -52,44 +52,23 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   showUploadDropdown = false;
   iframeDialogVisible = false;
   iframeLoading = false;
-  private _attachIframeSrc: SafeResourceUrl | null = null;
-  /** Never null: builds the URL on first read and re-builds it if something cleared the
-   *  backing field while the dialog is open (a late `onHide` from PrimeNG's leave animation
-   *  can land after the dialog was re-opened, which used to leave `*ngIf` false — modal open,
-   *  no iframe at all). Must return the SAME object once built, otherwise every change
-   *  detection pass re-assigns `src` and the frame reloads in a loop. */
-  get attachIframeSrc(): SafeResourceUrl {
-    if (!this._attachIframeSrc) {
-      this._attachIframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.attachIframeUrl);
-    }
-    return this._attachIframeSrc;
-  }
+  /** Plain field bound to the iframe's [src]. Assigned in openAttachFromFiles() before the dialog
+   *  becomes visible, and never cleared on close — the *ngIf on iframeDialogVisible destroys the
+   *  element anyway, so the next open builds a fresh frame. */
+  attachIframeSrc: SafeResourceUrl | null = null;
   get isMobileRequest(): boolean {
     return localStorage.getItem('isMobileRequest') === 'Y';
   }
-  /** Viewport width below which the frame should use the document app's mobile route. */
-  private readonly mobileBreakpointPx = 768;
-  /** Deliberately NOT localStorage('isMobileRequest'): that flag is written by the host app and
-   *  cannot be relied on here — when it is stale or missing the frame gets the wrong route and
-   *  renders nothing. The actual viewport is always available and always correct. */
-  private get isMobileViewport(): boolean {
-    const width = window.innerWidth || document.documentElement?.clientWidth || 0;
-    return width > 0 && width <= this.mobileBreakpointPx;
-  }
-  private get documentListRoute(): string {
-    // Default to the desktop route; only a genuinely small viewport gets the mobile one.
-    return this.isMobileViewport ? '/document/mobile' : '/document';
-  }
-  private get attachIframeUrl(): string {
-    // Dev serves the document app at the origin root (port 4300); production serves it under /webappnew
-    const prefix = window.location.port === '4300' ? '' : '/webappnew';
-    const url = `${window.location.origin}${prefix}${this.documentListRoute}`;
-    console.log('[fx-uploader] attach iframe URL:', url);
-    return url;
-  }
-  private get attachIframeOrigin(): string {
-    try { return new URL(this.attachIframeUrl).origin; } catch { return '*'; }
-  }
+  // ── TEMPORARY (testing) ───────────────────────────────────────────────────────────────────
+  // Plain fields, no getters, nothing derived at runtime. Keep the two in sync: attachIframeOrigin
+  // is the origin part of attachIframeUrl and is used as the postMessage targetOrigin and to
+  // validate incoming messages. Restore this before shipping:
+  //   const base = window.location.hostname === 'localhost'
+  //     ? 'http://localhost:4300'
+  //     : `${window.location.origin}/webappnew`;
+  //   attachIframeUrl = `${base}/document`;
+  attachIframeUrl = 'http://192.168.0.84:4300/document/mobile';
+  attachIframeOrigin = 'http://192.168.0.84:4300';
   private messageHandler!: (event: MessageEvent) => void;
   private http = inject(HttpClient);
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -902,9 +881,9 @@ ngAfterViewInit(): void {
   openAttachFromFiles(): void {
     this.showUploadDropdown = false;
     this.iframeLoading = true;
-    // Clear the cache so the getter builds a fresh URL for this open (a new object also makes
-    // Angular re-assign src, so the frame really re-navigates instead of showing a stale doc).
-    this._attachIframeSrc = null;
+    // Assign the URL here, before the dialog becomes visible, so the frame already has a src the
+    // moment *ngIf creates the element.
+    this.attachIframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.attachIframeUrl);
     this.iframeDialogVisible = true;
   }
 
@@ -944,7 +923,10 @@ ngAfterViewInit(): void {
   closeAttachDialog(): void {
     this.iframeDialogVisible = false;
     this.iframeLoading = false;
-    this._attachIframeSrc = null;
+    // Deliberately keep _attachIframeSrc. Nulling it here was the trap: PrimeNG emits onHide from
+    // the leave animation, so a close that lands just after a re-open wiped the src of the dialog
+    // that had already re-opened — modal visible, iframe gone. The element is destroyed by *ngIf
+    // on close anyway, so the next open builds a fresh frame regardless.
     this.removeBodyScrollBlock();
   }
 
