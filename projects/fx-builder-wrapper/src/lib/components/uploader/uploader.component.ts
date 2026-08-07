@@ -52,17 +52,40 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   showUploadDropdown = false;
   iframeDialogVisible = false;
   iframeLoading = false;
-  attachIframeSrc: SafeResourceUrl | null = null;
+  private _attachIframeSrc: SafeResourceUrl | null = null;
+  /** Never null: builds the URL on first read and re-builds it if something cleared the
+   *  backing field while the dialog is open (a late `onHide` from PrimeNG's leave animation
+   *  can land after the dialog was re-opened, which used to leave `*ngIf` false — modal open,
+   *  no iframe at all). Must return the SAME object once built, otherwise every change
+   *  detection pass re-assigns `src` and the frame reloads in a loop. */
+  get attachIframeSrc(): SafeResourceUrl {
+    if (!this._attachIframeSrc) {
+      this._attachIframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.attachIframeUrl);
+    }
+    return this._attachIframeSrc;
+  }
   get isMobileRequest(): boolean {
     return localStorage.getItem('isMobileRequest') === 'Y';
   }
+  /** Viewport width below which the frame should use the document app's mobile route. */
+  private readonly mobileBreakpointPx = 768;
+  /** Deliberately NOT localStorage('isMobileRequest'): that flag is written by the host app and
+   *  cannot be relied on here — when it is stale or missing the frame gets the wrong route and
+   *  renders nothing. The actual viewport is always available and always correct. */
+  private get isMobileViewport(): boolean {
+    const width = window.innerWidth || document.documentElement?.clientWidth || 0;
+    return width > 0 && width <= this.mobileBreakpointPx;
+  }
   private get documentListRoute(): string {
-    return this.isMobileRequest ? '/document/mobile' : '/document';
+    // Default to the desktop route; only a genuinely small viewport gets the mobile one.
+    return this.isMobileViewport ? '/document/mobile' : '/document';
   }
   private get attachIframeUrl(): string {
     // Dev serves the document app at the origin root (port 4300); production serves it under /webappnew
     const prefix = window.location.port === '4300' ? '' : '/webappnew';
-    return `${window.location.origin}${prefix}${this.documentListRoute}`;
+    const url = `${window.location.origin}${prefix}${this.documentListRoute}`;
+    console.log('[fx-uploader] attach iframe URL:', url);
+    return url;
   }
   private get attachIframeOrigin(): string {
     try { return new URL(this.attachIframeUrl).origin; } catch { return '*'; }
@@ -879,7 +902,9 @@ ngAfterViewInit(): void {
   openAttachFromFiles(): void {
     this.showUploadDropdown = false;
     this.iframeLoading = true;
-    this.attachIframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.attachIframeUrl);
+    // Clear the cache so the getter builds a fresh URL for this open (a new object also makes
+    // Angular re-assign src, so the frame really re-navigates instead of showing a stale doc).
+    this._attachIframeSrc = null;
     this.iframeDialogVisible = true;
   }
 
@@ -919,7 +944,7 @@ ngAfterViewInit(): void {
   closeAttachDialog(): void {
     this.iframeDialogVisible = false;
     this.iframeLoading = false;
-    this.attachIframeSrc = null;
+    this._attachIframeSrc = null;
     this.removeBodyScrollBlock();
   }
 
