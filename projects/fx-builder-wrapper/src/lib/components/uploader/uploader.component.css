@@ -139,6 +139,7 @@
   background-color: #DEDEDE !important;
   border-radius: 8px;
   padding: 4px;
+  height: 100%
   /* left: 50%;
   transform: translateX(-50%); */
 }
@@ -162,7 +163,7 @@
   height: calc(90vh - 11px) !important;
   max-height: unset;
   padding: 0;
-  overflow: hidden;
+  overflow:visible;
 }
 
 .lwoAttachFile-dialog .modal-body iframe {
