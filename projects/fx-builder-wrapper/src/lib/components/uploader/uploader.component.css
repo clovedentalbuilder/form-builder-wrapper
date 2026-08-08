@@ -137,9 +137,9 @@
 /* ── Attach-from-files iframe (lwoAttachFile-dialog) ─────────────────────── */
 .lwoAttachFile-dialog.p-dialog {
   background-color: #DEDEDE !important;
-  border-radius: 8px;
-  padding: 4px;
-  height: 100%
+  border-radius: 8px !important;
+  padding: 4px !important;
+  height: 100% !important;
   /* left: 50%;
   transform: translateX(-50%); */
 }
@@ -160,7 +160,7 @@
 }
 
 .lwoAttachFile-dialog .modal-body {
-  height: calc(90vh - 11px) !important;
+  height: 100% !important;
   max-height: unset;
   padding: 0;
   overflow:visible;
