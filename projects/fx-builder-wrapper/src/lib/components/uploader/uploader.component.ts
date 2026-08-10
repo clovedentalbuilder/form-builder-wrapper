@@ -584,6 +584,10 @@ ngAfterViewInit(): void {
       this.iframeDialogVisible = false;
       this.removeBodyScrollBlock();
     }
+
+    if (event.data?.type === 'DELETE_WORKDONE_ATTACHED_FILE') {
+      this.removeAttachedFileByMetaId(event.data.payload?.fileMetaId);
+    }
   };
   window.addEventListener('message', this.messageHandler);
 }
@@ -748,6 +752,39 @@ ngAfterViewInit(): void {
     };
 
     // Set the value of the uploadFileControl
+    this.uploadFileControl.setValue(this.formattedData);
+
+    if (this.isUploaderRequired && this.uploadedFiles.length === 0) {
+      this.uploadFileControl.setErrors({ required: true });
+      this.uploadFileControl.markAsTouched();
+    } else {
+      this.revalidateMeta();
+    }
+  }
+
+  /**
+   * The host app deleted an attached file somewhere else (work-done screen) and told us over
+   * postMessage. Drop it from the selection and from both attach lists so it stops being shown and
+   * stops being posted to the files iframe. It is NOT added to deletedFiles — that list drives the
+   * delete on save, and this file is already gone on the server.
+   */
+  private removeAttachedFileByMetaId(fileMetaId: any): void {
+    if (fileMetaId === null || fileMetaId === undefined || fileMetaId === '') return;
+
+    const isMatch = (f: any) => f?.fileMetaId != null && String(f.fileMetaId) === String(fileMetaId);
+
+    const remaining = this.uploadedFiles.filter(f => !isMatch(f));
+    if (remaining.length === this.uploadedFiles.length) return;
+
+    this.uploadedFiles = remaining;
+    this.alreadyAttachFile = this.alreadyAttachFile.filter(f => !isMatch(f));
+    this.pendingAttachFile = this.pendingAttachFile.filter(f => !isMatch(f));
+
+    this.formattedData = {
+      ...this.formattedData,
+      uploadedFiles: this.uploadedFiles,
+      deletedFiles: this.deletedFiles
+    };
     this.uploadFileControl.setValue(this.formattedData);
 
     if (this.isUploaderRequired && this.uploadedFiles.length === 0) {
