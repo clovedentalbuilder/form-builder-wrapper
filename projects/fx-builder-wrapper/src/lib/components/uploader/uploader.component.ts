@@ -586,6 +586,8 @@ ngAfterViewInit(): void {
     }
 
     if (event.data?.type === 'DELETE_WORKDONE_ATTACHED_FILE') {
+      this.iframeDialogVisible = false;
+      this.removeBodyScrollBlock();
       this.removeAttachedFileByMetaId(event.data.payload?.fileMetaId);
     }
   };
