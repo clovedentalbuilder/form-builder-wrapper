@@ -227,6 +227,16 @@
   [showToolbar]="false">
 </ngx-extended-pdf-viewer> -->
     </div>
+    <div *ngIf="pdfSrc && fileType !== 'unsupported'; else unsupportedMsg" class="border rounded shadow-sm">
+     <pdf-viewer
+  [src]="pdfSrc"
+  [render-text]="true"
+  [original-size]="false"
+  [fit-to-page]="true"
+  style="width: 100%; height: 600px; display: block;">
+</pdf-viewer>
+    </div>
+
 
     <ng-template #unsupportedMsg>
       <p class="text-red-600 mt-3" *ngIf="fileType === 'unsupported'">

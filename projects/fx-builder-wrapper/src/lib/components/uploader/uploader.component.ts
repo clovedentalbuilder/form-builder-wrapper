@@ -84,6 +84,7 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
 
   stlFileVisible: boolean = false;
   stlFileUpload: any = null;
+  pdfSrc: string | Uint8Array | { url: string; withCredentials: boolean } = '';
 
   // Posted to the files iframe. Filled at the only two entry points — the edit-time patch and the
   // iframe's SELECTED_FILES_RESPONSE — and pruned in deleteFile() when the user removes a file.
@@ -1091,9 +1092,7 @@ ngAfterViewInit(): void {
 
     if (extension === 'pdf') {
       // Native PDF rendering
-      const googleViewerUrl = 'https://docs.google.com/gview?url=' + encodeURIComponent(url) + '&embedded=true';
-      this.fileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(googleViewerUrl);
-      console.log('PDF Viewer URL:', this.fileUrl);
+      this.pdfSrc = { url, withCredentials: true };
     }
     else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv', '.stl'].includes(extension)) {
       // Microsoft Office Viewer for Office files
