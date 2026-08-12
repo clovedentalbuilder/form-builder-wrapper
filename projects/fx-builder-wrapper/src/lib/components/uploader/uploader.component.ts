@@ -14,7 +14,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerModule, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 
 @Component({
   selector: 'fx-uploader',
@@ -45,7 +45,7 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   fileVisible: boolean = false;
   selecteImageUrl: string = '';
   fileUrl: SafeResourceUrl | null = null;
-  pdfUrl: string = 'https://clove-qa.s3.ap-southeast-1.amazonaws.com/FileModule/Smile_Simulation_Report_Bigb_e4407e96-399e-439e-acdb-ea72b8dd794f.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260812T073821Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=AKIAZUW65RQXTX5HWE6X%2F20260812%2Fap-southeast-1%2Fs3%2Faws4_request&X-Amz-Signature=f85b559cde3aa23c17b754d8007d6ce65d20f64b34a74b7423d65322687a4a72';
+  pdfUrl: string = '';
   fileType: string | null = null;
   fileName: string | null = null;
   private destroy$ = new Subject<Boolean>();
@@ -79,6 +79,7 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
     this.onInit.subscribe((fxData) => {
       this._register(this.uploadFileControl);
     })
+    pdfDefaultOptions.assetsFolder = 'assets/ngx-extended-pdf-viewer/';
   }
 
   stlFileVisible: boolean = false;
@@ -1090,7 +1091,7 @@ ngAfterViewInit(): void {
 
     if (extension === 'pdf') {
       // Native PDF rendering
-      // this.pdfUrl = url;
+      this.pdfUrl = url;
     }
     else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv', '.stl'].includes(extension)) {
       // Microsoft Office Viewer for Office files
