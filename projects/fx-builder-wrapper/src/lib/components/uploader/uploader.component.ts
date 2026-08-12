@@ -15,11 +15,12 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
 import { NgxExtendedPdfViewerModule, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @Component({
   selector: 'fx-uploader',
   standalone: true,
-  imports: [CommonModule, FxComponent, FormsModule, ReactiveFormsModule, FileUploadModule, ToastModule, ConfirmDialogModule, DialogModule, ThreeViewerComponent,NgxExtendedPdfViewerModule],
+  imports: [CommonModule, FxComponent, FormsModule, ReactiveFormsModule, FileUploadModule, ToastModule, ConfirmDialogModule, DialogModule, ThreeViewerComponent,NgxExtendedPdfViewerModule, PdfViewerModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './uploader.component.html',
   styleUrl: './uploader.component.css'
