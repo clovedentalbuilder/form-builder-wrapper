@@ -14,13 +14,13 @@ import { DialogModule } from 'primeng/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
-import { NgxExtendedPdfViewerModule, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
+// import { NgxExtendedPdfViewerModule, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @Component({
   selector: 'fx-uploader',
   standalone: true,
-  imports: [CommonModule, FxComponent, FormsModule, ReactiveFormsModule, FileUploadModule, ToastModule, ConfirmDialogModule, DialogModule, ThreeViewerComponent,NgxExtendedPdfViewerModule, PdfViewerModule],
+  imports: [CommonModule, FxComponent, FormsModule, ReactiveFormsModule, FileUploadModule, ToastModule, ConfirmDialogModule, DialogModule, ThreeViewerComponent,PdfViewerModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './uploader.component.html',
   styleUrl: './uploader.component.css'
@@ -80,7 +80,7 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
     this.onInit.subscribe((fxData) => {
       this._register(this.uploadFileControl);
     })
-    pdfDefaultOptions.assetsFolder = 'assets/ngx-extended-pdf-viewer';
+    // pdfDefaultOptions.assetsFolder = 'assets/ngx-extended-pdf-viewer';
   }
 
   stlFileVisible: boolean = false;
