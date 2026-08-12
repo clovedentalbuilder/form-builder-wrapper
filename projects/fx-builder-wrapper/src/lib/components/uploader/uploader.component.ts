@@ -79,7 +79,7 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
     this.onInit.subscribe((fxData) => {
       this._register(this.uploadFileControl);
     })
-    pdfDefaultOptions.assetsFolder = 'assets/ngx-extended-pdf-viewer/';
+    pdfDefaultOptions.assetsFolder = 'assets/ngx-extended-pdf-viewer';
   }
 
   stlFileVisible: boolean = false;
