@@ -1093,7 +1093,7 @@ ngAfterViewInit(): void {
 
     if (extension === 'pdf') {
       // Native PDF rendering
-      this.pdfSrc = { url, withCredentials: true };
+      this.pdfSrc = url;
     }
     else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv', '.stl'].includes(extension)) {
       // Microsoft Office Viewer for Office files
