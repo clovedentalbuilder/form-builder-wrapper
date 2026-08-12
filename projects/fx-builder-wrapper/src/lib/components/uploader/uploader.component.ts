@@ -1091,7 +1091,9 @@ ngAfterViewInit(): void {
 
     if (extension === 'pdf') {
       // Native PDF rendering
-      this.pdfUrl = url;
+      const googleViewerUrl = 'https://docs.google.com/gview?url=' + encodeURIComponent(url) + '&embedded=true';
+      this.fileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(googleViewerUrl);
+      console.log('PDF Viewer URL:', this.fileUrl);
     }
     else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv', '.stl'].includes(extension)) {
       // Microsoft Office Viewer for Office files
