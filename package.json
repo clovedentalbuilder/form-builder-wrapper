@@ -20,6 +20,7 @@
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
     "@instantsys-labs/fx": "^2.1.1",
+    "ngx-extended-pdf-viewer": "25.6.4",
     "primeng": "^17.18.10",
     "rxjs": "~7.8.0",
     "tailwindcss-primeui": "^0.4.0",

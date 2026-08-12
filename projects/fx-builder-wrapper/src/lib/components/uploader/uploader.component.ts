@@ -14,11 +14,12 @@ import { DialogModule } from 'primeng/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 @Component({
   selector: 'fx-uploader',
   standalone: true,
-  imports: [CommonModule, FxComponent, FormsModule, ReactiveFormsModule, FileUploadModule, ToastModule, ConfirmDialogModule, DialogModule, ThreeViewerComponent],
+  imports: [CommonModule, FxComponent, FormsModule, ReactiveFormsModule, FileUploadModule, ToastModule, ConfirmDialogModule, DialogModule, ThreeViewerComponent,NgxExtendedPdfViewerModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './uploader.component.html',
   styleUrl: './uploader.component.css'
@@ -44,6 +45,7 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   fileVisible: boolean = false;
   selecteImageUrl: string = '';
   fileUrl: SafeResourceUrl | null = null;
+  pdfUrl: string = '';
   fileType: string | null = null;
   fileName: string | null = null;
   private destroy$ = new Subject<Boolean>();
@@ -1087,7 +1089,7 @@ ngAfterViewInit(): void {
 
     if (extension === 'pdf') {
       // Native PDF rendering
-      this.fileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.pdfUrl = url;
     }
     else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv', '.stl'].includes(extension)) {
       // Microsoft Office Viewer for Office files
