@@ -210,14 +210,14 @@
   </div>
 
   <!-- Image Preview Dialog -->
-  <p-dialog header="Image Preview" [modal]="true" [draggable]="false" [(visible)]="visible" [style]="{width: '70rem'}"
+  <p-dialog header="Image Preview" [modal]="true" [draggable]="false" [(visible)]="visible" [style]="{width: '60vw'}"
     class="customDialogClass" (onHide)="closeDialog()">
     <img [src]="selecteImageUrl" class="img-wd"/>
   </p-dialog>
 
     <!-- Document Preview Dialog -->
   <p-dialog header="Document Preview" [modal]="true" [draggable]="false" [(visible)]="fileVisible"
-    [style]="{width: '70rem'}" class="customDialogClass" (onHide)="closeFileDialog()">
+    [style]="{width: '60vw'}" class="customDialogClass" (onHide)="closeFileDialog()">
     <div *ngIf="fileUrl && fileType !== 'unsupported'; else unsupportedMsg" class="border rounded shadow-sm">
       <iframe [src]="fileUrl" width="100%" height="600" style="border: none;" allowfullscreen>
       </iframe>
@@ -233,7 +233,7 @@
   [render-text]="true"
   [original-size]="false"
   [fit-to-page]="true"
-  style="width: 100%; height: 600px; display: block;">
+  style="width: 100%; height: 75vh; display: block;">
 </pdf-viewer>
     </div>
 
