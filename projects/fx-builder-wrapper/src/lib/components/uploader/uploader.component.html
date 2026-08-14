@@ -212,7 +212,9 @@
   <!-- Image Preview Dialog -->
   <p-dialog header="Image Preview" [modal]="true" [draggable]="false" [(visible)]="visible" [style]="{width: '60vw'}"
     class="customDialogClass" (onHide)="closeDialog()">
+    <div class="preview-container" *ngIf="selecteImageUrl">
     <img [src]="selecteImageUrl" class="img-wd"/>
+    </div>
   </p-dialog>
 
     <!-- Document Preview Dialog -->
@@ -233,7 +235,7 @@
   [render-text]="true"
   [original-size]="false"
   [fit-to-page]="true"
-  style="width: 100%; height: 75vh; display: block;">
+  style="width: 100%; height: 100%; display: block;">
 </pdf-viewer>
     </div>
 

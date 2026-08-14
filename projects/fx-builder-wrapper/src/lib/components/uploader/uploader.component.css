@@ -298,7 +298,15 @@ input:focus,textarea:focus,select:focus{
 }
 
 .img-wd{
-  height: 75vh !important;
+  height: 100% !important;
   width: 100% !important;
+}
+
+.preview-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
  
