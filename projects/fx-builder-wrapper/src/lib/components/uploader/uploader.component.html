@@ -51,9 +51,9 @@
             <!-- Thumbnail on left -->
             <div class="thumbnail cursor-pointer relative">
               <ng-container *ngIf="file.type === 'image'; else nonImageThumb">
-                <img class="file-thumbnail" [src]="file?.result" alt="preview" (click)="onImageSelect(file?.result)"
-                  *ngIf="file?.result" />
-                <svg *ngIf="!file?.result" width="180px" height="180px" viewBox="0 0 16 16" fill="none"
+                <img class="file-thumbnail" [src]="getThumbnailSrc(file)" alt="preview" (click)="openPreview(file)"
+                  (error)="onThumbnailError(file)" *ngIf="getThumbnailSrc(file)" />
+                <svg *ngIf="!getThumbnailSrc(file)" width="180px" height="180px" viewBox="0 0 16 16" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M12.7013 13H3.3127C2.58501 13 2 12.4048 2 11.6645V4.33548C2 3.59516 2.58501 3 3.3127 3H12.6871C13.4147 3 13.9998 3.59516 13.9998 4.33548V11.6645C14.014 12.4048 13.4147 13 12.7013 13ZM9.24836 7.90484L7.39347 10.0677C7.27932 10.2129 7.05102 10.2129 6.93688 10.0823L5.93809 8.99355C5.80967 8.8629 5.60991 8.8629 5.4815 8.99355L3.76929 10.8661C3.5838 11.0694 3.72648 11.4032 3.99758 11.4032H6.26626H8.13543H12.0164C12.2875 11.4032 12.4302 11.0839 12.2447 10.8806L9.71922 7.90484C9.59081 7.75968 9.37678 7.75968 9.24836 7.90484ZM6.73712 5.98871C6.25199 5.98871 5.85248 6.39516 5.85248 6.88871C5.85248 7.38226 6.25199 7.78871 6.73712 7.78871C7.22225 7.78871 7.62176 7.38226 7.62176 6.88871C7.62176 6.39516 7.22225 5.98871 6.73712 5.98871Z"

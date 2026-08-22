@@ -4,7 +4,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, injec
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { FxBaseComponent, FxComponent, FxSelectSetting, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
-import { forkJoin, map, Observable, Subject, takeUntil } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, Subject, takeUntil } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -16,6 +16,9 @@ import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
 // import { NgxExtendedPdfViewerModule, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+
+/** Module a file-details lookup is scoped to on the file service. */
+const FILE_DETAILS_MODULE = 'FILE_MODULE';
 
 @Component({
   selector: 'fx-uploader',
@@ -86,6 +89,12 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   stlFileVisible: boolean = false;
   stlFileUpload: any = null;
   pdfSrc: string | Uint8Array | { url: string; withCredentials: boolean } = '';
+
+  // Thumbnails render from the small document_thumb image, not the full-size file. The files
+  // iframe hands us the freshest thumbnail URL, so it is kept for this session only (keyed by the
+  // file's local uuid) - a reloaded form falls back to the persisted originalUrl.thumbnailUrl.
+  private sessionThumbnails = new Map<string, string>();
+  private brokenThumbnails = new Set<string>();
 
   // Posted to the files iframe. Filled at the only two entry points — the edit-time patch and the
   // iframe's SELECTED_FILES_RESPONSE — and pruned in deleteFile() when the user removes a file.
@@ -552,7 +561,7 @@ ngAfterViewInit(): void {
             ? `https://s3.${region}.amazonaws.com/${bucketName}/${thumbnailPath}`
             : item.thumbnailUrl;
 
-          return {
+          const mapped: any = {
             id: uuidv4(),
             file: null,
             originalUrl: {
@@ -575,6 +584,13 @@ ngAfterViewInit(): void {
             type:        this.detectFileTypeFromName(fileName || ''),
             // _showErrors: false,
           };
+
+          const sessionThumbnail = item.thumbnailUrl || thumbnailUrl;
+          if (sessionThumbnail) {
+            this.sessionThumbnails.set(mapped.id, sessionThumbnail);
+          }
+
+          return mapped;
         });
         this.pendingAttachFile = [...this.pendingAttachFile, ...newFiles];
         this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
@@ -981,13 +997,7 @@ ngAfterViewInit(): void {
 
   onExpandFile(file: any, event: MouseEvent): void {
     event.stopPropagation();
-    if (file.type === 'image') {
-      this.onImageSelect(file.result || file.originalUrl?.previewUrl || '');
-    } else if (file.type === 'stl') {
-      this.onOpenSTLFile(file);
-    } else {
-      this.onFileClick(file, file.name);
-    }
+    this.openPreview(file);
   }
 
   detectFileTypeFromName(name: string): 'image' | 'csv' | 'text' | 'pdf' | 'excel' | 'word' | 'stl' | 'other' | 'dcm' | 'htl' {
@@ -1033,23 +1043,91 @@ ngAfterViewInit(): void {
   }
 
   onFileClick(file: any, name: any): void {
+    this.openPreview(file, name);
+  }
 
+  /** Thumbnail shown in the file tile - the document_thumb image, never the full-size file. */
+  getThumbnailSrc(file: any): string {
+    if (!file) return '';
+    if (file.id && this.brokenThumbnails.has(file.id)) return file.result || '';
+    return (file.id && this.sessionThumbnails.get(file.id))
+      || file.originalUrl?.thumbnailUrl
+      || file.result
+      || '';
+  }
+
+  /** A thumbnail that fails to load falls back to the full-size image, then to the placeholder. */
+  onThumbnailError(file: any): void {
+    if (file?.id) this.brokenThumbnails.add(file.id);
+  }
+
+  /** Single entry point for opening a file: resolve a usable URL, then route to the right dialog. */
+  openPreview(file: any, name?: any): void {
     if (!file) return;
 
-    // this.fileName = file.name;
-    let localUrl = '';
-
-    if (file?.file) {
-      localUrl = URL.createObjectURL(file.file);
-    } else {
-      localUrl = file?.result || '';
+    if (file.type === 'stl') {
+      this.onOpenSTLFile(file);
+      return;
     }
-    // const localUrl = URL.createObjectURL(file);
 
+    this.resolvePreviewUrl(file)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((url: string) => {
+        if (!url) return;
+        if (file.type === 'image') {
+          this.onImageSelect(url);
+        } else {
+          this.loadFile(url, name || file.name || '');
+          this.fileVisible = true;
+        }
+      });
+  }
 
-    this.loadFile(localUrl, name);
-    console.log('File URL:', localUrl);
-    this.fileVisible = true;
+  /**
+   * The pre-signed URL saved with the form expires, so a stored file is opened with a URL freshly
+   * issued by the file service. Files still in memory (just picked) and files with no fileMetaId
+   * keep using what they already have.
+   */
+  private resolvePreviewUrl(file: any): Observable<string> {
+    if (file?.file) {
+      return of(file.result || URL.createObjectURL(file.file));
+    }
+
+    const fallback = file?.result || file?.originalUrl?.previewUrl || '';
+    const fileMetaId = file?.fileMetaId;
+    const endpoint = this.fileDetailsUrl;
+
+    if (fileMetaId === null || fileMetaId === undefined || fileMetaId === '' || !endpoint) {
+      return of(fallback);
+    }
+
+    return this.http
+      .post<any>(endpoint, { fileMetaId: String(fileMetaId), moduleName: FILE_DETAILS_MODULE })
+      .pipe(
+        map((res: any) => res?.data?.url || fallback),
+        catchError(() => of(fallback)),
+      );
+  }
+
+  /**
+   * `<file service>/file-records/file-details`. Hosts that only register `workflow_service` share
+   * the same gateway prefix, so the endpoint is derived from it when no file service is registered.
+   */
+  private get fileDetailsUrl(): string {
+    for (const service of ['file_service', 'workflow_service']) {
+      let base = '';
+      try {
+        base = this.fxApiService.getServiceUrl(service) || '';
+      } catch {
+        continue; // not registered by the host app
+      }
+      if (!base) continue;
+      base = base.replace(/\/+$/, '');
+      return service === 'file_service'
+        ? `${base}/file-records/file-details`
+        : `${base}/file/file-records/file-details`;
+    }
+    return '';
   }
 
   onOpenSTLFile(file: any): void {
@@ -1090,6 +1168,8 @@ ngAfterViewInit(): void {
   private loadFile(url: string, fileName: string): void {
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
     this.fileType = extension;
+    this.fileUrl = null;
+    this.pdfSrc = '';
 
     if (extension === 'pdf') {
       // Native PDF rendering
@@ -1114,6 +1194,7 @@ ngAfterViewInit(): void {
   closeFileDialog() {
     this.fileVisible = false;
     this.fileUrl = null;
+    this.pdfSrc = '';
     this.fileType = null;
     this.fileName = null;
   }
