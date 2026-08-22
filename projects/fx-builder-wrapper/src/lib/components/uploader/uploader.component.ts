@@ -1035,6 +1035,7 @@ ngAfterViewInit(): void {
   closeDialog() {
     this.visible = false;
     this.selecteImageUrl = '';
+    this.removeBodyScrollBlock();
   }
 
   onImageSelect(url: string) {
@@ -1197,11 +1198,13 @@ ngAfterViewInit(): void {
     this.pdfSrc = '';
     this.fileType = null;
     this.fileName = null;
+    this.removeBodyScrollBlock();
   }
 
   closeStlDialog() {
     this.stlFileVisible = false;
     this.stlFileUpload = null;
+    this.removeBodyScrollBlock();
   }
 
 }
