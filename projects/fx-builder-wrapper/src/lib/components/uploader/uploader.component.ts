@@ -554,7 +554,7 @@ ngAfterViewInit(): void {
           // Non-presigned S3 fileUrl (matches the format used by existing uploaded files)
           const s3FileUrl = (region && bucketName && objectKey)
             ? `https://s3.${region}.amazonaws.com/${bucketName}/${objectKey}`
-            : item.fileUrl;
+            : item.appFileUrl;
 
           // Thumbnail using thumbnailPath when available. The path comes from the
           // uploaded file name, so the URL we build has to be percent-encoded before
