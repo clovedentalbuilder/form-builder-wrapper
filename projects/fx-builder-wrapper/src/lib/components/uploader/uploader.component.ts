@@ -546,7 +546,7 @@ ngAfterViewInit(): void {
           const mimeType    = item.mimeType;
 
           // Extract region from the pre-signed fileUrl
-          const urlForRegion = item.fileUrl || item.thumbnailUrl || '';
+          const urlForRegion = item.appFileUrl || item.thumbnailUrl || '';
           const regionMatch  = urlForRegion.match(/\.s3\.([\w-]+)\.amazonaws\.com/) ||
                                urlForRegion.match(/s3-([\w-]+)\.amazonaws\.com/);
           const region = regionMatch?.[1] || '';
