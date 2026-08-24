@@ -4,6 +4,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, ElementRef, injec
 import { FormControl, FormsModule, ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { FxBaseComponent, FxComponent, FxSelectSetting, FxSetting, FxStringSetting, FxValidation, FxValidatorService } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
+import { sanitizeAssetUrl } from '../shared/asset-url';
 import { catchError, forkJoin, map, Observable, of, Subject, takeUntil } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
@@ -555,11 +556,14 @@ ngAfterViewInit(): void {
             ? `https://s3.${region}.amazonaws.com/${bucketName}/${objectKey}`
             : item.fileUrl;
 
-          // Thumbnail using thumbnailPath when available
+          // Thumbnail using thumbnailPath when available. The path comes from the
+          // uploaded file name, so the URL we build has to be percent-encoded before
+          // it is stored/rendered. The pre-signed fallback is left untouched -
+          // sanitising it would break its X-Amz-* query string.
           const thumbnailPath = item.thumbnailPath || `document_thumb/${objectKey}`;
           const thumbnailUrl  = (region && bucketName)
-            ? `https://s3.${region}.amazonaws.com/${bucketName}/${thumbnailPath}`
-            : item.thumbnailUrl;
+            ? sanitizeAssetUrl(`https://s3.${region}.amazonaws.com/${bucketName}/${thumbnailPath}`)
+            : sanitizeAssetUrl(item.thumbnailUrl);
 
           const mapped: any = {
             id: uuidv4(),
@@ -585,7 +589,7 @@ ngAfterViewInit(): void {
             // _showErrors: false,
           };
 
-          const sessionThumbnail = item.thumbnailUrl || thumbnailUrl;
+          const sessionThumbnail = sanitizeAssetUrl(item.thumbnailUrl) || thumbnailUrl;
           if (sessionThumbnail) {
             this.sessionThumbnails.set(mapped.id, sessionThumbnail);
           }
