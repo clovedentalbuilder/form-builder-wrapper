@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+import { toYesNo } from '../shared/yes-no-setting';
 
 export interface ManualOption {
   option: string;
@@ -39,7 +40,7 @@ type ImportMode = 'upload' | 'paste';
  *
  * "Enable Search" (isSearchEnabled) toggles the dropdown's built-in filter
  * box — defaults to Yes (search visible), same Yes/No FxSelectSetting shape
- * as isSearchRequired (a string, not FxToggleSetting, so a saved "No" isn't
+ * as isSearchRequired (a string, not a boolean, so a saved "No" isn't
  * silently reverted back to the "Yes" class default by the fx library's
  * deepMergeObjects — see DropdownWithSearchComponent.settings()).
  */
@@ -119,7 +120,7 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
       isSearchRequired: this.read('isSearchRequired', 'true'),
       multiErrorSearch: this.read('multiErrorSearch', 'Please select'),
 
-      visibilityUseCode: this.read('visibilityUseCode', false) ? 'true' : 'false',
+      visibilityUseCode: toYesNo(this.read('visibilityUseCode', false)),
       visibilityCode: this.read('visibilityCode', ''),
     });
 
@@ -162,7 +163,7 @@ export class DropdownWithSearchSettingsPanelComponent extends FxComponent {
 
     // Custom-code gating is hidden in this panel for now — force it off so re-saving
     // an old field (that may have had it on) falls back to conditions-only.
-    this.write('visibilityUseCode', false);
+    this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 

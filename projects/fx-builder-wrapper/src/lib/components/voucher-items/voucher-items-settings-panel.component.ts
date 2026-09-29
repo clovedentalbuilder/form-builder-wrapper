@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+import { toYesNo } from '../shared/yes-no-setting';
 
 type SettingsTab = 'basic' | 'validations' | 'import';
 type ImportMode = 'upload' | 'paste';
@@ -80,7 +81,7 @@ export class VoucherItemsSettingsPanelComponent extends FxComponent {
       typeOptions: this.read('typeOptions', 'Coupon,Voucher'),
       minItems: this.read('minItems', 1),
       maxItems: this.read('maxItems', 0),
-      showCreatedAt: this.read('showCreatedAt', true) ? 'true' : 'false',
+      showCreatedAt: toYesNo(this.read('showCreatedAt', true)),
     });
 
     this.splitIntoSections(
@@ -110,11 +111,11 @@ export class VoucherItemsSettingsPanelComponent extends FxComponent {
     this.write('typeOptions', raw.typeOptions);
     this.write('minItems', raw.minItems);
     this.write('maxItems', raw.maxItems);
-    this.write('showCreatedAt', raw.showCreatedAt === 'true');
+    this.write('showCreatedAt', raw.showCreatedAt === 'true' ? 'true' : 'false');
 
     // Custom-code gating is hidden in this panel for now — force it off so re-saving
     // an old field (that may have had it on) falls back to conditions-only.
-    this.write('visibilityUseCode', false);
+    this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 

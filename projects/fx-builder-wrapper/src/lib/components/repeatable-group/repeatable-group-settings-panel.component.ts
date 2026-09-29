@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+import { toYesNo } from '../shared/yes-no-setting';
 
 type SettingsTab = 'basic' | 'validations' | 'import';
 type ImportMode = 'upload' | 'paste';
@@ -92,7 +93,7 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
       groupTitle: this.read('groupTitle', 'ITEMS'),
       addButtonText: this.read('addButtonText', 'Add Item'),
       itemLabel: this.read('itemLabel', 'ITEM'),
-      showCreatedAt: this.read('showCreatedAt', true) ? 'true' : 'false',
+      showCreatedAt: toYesNo(this.read('showCreatedAt', true)),
       showInListing: this.read('showInListing', false) ? 'true' : 'false',
     });
 
@@ -124,16 +125,16 @@ export class RepeatableGroupSettingsPanelComponent extends FxComponent {
     this.write('groupTitle', raw.groupTitle);
     this.write('addButtonText', raw.addButtonText);
     this.write('itemLabel', raw.itemLabel);
-    this.write('showCreatedAt', raw.showCreatedAt === 'true');
+    this.write('showCreatedAt', raw.showCreatedAt === 'true' ? 'true' : 'false');
     this.write('showInListing', raw.showInListing === 'true');
 
     // Custom-code gating is hidden in this panel for now — force it off so re-saving
     // an old field (that may have had it on) falls back to conditions-only.
-    this.write('visibilityUseCode', false);
+    this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 
-    this.write('enableUseCode', false);
+    this.write('enableUseCode', 'false');
     this.write('enableCode', '');
     this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
 

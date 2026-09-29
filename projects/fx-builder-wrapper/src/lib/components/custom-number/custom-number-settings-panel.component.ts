@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+import { toYesNo } from '../shared/yes-no-setting';
 
 type SettingsTab = 'basic' | 'validations' | 'import';
 type ImportMode = 'upload' | 'paste';
@@ -95,7 +96,7 @@ export class CustomNumberSettingsPanelComponent extends FxComponent {
       decimalPlaces: this.read('decimalPlaces', ''),
       step: this.read('step', ''),
 
-      isRequired: this.read('isRequired', false) ? 'true' : 'false',
+      isRequired: toYesNo(this.read('isRequired', false)),
       requiredMessage: this.read('requiredMessage', 'This field is required'),
       min: this.read('min', ''),
       minMessage: this.read('minMessage', 'Value is too small'),
@@ -142,7 +143,7 @@ export class CustomNumberSettingsPanelComponent extends FxComponent {
     this.write('decimalPlaces', raw.decimalPlaces);
     this.write('step', raw.step);
 
-    this.write('isRequired', raw.isRequired === 'true');
+    this.write('isRequired', raw.isRequired === 'true' ? 'true' : 'false');
     this.write('requiredMessage', raw.requiredMessage);
     this.write('min', raw.min);
     this.write('minMessage', raw.minMessage);
@@ -155,11 +156,11 @@ export class CustomNumberSettingsPanelComponent extends FxComponent {
 
     // Custom-code gating is hidden in this panel — force it off so re-saving an old
     // field (that may have had it on) falls back to conditions-only.
-    this.write('enableUseCode', false);
+    this.write('enableUseCode', 'false');
     this.write('enableCode', '');
     this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
 
-    this.write('visibilityUseCode', false);
+    this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 

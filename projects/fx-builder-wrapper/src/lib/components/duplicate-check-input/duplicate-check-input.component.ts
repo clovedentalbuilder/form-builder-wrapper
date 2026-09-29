@@ -8,7 +8,6 @@ import {
   FxSelectSetting,
   FxSetting,
   FxStringSetting,
-  FxToggleSetting,
   FxValidation,
 } from '@instantsys-labs/fx';
 import { ApiServiceRegistry } from '@instantsys-labs/core';
@@ -20,6 +19,7 @@ import { DuplicateCheckInputSettingsPanelComponent } from './duplicate-check-inp
 import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
 import { FieldControlIncludeController } from '../shared/form-control-visibility';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 type CheckState = 'idle' | 'checking' | 'duplicate' | 'available' | 'error';
 
@@ -82,9 +82,17 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
   }
 
   ngDoCheck(): void {
-    const exclude = this.setting('excludeControlsWhenHidden') === true;
+    const exclude = isSettingOn(this.setting('excludeControlsWhenHidden'));
     const shouldInclude = !this.fieldHidden || !exclude;
     this.controlToggler.update(shouldInclude);
+  }
+
+  /**
+   * Template helper for a Yes/No setting. Templates must NOT test `setting(key)`
+   * directly — it now holds the string 'false', which is truthy.
+   */
+  public isOn(key: string): boolean {
+    return isSettingOn(this.setting(key));
   }
 
   protected settings(): FxSetting[] {
@@ -117,7 +125,7 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
       new FxStringSetting({ key: 'paramKey', $title: 'Param / Body Key', value: 'value' }),
       new FxStringSetting({ key: 'extraParams', $title: 'Extra Static Params (JSON)', value: '{}' }),
       new FxStringSetting({ key: 'responsePath', $title: 'Response Path (dot notation)', value: 'exists' }),
-      new FxToggleSetting({ key: 'invertResult', $title: 'Invert Result (truthy = available)', value: false }),
+      new FxSelectSetting({ key: 'invertResult', $title: 'Invert Result (truthy = available)', value: 'false' }, yesNoOptions()),
       new FxSelectSetting({ key: 'onApiError', $title: 'On API Error', value: 'allow' }, [
         { option: 'Allow (treat as valid)', value: 'allow' },
         { option: 'Block (mark invalid)', value: 'block' },
@@ -127,11 +135,11 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
       // Messages
       new FxStringSetting({ key: 'duplicateMessage', $title: 'Duplicate Message', value: 'This value already exists' }),
       new FxStringSetting({ key: 'checkingMessage', $title: 'Checking Message', value: 'Checking...' }),
-      new FxToggleSetting({ key: 'showAvailableMessage', $title: 'Show Available Message', value: true }),
+      new FxSelectSetting({ key: 'showAvailableMessage', $title: 'Show Available Message', value: 'true' }, yesNoOptions()),
       new FxStringSetting({ key: 'availableMessage', $title: 'Available Message', value: 'Available' }),
 
       // Validation
-      new FxToggleSetting({ key: 'isRequired', $title: 'Required', value: false }),
+      new FxSelectSetting({ key: 'isRequired', $title: 'Required', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'requiredMessage', $title: 'Required Message', value: 'This field is required' }),
       new FxStringSetting({ key: 'minLength', $title: 'Min Length', value: '' }),
       new FxStringSetting({ key: 'minLengthMessage', $title: 'Min Length Message', value: 'Value is too short' }),
@@ -142,18 +150,18 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
 
       // Enable/disable gate: a condition list (privilege/supportingData/field rows, freely
       // combined via any/all) OR custom code — see shared/applicability.ts.
-      new FxToggleSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'enableConditions', $title: 'Enable Conditions', value: '[]' }),
       new FxStringSetting({ key: 'enableConditionsMatch', $title: 'Enable Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
 
       // Visibility gate: same condition-list-or-code shape as enable.
-      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
       // Default MUST be false — see form-control-visibility.ts / the deepMergeObjects note elsewhere in the codebase.
-      new FxToggleSetting({ key: 'excludeControlsWhenHidden', $title: 'Exclude Form Control When Hidden', value: false }),
+      new FxSelectSetting({ key: 'excludeControlsWhenHidden', $title: 'Exclude Form Control When Hidden', value: 'false' }, yesNoOptions()),
     ];
   }
 
@@ -172,13 +180,13 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
   /** Computes { visible, enabled } from privileges + supportingData + another field's live value. See shared/applicability.ts. */
   private get applicability(): { visible: boolean; enabled: boolean } {
     const visibility: GateConfig = {
-      useCode: this.setting('visibilityUseCode') === true,
+      useCode: isSettingOn(this.setting('visibilityUseCode')),
       code: this.setting('visibilityCode'),
       conditions: parseConditions(this.setting('visibilityConditions')),
       conditionsMatch: this.setting('visibilityConditionsMatch'),
     };
     const enable: GateConfig = {
-      useCode: this.setting('enableUseCode') === true,
+      useCode: isSettingOn(this.setting('enableUseCode')),
       code: this.setting('enableCode'),
       conditions: parseConditions(this.setting('enableConditions')),
       conditionsMatch: this.setting('enableConditionsMatch'),
@@ -226,7 +234,7 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
 
   get statusMessage(): string | null {
     if (this.state === 'checking') return this.setting('checkingMessage') || 'Checking...';
-    if (this.state === 'available' && this.setting('showAvailableMessage') === true) {
+    if (this.state === 'available' && isSettingOn(this.setting('showAvailableMessage'))) {
       return this.setting('availableMessage') || 'Available';
     }
     return null;
@@ -371,12 +379,12 @@ export class DuplicateCheckInputComponent extends FxBaseComponent implements DoC
       cursor = cursor?.[segment];
     }
     const truthy = Boolean(cursor);
-    return this.setting('invertResult') === true ? !truthy : truthy;
+    return isSettingOn(this.setting('invertResult')) ? !truthy : truthy;
   }
 
   private applyValidators(): void {
     const validators = [];
-    if (this.setting('isRequired') === true) validators.push(Validators.required);
+    if (isSettingOn(this.setting('isRequired'))) validators.push(Validators.required);
     const minLength = Number(this.setting('minLength'));
     if (minLength > 0) validators.push(Validators.minLength(minLength));
     const maxLength = Number(this.setting('maxLength'));

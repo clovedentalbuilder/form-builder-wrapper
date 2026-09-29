@@ -6,7 +6,7 @@
   <div class="cnm-field">
     <label class="cnm-label" *ngIf="setting('label')">
       {{ setting('label') }}
-      <span class="cnm-required" *ngIf="setting('isRequired')">*</span>
+      <span class="cnm-required" *ngIf="isOn('isRequired')">*</span>
     </label>
     <input
       type="number"

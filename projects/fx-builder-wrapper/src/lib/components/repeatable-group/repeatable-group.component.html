@@ -33,7 +33,7 @@
             <fx-form [fxForm]="withScope(row)" [formGroup]="getFG(i)" [value]="rowValues[i]" [mode]="mode"></fx-form>
           </div>
 
-          <div class="rg__item-foot" *ngIf="isView && setting('showCreatedAt') && createdAt(row)">
+          <div class="rg__item-foot" *ngIf="isView && isOn('showCreatedAt') && createdAt(row)">
             Created At: <strong>{{ createdAt(row) }}</strong>
           </div>
         </div>

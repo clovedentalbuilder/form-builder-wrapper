@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+import { toYesNo } from '../shared/yes-no-setting';
 
 type SettingsTab = 'basic' | 'validations' | 'import';
 type ImportMode = 'upload' | 'paste';
@@ -131,16 +132,16 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
       paramKey: this.read('paramKey', 'value'),
       extraParams: this.read('extraParams', '{}'),
       responsePath: this.read('responsePath', 'exists'),
-      invertResult: this.read('invertResult', false) ? 'true' : 'false',
+      invertResult: toYesNo(this.read('invertResult', false)),
       onApiError: this.read('onApiError', 'allow'),
       apiErrorMessage: this.read('apiErrorMessage', 'Unable to verify right now. Please try again.'),
 
       duplicateMessage: this.read('duplicateMessage', 'This value already exists'),
       checkingMessage: this.read('checkingMessage', 'Checking...'),
-      showAvailableMessage: this.read('showAvailableMessage', true) ? 'true' : 'false',
+      showAvailableMessage: toYesNo(this.read('showAvailableMessage', true)),
       availableMessage: this.read('availableMessage', 'Available'),
 
-      isRequired: this.read('isRequired', false) ? 'true' : 'false',
+      isRequired: toYesNo(this.read('isRequired', false)),
       requiredMessage: this.read('requiredMessage', 'This field is required'),
       minLength: this.read('minLength', ''),
       minLengthMessage: this.read('minLengthMessage', 'Value is too short'),
@@ -191,16 +192,16 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
     this.write('paramKey', raw.paramKey);
     this.write('extraParams', raw.extraParams);
     this.write('responsePath', raw.responsePath);
-    this.write('invertResult', raw.invertResult === 'true');
+    this.write('invertResult', raw.invertResult === 'true' ? 'true' : 'false');
     this.write('onApiError', raw.onApiError);
     this.write('apiErrorMessage', raw.apiErrorMessage);
 
     this.write('duplicateMessage', raw.duplicateMessage);
     this.write('checkingMessage', raw.checkingMessage);
-    this.write('showAvailableMessage', raw.showAvailableMessage === 'true');
+    this.write('showAvailableMessage', raw.showAvailableMessage === 'true' ? 'true' : 'false');
     this.write('availableMessage', raw.availableMessage);
 
-    this.write('isRequired', raw.isRequired === 'true');
+    this.write('isRequired', raw.isRequired === 'true' ? 'true' : 'false');
     this.write('requiredMessage', raw.requiredMessage);
     this.write('minLength', raw.minLength);
     this.write('minLengthMessage', raw.minLengthMessage);
@@ -212,11 +213,11 @@ export class DuplicateCheckInputSettingsPanelComponent extends FxComponent {
 
     // Custom-code gating is hidden in this panel for now — force it off so re-saving
     // an old field (that may have had it on) falls back to conditions-only.
-    this.write('enableUseCode', false);
+    this.write('enableUseCode', 'false');
     this.write('enableCode', '');
     this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
 
-    this.write('visibilityUseCode', false);
+    this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 

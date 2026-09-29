@@ -6,7 +6,7 @@
   <div class="cta-field">
     <label class="cta-label" *ngIf="setting('label')">
       {{ setting('label') }}
-      <span class="cta-required" *ngIf="setting('isRequired')">*</span>
+      <span class="cta-required" *ngIf="isOn('isRequired')">*</span>
     </label>
     <textarea
       class="cta-input"

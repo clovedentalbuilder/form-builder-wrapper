@@ -7,7 +7,7 @@
        does in dropdown-with-other (its label sits inside a relative wrapper too). -->
   <div class="cpi-field">
     <label class="input-label dark:text-gray-300" *ngIf="setting('label')">
-      {{ setting('label') }} <span class="cpi-required" *ngIf="setting('isRequired')">*</span>
+      {{ setting('label') }} <span class="cpi-required" *ngIf="isOn('isRequired')">*</span>
     </label>
     <div class="cpi-input-wrap">
       <input

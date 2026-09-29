@@ -6,13 +6,14 @@ import {
   FxMode,
   FxSetting,
   FxStringSetting,
-  FxToggleSetting,
+  FxSelectSetting,
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { CustomTextboxSettingsPanelComponent } from './custom-textbox-settings-panel.component';
 import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 /**
  * Custom textbox: a self-contained text-input field (own FormControl, own
@@ -51,6 +52,14 @@ export class CustomTextboxComponent extends FxBaseComponent {
     });
   }
 
+  /**
+   * Template helper for a Yes/No setting. Templates must NOT test `setting(key)`
+   * directly — it now holds the string 'false', which is truthy.
+   */
+  public isOn(key: string): boolean {
+    return isSettingOn(this.setting(key));
+  }
+
   protected settings(): FxSetting[] {
     return [
       new FxStringSetting({ key: 'label', $title: 'Label', value: 'Label' }),
@@ -58,7 +67,7 @@ export class CustomTextboxComponent extends FxBaseComponent {
       new FxStringSetting({ key: 'helpText', $title: 'Help Text', value: '' }),
       new FxStringSetting({ key: 'showInListing', $title: 'Show In Listing', value: false }),
 
-      new FxToggleSetting({ key: 'isRequired', $title: 'Required', value: false }),
+      new FxSelectSetting({ key: 'isRequired', $title: 'Required', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'requiredMessage', $title: 'Required Message', value: 'This field is required' }),
       new FxStringSetting({ key: 'minLength', $title: 'Min Length', value: '' }),
       new FxStringSetting({ key: 'minLengthMessage', $title: 'Min Length Message', value: 'Value is too short' }),
@@ -69,13 +78,13 @@ export class CustomTextboxComponent extends FxBaseComponent {
 
       // Enable/disable gate: a condition list (privilege/supportingData/field rows, freely
       // combined via any/all) OR custom code — see shared/applicability.ts.
-      new FxToggleSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'enableConditions', $title: 'Enable Conditions', value: '[]' }),
       new FxStringSetting({ key: 'enableConditionsMatch', $title: 'Enable Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
 
       // Visibility gate: same condition-list-or-code shape as enable.
-      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
@@ -93,13 +102,13 @@ export class CustomTextboxComponent extends FxBaseComponent {
   /** Computes { visible, enabled } from privileges + supportingData + another field's live value. See shared/applicability.ts. */
   private get applicability(): { visible: boolean; enabled: boolean } {
     const visibility: GateConfig = {
-      useCode: this.setting('visibilityUseCode') === true,
+      useCode: isSettingOn(this.setting('visibilityUseCode')),
       code: this.setting('visibilityCode'),
       conditions: parseConditions(this.setting('visibilityConditions')),
       conditionsMatch: this.setting('visibilityConditionsMatch'),
     };
     const enable: GateConfig = {
-      useCode: this.setting('enableUseCode') === true,
+      useCode: isSettingOn(this.setting('enableUseCode')),
       code: this.setting('enableCode'),
       conditions: parseConditions(this.setting('enableConditions')),
       conditionsMatch: this.setting('enableConditionsMatch'),
@@ -152,7 +161,7 @@ export class CustomTextboxComponent extends FxBaseComponent {
 
   private applyValidators(): void {
     const validators = [];
-    if (this.setting('isRequired') === true) validators.push(Validators.required);
+    if (isSettingOn(this.setting('isRequired'))) validators.push(Validators.required);
     const minLength = Number(this.setting('minLength'));
     if (minLength > 0) validators.push(Validators.minLength(minLength));
     const maxLength = Number(this.setting('maxLength'));

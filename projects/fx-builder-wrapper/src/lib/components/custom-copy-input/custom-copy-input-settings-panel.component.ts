@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Condition, ConditionSource, isConditionConfigured, parseConditions } from '../shared/applicability';
+import { toYesNo } from '../shared/yes-no-setting';
 
 type SettingsTab = 'basic' | 'validations' | 'import';
 type ImportMode = 'upload' | 'paste';
@@ -91,7 +92,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
       copiedMessage: this.read('copiedMessage', 'Copied to clipboard'),
       showInListing: this.read('showInListing', false) ? 'true' : 'false',
 
-      isRequired: this.read('isRequired', false) ? 'true' : 'false',
+      isRequired: toYesNo(this.read('isRequired', false)),
       requiredMessage: this.read('requiredMessage', 'This field is required'),
       minLength: this.read('minLength', ''),
       minLengthMessage: this.read('minLengthMessage', 'Value is too short'),
@@ -132,7 +133,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
     this.write('copiedMessage', raw.copiedMessage);
     this.write('showInListing', raw.showInListing === 'true');
 
-    this.write('isRequired', raw.isRequired === 'true');
+    this.write('isRequired', raw.isRequired === 'true' ? 'true' : 'false');
     this.write('requiredMessage', raw.requiredMessage);
     this.write('minLength', raw.minLength);
     this.write('minLengthMessage', raw.minLengthMessage);
@@ -143,11 +144,11 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
 
     // Custom-code gating is hidden in this panel — force it off so re-saving an old
     // field (that may have had it on) falls back to conditions-only.
-    this.write('enableUseCode', false);
+    this.write('enableUseCode', 'false');
     this.write('enableCode', '');
     this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
 
-    this.write('visibilityUseCode', false);
+    this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
     this.write('visibilityConditions', JSON.stringify(this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions)));
 

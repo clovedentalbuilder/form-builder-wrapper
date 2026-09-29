@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, HostBinding, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FxSetting, FxStringSetting, FxSelectSetting, FxToggleSetting, FxValidation, FxBaseComponent, FxOptionSetting, FxMode } from '@instantsys-labs/fx';
+import { FxSetting, FxStringSetting, FxSelectSetting, FxValidation, FxBaseComponent, FxOptionSetting, FxMode } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiServiceRegistry } from '@instantsys-labs/core'
@@ -12,6 +12,7 @@ import { MultiselectDropdownSettingsPanelComponent } from './multiselect-dropdow
 import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
 import { FieldControlIncludeController } from '../shared/form-control-visibility';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 @Component({
   selector: 'lib-multiselect-dropdown',
@@ -111,17 +112,17 @@ export class MultiselectDropdownComponent extends FxBaseComponent implements OnI
 
       // Visibility gate: a condition list (privilege/supportingData/field rows, freely
       // combined via any/all) OR custom code — see shared/applicability.ts.
-      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
       // Default MUST be false — deepMergeObjects in the fx library silently reverts a saved
       // `false` back to the class default whenever the default is `true` (treats falsy saved
       // values as "unset"). Keying this as an opt-in flag (default false) survives reloads.
-      new FxToggleSetting({ key: 'excludeControlsWhenHidden', $title: 'Exclude Form Control When Hidden', value: false }),
+      new FxSelectSetting({ key: 'excludeControlsWhenHidden', $title: 'Exclude Form Control When Hidden', value: 'false' }, yesNoOptions()),
 
       // Enable/disable gate: same condition-list-or-code shape as visibility.
-      new FxToggleSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'enableConditions', $title: 'Enable Conditions', value: '[]' }),
       new FxStringSetting({ key: 'enableConditionsMatch', $title: 'Enable Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
@@ -139,13 +140,13 @@ export class MultiselectDropdownComponent extends FxBaseComponent implements OnI
   /** Computes { visible, enabled } from privileges + supportingData + another field's live value. See shared/applicability.ts. */
   private get applicability(): { visible: boolean; enabled: boolean } {
     const visibility: GateConfig = {
-      useCode: this.setting('visibilityUseCode') === true,
+      useCode: isSettingOn(this.setting('visibilityUseCode')),
       code: this.setting('visibilityCode'),
       conditions: parseConditions(this.setting('visibilityConditions')),
       conditionsMatch: this.setting('visibilityConditionsMatch'),
     };
     const enable: GateConfig = {
-      useCode: this.setting('enableUseCode') === true,
+      useCode: isSettingOn(this.setting('enableUseCode')),
       code: this.setting('enableCode'),
       conditions: parseConditions(this.setting('enableConditions')),
       conditionsMatch: this.setting('enableConditionsMatch'),
@@ -183,7 +184,7 @@ export class MultiselectDropdownComponent extends FxBaseComponent implements OnI
   }
 
   ngDoCheck(): void {
-    const exclude = this.setting('excludeControlsWhenHidden') === true;
+    const exclude = isSettingOn(this.setting('excludeControlsWhenHidden'));
     const shouldInclude = !this.fieldHidden || !exclude;
     this.controlToggler.update(shouldInclude);
   }

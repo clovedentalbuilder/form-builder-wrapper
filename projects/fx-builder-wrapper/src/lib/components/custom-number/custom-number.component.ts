@@ -7,13 +7,13 @@ import {
   FxSelectSetting,
   FxSetting,
   FxStringSetting,
-  FxToggleSetting,
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { CustomNumberSettingsPanelComponent } from './custom-number-settings-panel.component';
 import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 /**
  * Custom number: a self-contained numeric-input field (own FormControl, own
@@ -35,10 +35,10 @@ import { resolveSiblingControl } from '../shared/conditional-disable';
  *     supportingData / another-field's-value rows combined via per-condition
  *     AND/OR grouping. See shared/applicability.ts.
  *
- * allow-decimals and validate-step are Yes/No selects storing the STRINGS
- * 'true'/'false' (not toggles) so a "No" survives the fx deepMergeObjects
- * boolean quirk. isRequired mirrors custom-textbox: a FxToggleSetting whose
- * default is false, which is merge-safe.
+ * Every Yes/No setting here (allow-decimals, validate-step, isRequired, the gate
+ * *UseCode flags) is an FxSelectSetting storing the STRINGS 'true'/'false', so a
+ * saved "No" survives the fx deepMergeObjects boolean quirk. Read them with
+ * isSettingOn() (templates: isOn()) — see shared/yes-no-setting.ts.
  */
 @Component({
   selector: 'lib-custom-number',
@@ -59,6 +59,14 @@ export class CustomNumberComponent extends FxBaseComponent {
     });
   }
 
+  /**
+   * Template helper for a Yes/No setting. Templates must NOT test `setting(key)`
+   * directly — it now holds the string 'false', which is truthy.
+   */
+  public isOn(key: string): boolean {
+    return isSettingOn(this.setting(key));
+  }
+
   protected settings(): FxSetting[] {
     return [
       new FxStringSetting({ key: 'label', $title: 'Label', value: 'Label' }),
@@ -75,8 +83,7 @@ export class CustomNumberComponent extends FxBaseComponent {
       new FxStringSetting({ key: 'decimalPlaces', $title: 'Decimal Places', value: '' }),
       new FxStringSetting({ key: 'step', $title: 'Step Increment', value: '' }),
 
-      // isRequired: FxToggleSetting is only merge-safe because its default is false.
-      new FxToggleSetting({ key: 'isRequired', $title: 'Required', value: false }),
+      new FxSelectSetting({ key: 'isRequired', $title: 'Required', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'requiredMessage', $title: 'Required Message', value: 'This field is required' }),
       new FxStringSetting({ key: 'min', $title: 'Min Value', value: '' }),
       new FxStringSetting({ key: 'minMessage', $title: 'Min Message', value: 'Value is too small' }),
@@ -92,13 +99,13 @@ export class CustomNumberComponent extends FxBaseComponent {
 
       // Enable/disable gate: a condition list (privilege/supportingData/field rows, freely
       // combined via grouping) OR custom code — see shared/applicability.ts.
-      new FxToggleSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'enableConditions', $title: 'Enable Conditions', value: '[]' }),
       new FxStringSetting({ key: 'enableConditionsMatch', $title: 'Enable Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
 
       // Visibility gate: same condition-list-or-code shape as enable.
-      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
@@ -135,13 +142,13 @@ export class CustomNumberComponent extends FxBaseComponent {
   /** Computes { visible, enabled } from privileges + supportingData + another field's live value. See shared/applicability.ts. */
   private get applicability(): { visible: boolean; enabled: boolean } {
     const visibility: GateConfig = {
-      useCode: this.setting('visibilityUseCode') === true,
+      useCode: isSettingOn(this.setting('visibilityUseCode')),
       code: this.setting('visibilityCode'),
       conditions: parseConditions(this.setting('visibilityConditions')),
       conditionsMatch: this.setting('visibilityConditionsMatch'),
     };
     const enable: GateConfig = {
-      useCode: this.setting('enableUseCode') === true,
+      useCode: isSettingOn(this.setting('enableUseCode')),
       code: this.setting('enableCode'),
       conditions: parseConditions(this.setting('enableConditions')),
       conditionsMatch: this.setting('enableConditionsMatch'),
@@ -203,7 +210,7 @@ export class CustomNumberComponent extends FxBaseComponent {
 
   private applyValidators(): void {
     const validators: ValidatorFn[] = [];
-    if (this.setting('isRequired') === true) validators.push(Validators.required);
+    if (isSettingOn(this.setting('isRequired'))) validators.push(Validators.required);
 
     const min = this.numOrNull(this.setting('min'));
     if (min != null) validators.push(Validators.min(min));

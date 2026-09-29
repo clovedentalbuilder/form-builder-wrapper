@@ -7,11 +7,12 @@ import {
   FxComponent,
   FxSetting,
   FxStringSetting,
-  FxToggleSetting,
+  FxSelectSetting,
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { ConditionalDisableController, conditionalDisableSettings } from '../shared/conditional-disable';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 /**
  * Toggle switch (label + slider + on/off text).
@@ -50,7 +51,7 @@ export class ToggleSwitchComponent extends FxBaseComponent implements DoCheck, O
       new FxStringSetting({ key: 'label', $title: 'Label', value: 'Enable' }),
       new FxStringSetting({ key: 'onText', $title: 'On Text', value: 'On' }),
       new FxStringSetting({ key: 'offText', $title: 'Off Text', value: 'Off' }),
-      new FxToggleSetting({ key: 'defaultOn', $title: 'Default On', value: false }),
+      new FxSelectSetting({ key: 'defaultOn', $title: 'Default On', value: 'false' }, yesNoOptions()),
       ...conditionalDisableSettings(),
     ];
   }
@@ -73,7 +74,7 @@ export class ToggleSwitchComponent extends FxBaseComponent implements DoCheck, O
 
   private initToggle(): void {
     const defaultOn = this.setting('defaultOn');
-    if (defaultOn === true || defaultOn === 'true') {
+    if (isSettingOn(defaultOn)) {
       this.toggleControl.setValue(true, { emitEvent: false });
     }
     this._register(this.toggleControl);

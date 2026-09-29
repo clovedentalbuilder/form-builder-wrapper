@@ -6,7 +6,7 @@
   <div class="dci-field" [ngClass]="setting('customClass')">
     <label class="dci-label" *ngIf="setting('label')">
       {{ setting('label') }}
-      <span class="dci-required" *ngIf="setting('isRequired')">*</span>
+      <span class="dci-required" *ngIf="isOn('isRequired')">*</span>
     </label>
 
     <div class="dci-input-row">

@@ -8,13 +8,14 @@ import {
   FxMode,
   FxSetting,
   FxStringSetting,
-  FxToggleSetting,
+  FxSelectSetting,
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { SectionSettingsPanelComponent } from './section-settings-panel.component';
 import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 /**
  * Section box: a heading card that acts as a drop-zone container.
@@ -52,12 +53,12 @@ export class SectionComponent extends FxBaseComponent {
       new FxStringSetting({ key: 'showInListing', $title: 'Show In Listing', value: false }),
       // Visibility gate: a condition list (privilege/supportingData/field rows, freely combined
       // via any/all) OR custom code — see shared/applicability.ts.
-      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
       // Enable/disable gate: same condition-list-or-code shape as visibility.
-      new FxToggleSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'enableUseCode', $title: 'Enable: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'enableConditions', $title: 'Enable Conditions', value: '[]' }),
       new FxStringSetting({ key: 'enableConditionsMatch', $title: 'Enable Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
@@ -84,13 +85,13 @@ export class SectionComponent extends FxBaseComponent {
   /** Computes { visible, enabled } from privileges + supportingData + sibling fields. See shared/applicability.ts. */
   private get applicability(): { visible: boolean; enabled: boolean } {
     const visibility: GateConfig = {
-      useCode: this.setting('visibilityUseCode') === true,
+      useCode: isSettingOn(this.setting('visibilityUseCode')),
       code: this.setting('visibilityCode'),
       conditions: parseConditions(this.setting('visibilityConditions')),
       conditionsMatch: this.setting('visibilityConditionsMatch'),
     };
     const enable: GateConfig = {
-      useCode: this.setting('enableUseCode') === true,
+      useCode: isSettingOn(this.setting('enableUseCode')),
       code: this.setting('enableCode'),
       conditions: parseConditions(this.setting('enableConditions')),
       conditionsMatch: this.setting('enableConditionsMatch'),

@@ -89,7 +89,7 @@
             <input type="checkbox" formControlName="transferrable" /> Transferrable
           </label>
         </div>
-        <div class="vi__created" *ngIf="isView && setting('showCreatedAt') && createdAtLabel(item)">
+        <div class="vi__created" *ngIf="isView && isOn('showCreatedAt') && createdAtLabel(item)">
           Created At: <strong>{{ createdAtLabel(item) }}</strong>
         </div>
       </div>

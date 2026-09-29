@@ -7,13 +7,14 @@ import {
   FxMode,
   FxSetting,
   FxStringSetting,
-  FxToggleSetting,
+  FxSelectSetting,
   FxValidation,
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { VoucherItemsSettingsPanelComponent } from './voucher-items-settings-panel.component';
 import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
+import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 
 interface VoucherItem {
   type: string;
@@ -54,6 +55,14 @@ export class VoucherItemsComponent extends FxBaseComponent implements OnDestroy 
     this.onInit.subscribe(() => this.initGroup());
   }
 
+  /**
+   * Template helper for a Yes/No setting. Templates must NOT test `setting(key)`
+   * directly — it now holds the string 'false', which is truthy.
+   */
+  public isOn(key: string): boolean {
+    return isSettingOn(this.setting(key));
+  }
+
   protected settings(): FxSetting[] {
     return [
       new FxStringSetting({ key: 'groupTitle', $title: 'Group Title', value: 'COUPON / VOUCHER ITEMS' }),
@@ -62,12 +71,12 @@ export class VoucherItemsComponent extends FxBaseComponent implements OnDestroy 
       new FxStringSetting({ key: 'typeOptions', $title: 'Type Options (comma-separated)', value: 'Coupon,Voucher' }),
       new FxStringSetting({ key: 'minItems', $title: 'Minimum Items', value: 1 }),
       new FxStringSetting({ key: 'maxItems', $title: 'Maximum Items (0 = unlimited)', value: 0 }),
-      new FxToggleSetting({ key: 'showCreatedAt', $title: 'Show Created At', value: true }),
+      new FxSelectSetting({ key: 'showCreatedAt', $title: 'Show Created At', value: 'true' }, yesNoOptions()),
 
       // Visibility gate: a condition list (privilege/supportingData/field rows, freely
       // combined via any/all) OR custom code — see shared/applicability.ts. No separate
       // Enable/Disable gate — this component intentionally only supports Visibility.
-      new FxToggleSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: false }),
+      new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
       new FxStringSetting({ key: 'visibilityCode', $title: 'Visibility Code', value: '' }),
@@ -87,7 +96,7 @@ export class VoucherItemsComponent extends FxBaseComponent implements OnDestroy 
   /** Computes visibility from privileges + supportingData + another field's live value. See shared/applicability.ts. */
   private get applicability(): { visible: boolean } {
     const visibility: GateConfig = {
-      useCode: this.setting('visibilityUseCode') === true,
+      useCode: isSettingOn(this.setting('visibilityUseCode')),
       code: this.setting('visibilityCode'),
       conditions: parseConditions(this.setting('visibilityConditions')),
       conditionsMatch: this.setting('visibilityConditionsMatch'),

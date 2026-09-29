@@ -6,7 +6,7 @@
   <div class="ctb-field">
     <label class="ctb-label" *ngIf="setting('label')">
       {{ setting('label') }}
-      <span class="ctb-required" *ngIf="setting('isRequired')">*</span>
+      <span class="ctb-required" *ngIf="isOn('isRequired')">*</span>
     </label>
     <input
       type="text"
