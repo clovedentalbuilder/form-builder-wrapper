@@ -8,6 +8,7 @@ import { buildListingFromForm } from '../shared/listing';
 import { DynamicTableComponent } from '../dynamic-table/dynamic-table.component';
 import { ToggleButtonComponent } from '../toggle-button/toggle-button.component';
 import { UploaderComponent } from '../uploader/uploader.component';
+import { SystemFileUploaderComponent } from '../system-file-uploader/system-file-uploader.component';
 import { ToggleComponent } from '../toggle/toggle.component';
 import { UploaderCheckboxComponent } from '../uploader-checkbox/uploader-checkbox.component';
 import { DatePickerComponent } from '../date-picker/date-picker.component';
@@ -32,6 +33,9 @@ import { VoucherItemsComponent } from '../voucher-items/voucher-items.component'
 import { ToggleSwitchComponent } from '../toggle-switch/toggle-switch.component';
 import { CustomTextboxComponent } from '../custom-textbox/custom-textbox.component';
 import { CustomTextareaComponent } from '../custom-textarea/custom-textarea.component';
+import { CustomNumberComponent } from '../custom-number/custom-number.component';
+import { CustomPasswordComponent } from '../custom-password/custom-password.component';
+import { CustomCopyInputComponent } from '../custom-copy-input/custom-copy-input.component';
 import { DuplicateCheckInputComponent } from '../duplicate-check-input/duplicate-check-input.component';
 import { ImageUploaderComponent } from '../image-uploader/image-uploader.component';
 // import { CustomizeDropdownComponent } from '../multiselect-with-form-fields/customize-dropdown.component';
@@ -211,6 +215,7 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       { name: 'Dynamic Table', key: 'dynamic-table', component: DynamicTableComponent },
       { name: 'Toggle Button', key: 'toggle-button', component: ToggleButtonComponent },
       { name: 'Uploader', key: 'uploader', component: UploaderComponent },
+      { name: 'System File Uploader', key: 'system-file-uploader', component: SystemFileUploaderComponent },
       { name: 'Toggle', key: 'toggle', component: ToggleComponent },
       { name: 'Uploader with Checkbox', key: 'uploader-checkbox', component: UploaderCheckboxComponent },
       { name: 'Date Picker', key: 'lib-date-picker', component: DatePickerComponent },
@@ -227,15 +232,18 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       { name: 'Checkbox Group',              key: 'lib-checkbox-group',        component: CheckboxGroupComponent },
       { name: 'Radio with Child Field',      key: 'radio-with-child-field',    component: RadioWithChildFieldComponent },
       { name: 'Dropdown with Child Field',   key: 'dropdown-with-child-field', component: DropdownWithChildFieldComponent },
-      { name: 'Section',                     key: 'lib-section',               component: SectionComponent },
-      { name: 'Stepper',                     key: 'lib-stepper',               component: StepperComponent },
-      { name: 'Repeatable Group',            key: 'lib-repeatable-group',      component: RepeatableGroupComponent },
-      { name: 'Voucher Items',               key: 'lib-voucher-items',         component: VoucherItemsComponent },
-      { name: 'Toggle Switch',               key: 'lib-toggle-switch',         component: ToggleSwitchComponent },
-      { name: 'Custom Textbox',              key: 'lib-custom-textbox',        component: CustomTextboxComponent },
-      { name: 'Custom Textarea',             key: 'lib-custom-textarea',       component: CustomTextareaComponent },
-      { name: 'Duplicate Check Input',       key: 'lib-duplicate-check-input', component: DuplicateCheckInputComponent },
-      { name: 'Image Uploader',              key: 'lib-image-uploader',        component: ImageUploaderComponent },
+      // { name: 'Section',                     key: 'lib-section',               component: SectionComponent },
+      // { name: 'Stepper',                     key: 'lib-stepper',               component: StepperComponent },
+      // { name: 'Repeatable Group',            key: 'lib-repeatable-group',      component: RepeatableGroupComponent },
+      // { name: 'Voucher Items',               key: 'lib-voucher-items',         component: VoucherItemsComponent },
+      // { name: 'Toggle Switch',               key: 'lib-toggle-switch',         component: ToggleSwitchComponent },
+      // { name: 'Custom Textbox',              key: 'lib-custom-textbox',        component: CustomTextboxComponent },
+      // { name: 'Custom Textarea',             key: 'lib-custom-textarea',       component: CustomTextareaComponent },
+      // { name: 'Custom Number',               key: 'lib-custom-number',         component: CustomNumberComponent },
+      // { name: 'Password Field',              key: 'lib-custom-password',       component: CustomPasswordComponent },
+      { name: 'Input with Copy',             key: 'lib-custom-copy-input',     component: CustomCopyInputComponent },
+      // { name: 'Duplicate Check Input',       key: 'lib-duplicate-check-input', component: DuplicateCheckInputComponent },
+      // { name: 'Image Uploader',              key: 'lib-image-uploader',        component: ImageUploaderComponent },
     ];
     
     components.forEach(({ name, key, component }) => {

@@ -1,0 +1,95 @@
+/* The label itself is styled by the GLOBAL .input-label class (see
+   src/styles/form-builder.css) — the same approach dropdown-with-other uses — so it is
+   deliberately NOT restyled here. .cpi-field only supplies the relative positioning
+   context that class expects. */
+.cpi-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 12px;
+}
+/* .field-required is local to dropdown-with-other (not global), so match it visually here. */
+.cpi-required {
+  color: #d60000;
+  font-size: 1.1em;
+  margin-left: 5px;
+}
+.cpi-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.cpi-input {
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  /* right padding leaves room for the absolutely-positioned copy button */
+  padding: 0.55rem 2.5rem 0.55rem 0.75rem;
+  width: 100%;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.cpi-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  outline: none;
+}
+.cpi-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+.cpi-input--error {
+  border-color: #dc2626;
+}
+.cpi-copy {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.cpi-copy:hover:not(:disabled) {
+  color: #3b82f6;
+  background: #eff6ff;
+}
+.cpi-copy:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+.cpi-copy--copied,
+.cpi-copy--copied:hover:not(:disabled) {
+  color: #16a34a;
+  background: #f0fdf4;
+}
+.cpi-copy i {
+  font-size: 0.95rem;
+}
+.cpi-help {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.cpi-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+/* p-toast renders inside this component's view, so its internals are only reachable
+   through ::ng-deep (the same convention dropdown-with-other uses for its PrimeNG
+   overrides). The toast's visual styling comes from the globally loaded
+   primeng.min.css; this rule only lifts it above the builder chrome and dialogs. */
+:host ::ng-deep .p-toast {
+  z-index: 99999;
+}

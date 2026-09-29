@@ -1,0 +1,26 @@
+<lib-custom-number-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
+  <div class="cnm-field">
+    <label class="cnm-label" *ngIf="setting('label')">
+      {{ setting('label') }}
+      <span class="cnm-required" *ngIf="setting('isRequired')">*</span>
+    </label>
+    <input
+      type="number"
+      class="cnm-input"
+      [class.cnm-input--error]="errorMessage"
+      [formControl]="control"
+      [placeholder]="setting('placeholder')"
+      [disabled]="fieldDisabled"
+      [attr.step]="stepAttr"
+      [attr.min]="minAttr"
+      [attr.max]="maxAttr"
+      inputmode="decimal"
+    />
+    <div class="cnm-help" *ngIf="setting('helpText') && !errorMessage">{{ setting('helpText') }}</div>
+    <div class="cnm-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+</lib-custom-number-settings-panel>

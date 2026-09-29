@@ -1,0 +1,41 @@
+<lib-custom-copy-input-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
+  <!-- .cpi-field is position:relative so the global .input-label class behaves exactly as it
+       does in dropdown-with-other (its label sits inside a relative wrapper too). -->
+  <div class="cpi-field">
+    <label class="input-label dark:text-gray-300" *ngIf="setting('label')">
+      {{ setting('label') }} <span class="cpi-required" *ngIf="setting('isRequired')">*</span>
+    </label>
+    <div class="cpi-input-wrap">
+      <input
+        type="text"
+        class="cpi-input"
+        [class.cpi-input--error]="errorMessage"
+        [formControl]="control"
+        [placeholder]="setting('placeholder')"
+        [disabled]="fieldDisabled"
+        [attr.maxlength]="setting('maxLength') || null"
+      />
+      <button
+        type="button"
+        class="cpi-copy"
+        [class.cpi-copy--copied]="copied"
+        (click)="copyValue()"
+        [disabled]="fieldDisabled"
+        [attr.aria-label]="copied ? 'Copied to clipboard' : 'Copy to clipboard'"
+        [title]="copied ? 'Copied!' : 'Copy to clipboard'"
+      >
+        <i class="pi" [ngClass]="copied ? 'pi-check' : 'pi-copy'"></i>
+      </button>
+    </div>
+    <div class="cpi-help" *ngIf="setting('helpText') && !errorMessage">{{ setting('helpText') }}</div>
+    <div class="cpi-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Copy confirmation. Own MessageService instance per field (providers: [MessageService]),
+       so one field's toast never fires on another's. Same options as the uploader's toast. -->
+  <p-toast [preventOpenDuplicates]="true" [breakpoints]="{ '426px': { width: '90%' } }" position="top-center"></p-toast>
+</lib-custom-copy-input-settings-panel>

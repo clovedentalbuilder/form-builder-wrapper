@@ -6,6 +6,7 @@ import { FxBuilderWrapperService } from './fx-builder-wrapper.service';
 import { DynamicTableComponent } from './components/dynamic-table/dynamic-table.component';
 import { ToggleButtonComponent } from './components/toggle-button/toggle-button.component';
 import { UploaderComponent } from './components/uploader/uploader.component';
+import { SystemFileUploaderComponent } from './components/system-file-uploader/system-file-uploader.component';
 import { ToggleComponent } from './components/toggle/toggle.component';
 import { UploaderCheckboxComponent } from './components/uploader-checkbox/uploader-checkbox.component';
 import { DatePickerComponent } from './components/date-picker/date-picker.component';
@@ -30,6 +31,9 @@ import { VoucherItemsComponent } from './components/voucher-items/voucher-items.
 import { ToggleSwitchComponent } from './components/toggle-switch/toggle-switch.component';
 import { CustomTextboxComponent } from './components/custom-textbox/custom-textbox.component';
 import { CustomTextareaComponent } from './components/custom-textarea/custom-textarea.component';
+import { CustomNumberComponent } from './components/custom-number/custom-number.component';
+import { CustomPasswordComponent } from './components/custom-password/custom-password.component';
+import { CustomCopyInputComponent } from './components/custom-copy-input/custom-copy-input.component';
 import { DuplicateCheckInputComponent } from './components/duplicate-check-input/duplicate-check-input.component';
 import { ImageUploaderComponent } from './components/image-uploader/image-uploader.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
@@ -76,6 +80,9 @@ export class FxBuilderWrapperComponent implements OnInit {
     }
     if (!Boolean(this.fxWrapperService.getComponent('uploader'))) {
       this.fxWrapperService.registerCustomComponent('Uploader', 'uploader', UploaderComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('system-file-uploader'))) {
+      this.fxWrapperService.registerCustomComponent('System File Uploader', 'system-file-uploader', SystemFileUploaderComponent);
     }
     if (!Boolean(this.fxWrapperService.getComponent('uploader-checkbox'))) {
       this.fxWrapperService.registerCustomComponent('Uploader with Checkbox', 'uploader-checkbox', UploaderCheckboxComponent);
@@ -128,33 +135,42 @@ export class FxBuilderWrapperComponent implements OnInit {
     if (!Boolean(this.fxWrapperService.getComponent('dropdown-with-child-field'))) {
       this.fxWrapperService.registerCustomComponent('Dropdown with Child Field', 'dropdown-with-child-field', DropdownWithChildFieldComponent);
     }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-section'))) {
-      this.fxWrapperService.registerCustomComponent('Section', 'lib-section', SectionComponent);
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-section'))) {
+    //   this.fxWrapperService.registerCustomComponent('Section', 'lib-section', SectionComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-stepper'))) {
+    //   this.fxWrapperService.registerCustomComponent('Stepper', 'lib-stepper', StepperComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-repeatable-group'))) {
+    //   this.fxWrapperService.registerCustomComponent('Repeatable Group', 'lib-repeatable-group', RepeatableGroupComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-voucher-items'))) {
+    //   this.fxWrapperService.registerCustomComponent('Voucher Items', 'lib-voucher-items', VoucherItemsComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-toggle-switch'))) {
+    //   this.fxWrapperService.registerCustomComponent('Toggle Switch', 'lib-toggle-switch', ToggleSwitchComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-custom-textbox'))) {
+    //   this.fxWrapperService.registerCustomComponent('Custom Textbox', 'lib-custom-textbox', CustomTextboxComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-custom-textarea'))) {
+    //   this.fxWrapperService.registerCustomComponent('Custom Textarea', 'lib-custom-textarea', CustomTextareaComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-custom-number'))) {
+    //   this.fxWrapperService.registerCustomComponent('Custom Number', 'lib-custom-number', CustomNumberComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-custom-password'))) {
+    //   this.fxWrapperService.registerCustomComponent('Password Field', 'lib-custom-password', CustomPasswordComponent);
+    // }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-custom-copy-input'))) {
+      this.fxWrapperService.registerCustomComponent('Input with Copy', 'lib-custom-copy-input', CustomCopyInputComponent);
     }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-stepper'))) {
-      this.fxWrapperService.registerCustomComponent('Stepper', 'lib-stepper', StepperComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-repeatable-group'))) {
-      this.fxWrapperService.registerCustomComponent('Repeatable Group', 'lib-repeatable-group', RepeatableGroupComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-voucher-items'))) {
-      this.fxWrapperService.registerCustomComponent('Voucher Items', 'lib-voucher-items', VoucherItemsComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-toggle-switch'))) {
-      this.fxWrapperService.registerCustomComponent('Toggle Switch', 'lib-toggle-switch', ToggleSwitchComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-custom-textbox'))) {
-      this.fxWrapperService.registerCustomComponent('Custom Textbox', 'lib-custom-textbox', CustomTextboxComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-custom-textarea'))) {
-      this.fxWrapperService.registerCustomComponent('Custom Textarea', 'lib-custom-textarea', CustomTextareaComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-duplicate-check-input'))) {
-      this.fxWrapperService.registerCustomComponent('Duplicate Check Input', 'lib-duplicate-check-input', DuplicateCheckInputComponent);
-    }
-    if (!Boolean(this.fxWrapperService.getComponent('lib-image-uploader'))) {
-      this.fxWrapperService.registerCustomComponent('Image Uploader', 'lib-image-uploader', ImageUploaderComponent);
-    }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-duplicate-check-input'))) {
+    //   this.fxWrapperService.registerCustomComponent('Duplicate Check Input', 'lib-duplicate-check-input', DuplicateCheckInputComponent);
+    // }
+    // if (!Boolean(this.fxWrapperService.getComponent('lib-image-uploader'))) {
+    //   this.fxWrapperService.registerCustomComponent('Image Uploader', 'lib-image-uploader', ImageUploaderComponent);
+    // }
   };
 
  

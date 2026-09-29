@@ -257,6 +257,19 @@ export const COMPONENT_VALUE_ADAPTERS: Readonly<Record<string, ComponentValueAda
     }),
   },
 
+  // Same { uploadedFiles, deletedFiles } shape as 'uploader' — the system-file-uploader is a
+  // standalone clone of the original uploader, so it needs its own selector key here for the
+  // migration lookup (COMPONENT_VALUE_ADAPTERS[el.selector]) to find it.
+  'system-file-uploader': {
+    identify: (v) => isObj(v) && 'uploadedFiles' in v,
+    extractPrimitive: (v: any) => v.uploadedFiles ?? [],
+
+    wrapFromPrimitive: (v: any) => ({
+      uploadedFiles: Array.isArray(v) ? v : [],
+      deletedFiles: [],
+    }),
+  },
+
 };
 
 /** Returns the first adapter whose identify() returns true for the given value. */

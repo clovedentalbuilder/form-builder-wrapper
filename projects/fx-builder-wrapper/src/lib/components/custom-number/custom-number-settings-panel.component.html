@@ -1,0 +1,456 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  styleClass="cnp-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="cnp-dialog-header">
+      <i class="pi pi-cog cnp-header-icon"></i>
+      <span class="cnp-dialog-title">Number Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="cnp-settings-body">
+
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="cnp-tabs">
+      <button type="button" class="cnp-tab" [class.cnp-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="cnp-tab" [class.cnp-tab--active]="activeTab === 'validations'" (click)="activeTab = 'validations'">
+        <i class="pi pi-check-square"></i> Validations
+      </button>
+      <button type="button" class="cnp-tab" [class.cnp-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+
+      <!-- Display Settings (ID + Name) -->
+      <div class="cnp-section">
+        <div class="cnp-section-header"><i class="pi pi-hashtag"></i><span>Display Settings</span></div>
+        <div class="cnp-section-body">
+          <div class="cnp-id-row" *ngIf="fxData?.id">
+            <span class="cnp-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+            <span class="cnp-id-value">{{ fxData!.id }}</span>
+          </div>
+
+          <div class="cnp-field">
+            <label class="cnp-label">
+              Name <span class="cnp-required-star">*</span>
+              <span class="cnp-name-hint">used to identify this component (e.g. quantity)</span>
+            </label>
+            <input pInputText formControlName="name" placeholder="e.g. quantity" class="cnp-input" />
+            <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="cnp-field-error">Name is required.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Basic -->
+      <div class="cnp-section">
+        <div class="cnp-section-header"><i class="pi pi-pencil"></i><span>Basic</span></div>
+        <div class="cnp-section-body">
+          <div class="cnp-field">
+            <label class="cnp-label">Label</label>
+            <input pInputText formControlName="label" placeholder="e.g. Quantity" class="cnp-input" />
+          </div>
+          <div class="cnp-field">
+            <label class="cnp-label">Placeholder</label>
+            <input pInputText formControlName="placeholder" placeholder="e.g. Enter a number" class="cnp-input" />
+          </div>
+          <div class="cnp-field">
+            <label class="cnp-label">Help Text</label>
+            <input pInputText formControlName="helpText" class="cnp-input" />
+          </div>
+          <div class="cnp-grid-2">
+            <div class="cnp-field">
+              <label class="cnp-label">Default Value</label>
+              <input pInputText type="number" formControlName="defaultValue" class="cnp-input" />
+            </div>
+            <div class="cnp-field">
+              <label class="cnp-label">Step Increment</label>
+              <input pInputText type="number" formControlName="step" placeholder="e.g. 1 or 0.5" class="cnp-input" />
+              <small class="cnp-hint">Arrow-key increment for the input.</small>
+            </div>
+          </div>
+          <div class="cnp-grid-2">
+            <div class="cnp-field">
+              <label class="cnp-label">Allow Decimals</label>
+              <div class="cnp-radio-group">
+                <label class="cnp-radio-option"><input type="radio" formControlName="allowDecimals" value="true" /><span>Yes</span></label>
+                <label class="cnp-radio-option"><input type="radio" formControlName="allowDecimals" value="false" /><span>No (integer only)</span></label>
+              </div>
+            </div>
+            <div class="cnp-field" *ngIf="settingsForm.value.allowDecimals === 'true'">
+              <label class="cnp-label">Decimal Places</label>
+              <input pInputText type="number" formControlName="decimalPlaces" placeholder="e.g. 2 (blank = unlimited)" class="cnp-input" />
+            </div>
+          </div>
+          <div class="cnp-field">
+            <label class="cnp-label">Show In Listing</label>
+            <div class="cnp-radio-group">
+              <label class="cnp-radio-option"><input type="radio" formControlName="showInListing" value="true" /><span>Yes</span></label>
+              <label class="cnp-radio-option"><input type="radio" formControlName="showInListing" value="false" /><span>No</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Validations tab                        -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'validations'">
+
+      <!-- Validation -->
+      <div class="cnp-section">
+        <div class="cnp-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
+        <div class="cnp-section-body">
+          <div class="cnp-grid-2">
+            <div class="cnp-field">
+              <label class="cnp-label">Required</label>
+              <div class="cnp-radio-group">
+                <label class="cnp-radio-option"><input type="radio" formControlName="isRequired" value="true" /><span>Yes</span></label>
+                <label class="cnp-radio-option"><input type="radio" formControlName="isRequired" value="false" /><span>No</span></label>
+              </div>
+            </div>
+            <div class="cnp-field" *ngIf="settingsForm.value.isRequired === 'true'">
+              <label class="cnp-label">Required Message</label>
+              <input pInputText formControlName="requiredMessage" class="cnp-input" />
+            </div>
+          </div>
+
+          <div class="cnp-grid-2">
+            <div class="cnp-field">
+              <label class="cnp-label">Min Value</label>
+              <input pInputText type="number" formControlName="min" class="cnp-input" />
+            </div>
+            <div class="cnp-field">
+              <label class="cnp-label">Min Message</label>
+              <input pInputText formControlName="minMessage" class="cnp-input" />
+            </div>
+          </div>
+
+          <div class="cnp-grid-2">
+            <div class="cnp-field">
+              <label class="cnp-label">Max Value</label>
+              <input pInputText type="number" formControlName="max" class="cnp-input" />
+            </div>
+            <div class="cnp-field">
+              <label class="cnp-label">Max Message</label>
+              <input pInputText formControlName="maxMessage" class="cnp-input" />
+            </div>
+          </div>
+
+          <div class="cnp-field" *ngIf="settingsForm.value.allowDecimals === 'false'">
+            <label class="cnp-label">Integer-only Message</label>
+            <input pInputText formControlName="integerMessage" class="cnp-input" />
+            <small class="cnp-hint">Shown when a non-whole number is entered (Allow Decimals = No).</small>
+          </div>
+
+          <div class="cnp-field" *ngIf="settingsForm.value.allowDecimals === 'true'">
+            <label class="cnp-label">Decimal Places Message</label>
+            <input pInputText formControlName="decimalPlacesMessage" class="cnp-input" />
+            <small class="cnp-hint">Shown when more than the configured Decimal Places are entered.</small>
+          </div>
+
+          <div class="cnp-grid-2 cnp-field--divider">
+            <div class="cnp-field">
+              <label class="cnp-label">Validate Step (multiple of)</label>
+              <div class="cnp-radio-group">
+                <label class="cnp-radio-option"><input type="radio" formControlName="validateStep" value="true" /><span>Yes</span></label>
+                <label class="cnp-radio-option"><input type="radio" formControlName="validateStep" value="false" /><span>No</span></label>
+              </div>
+              <small class="cnp-hint">Value must be Min + n×Step (uses the Step Increment above).</small>
+            </div>
+            <div class="cnp-field" *ngIf="settingsForm.value.validateStep === 'true'">
+              <label class="cnp-label">Step Message</label>
+              <input pInputText formControlName="stepMessage" class="cnp-input" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visibility -->
+      <div class="cnp-section">
+        <div class="cnp-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+        <div class="cnp-section-body">
+          <!-- Privilege -->
+          <div class="cnp-subsection">
+            <div class="cnp-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="cnp-add-btn" (click)="addCondition(visibilityPrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cnp-conditions" *ngIf="visibilityPrivilegeConditions.length">
+              <div class="cnp-condition-row cnp-condition-row--privilege" *ngFor="let cond of visibilityPrivilegeConditions; let i = index">
+                <label class="cnp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cnp-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="cnp-input" />
+                <button type="button" class="cnp-condition-remove" (click)="removeCondition(visibilityPrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cnp-empty-hint" *ngIf="!visibilityPrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="cnp-subsection">
+            <div class="cnp-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="cnp-add-btn" (click)="addCondition(visibilitySupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cnp-conditions" *ngIf="visibilitySupportingDataConditions.length">
+              <div class="cnp-condition-row cnp-condition-row--triple" *ngFor="let cond of visibilitySupportingDataConditions; let i = index">
+                <label class="cnp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="cnp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cnp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cnp-input" />
+                <button type="button" class="cnp-condition-remove" (click)="removeCondition(visibilitySupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cnp-empty-hint" *ngIf="!visibilitySupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="cnp-subsection">
+            <div class="cnp-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="cnp-add-btn" (click)="addCondition(visibilityFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cnp-conditions" *ngIf="visibilityFieldConditions.length">
+              <div class="cnp-condition-row cnp-condition-row--triple" *ngFor="let cond of visibilityFieldConditions; let i = index">
+                <label class="cnp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="cnp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cnp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cnp-input" />
+                <button type="button" class="cnp-condition-remove" (click)="removeCondition(visibilityFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cnp-empty-hint" *ngIf="!visibilityFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="cnp-hint">Visible when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always visible.</small>
+        </div>
+      </div>
+
+      <!-- Enable / Disable -->
+      <div class="cnp-section">
+        <div class="cnp-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+        <div class="cnp-section-body">
+          <!-- Privilege -->
+          <div class="cnp-subsection">
+            <div class="cnp-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="cnp-add-btn" (click)="addCondition(enablePrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cnp-conditions" *ngIf="enablePrivilegeConditions.length">
+              <div class="cnp-condition-row cnp-condition-row--privilege" *ngFor="let cond of enablePrivilegeConditions; let i = index">
+                <label class="cnp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cnp-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="cnp-input" />
+                <button type="button" class="cnp-condition-remove" (click)="removeCondition(enablePrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cnp-empty-hint" *ngIf="!enablePrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="cnp-subsection">
+            <div class="cnp-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="cnp-add-btn" (click)="addCondition(enableSupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cnp-conditions" *ngIf="enableSupportingDataConditions.length">
+              <div class="cnp-condition-row cnp-condition-row--triple" *ngFor="let cond of enableSupportingDataConditions; let i = index">
+                <label class="cnp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="cnp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cnp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cnp-input" />
+                <button type="button" class="cnp-condition-remove" (click)="removeCondition(enableSupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cnp-empty-hint" *ngIf="!enableSupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="cnp-subsection">
+            <div class="cnp-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="cnp-add-btn" (click)="addCondition(enableFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cnp-conditions" *ngIf="enableFieldConditions.length">
+              <div class="cnp-condition-row cnp-condition-row--triple" *ngFor="let cond of enableFieldConditions; let i = index">
+                <label class="cnp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="cnp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cnp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cnp-input" />
+                <button type="button" class="cnp-condition-remove" (click)="removeCondition(enableFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cnp-empty-hint" *ngIf="!enableFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="cnp-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="cnp-section">
+        <div class="cnp-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="cnp-section-body">
+
+          <div class="cnp-import-tabs">
+            <button type="button" class="cnp-import-tab" [class.cnp-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="cnp-import-tab" [class.cnp-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="cnp-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload cnp-drop-icon"></i>
+                <span class="cnp-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file cnp-drop-icon cnp-drop-icon--ready"></i>
+                <span class="cnp-drop-label cnp-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="cnp-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="cnp-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "name": "quantity", "label": "Quantity", "min": "0", "max": "100", "step": "1", ... }'
+                class="cnp-input cnp-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="cnp-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="cnp-import-apply-row">
+            <span class="cnp-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites the Basic Config and Validations tabs (not saved until you click Save Settings).</span>
+            <button type="button" class="cnp-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="cnp-how-to-card">
+            <div class="cnp-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="cnp-how-to-step"><span class="cnp-step-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="cnp-how-to-step"><span class="cnp-step-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="cnp-how-to-step"><span class="cnp-step-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="cnp-dialog-footer cnp-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="cnp-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the field stays interactive. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

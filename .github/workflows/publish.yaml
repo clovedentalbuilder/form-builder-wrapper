@@ -3,7 +3,7 @@ name: Fx Package Build
 on:
   push:
     branches:
-      - treatment-pricing
+      - old-uploader
 
 jobs:
   build-publish:
