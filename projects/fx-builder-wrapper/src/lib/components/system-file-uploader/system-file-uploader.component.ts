@@ -38,6 +38,9 @@ export class SystemFileUploaderComponent extends FxBaseComponent implements OnIn
     { label: 'Profile', value: 18 },
   ];
 
+  /** Category pre-selected on every file row: "Past Docs". Category is still required. */
+  readonly defaultCategoryId = 17;
+
   isUploaderRequired: boolean = false;
   private _prevTouched = false;
   visible: boolean = false;
@@ -462,7 +465,7 @@ ngAfterViewInit(): void {
           name: fileName,
           title: fileObj?.title || '',
           notes: fileObj?.notes || '',
-          categoryId: fileObj?.categoryId || '',
+          categoryId: fileObj?.categoryId || this.defaultCategoryId,
           type: type,
         };
       });
@@ -482,8 +485,9 @@ ngAfterViewInit(): void {
       if (files.length === 0) {
         return this.isUploaderRequired ? { required: true } : null;
       }
+      // Title and Notes are optional — Category is the only required per-file field.
       const allValid = files.every(
-        (f: any) => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+        (f: any) => f.categoryId?.toString().trim()
       );
       return allValid ? null : { requiredMeta: true };
     });
@@ -507,13 +511,14 @@ ngAfterViewInit(): void {
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
-    const maxFileSize = this.setting('maxFileSize');
 
     Array.from(input.files).forEach(file => {
       const fileType = this.detectFileType(file);
 
       const fileSizeInMB = file.size / (1024 * 1024);
       const allowedTypes = ['.pdf', '.stl', 'image/*','.DCM','.htl','HTL'];
+      // Resolved per file: this type's own cap when configured, else the global one.
+      const maxFileSize = this.maxSizeMbFor(fileType);
 
       if (fileSizeInMB > maxFileSize) {
         setTimeout(() => {
@@ -555,7 +560,7 @@ ngAfterViewInit(): void {
         name: file.name,
         title: '',
         notes: '',
-        categoryId: '',
+        categoryId: this.defaultCategoryId,
         type: fileType,
         _showErrors: false,
       };
@@ -657,8 +662,9 @@ ngAfterViewInit(): void {
 
   private revalidateMeta(): void {
     if (this.uploadedFiles.length === 0) return;
+    // Title and Notes are optional — Category is the only required per-file field.
     const allValid = this.uploadedFiles.every(
-      f => f.title?.trim() && f.notes?.trim() && f.categoryId?.toString().trim()
+      f => f.categoryId?.toString().trim()
     );
     if (!allValid) {
       this.uploadFileControl.setErrors({ requiredMeta: true });
@@ -676,12 +682,51 @@ ngAfterViewInit(): void {
       new FxSelectSetting({ key: 'multiple-upload', $title: 'Multiple Uploads', value: false }, [{ option: 'Enable', value: true }, { option: 'Disable', value: false }]),
       new FxStringSetting({ key: 'maxFileNo', $title: 'Maximum File Upload Allowed', value: 8 }),
       new FxStringSetting({ key: 'maxFileSize', $title: 'Maximum File Size Allowed', value: 10 }),
+      // Per-type size caps in MB, overriding 'maxFileSize' above for those three types.
+      // Default '' = inherit the global cap, which is what every form saved before these
+      // keys existed does. DCM/HTL and anything else always use the global cap.
+      new FxStringSetting({ key: 'maxFileSizeImage', $title: 'Maximum Image Size Allowed (MB)', value: '' }),
+      new FxStringSetting({ key: 'maxFileSizePdf', $title: 'Maximum PDF Size Allowed (MB)', value: '' }),
+      new FxStringSetting({ key: 'maxFileSizeStl', $title: 'Maximum STL Size Allowed (MB)', value: '' }),
       new FxSelectSetting({ key: 'isUploaderRequired', $title: 'Required', value: 'false' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
     ];
   }
+  
 
   protected validations(): FxValidation[] {
     return [];
+  }
+
+  /**
+   * Max upload size in MB for a detected file type. 'maxFileSizeImage' / 'maxFileSizePdf' /
+   * 'maxFileSizeStl' override the global 'maxFileSize' for those three types; every other
+   * type (dcm, htl, other) uses the global cap. A blank or non-positive per-type value means
+   * "inherit", so forms saved before these keys existed are unaffected.
+   *
+   * Returns Infinity when neither value is usable, which keeps the original behaviour: the old
+   * code compared against the raw setting, and `size > undefined` is false, so a mis-typed cap
+   * let the file through rather than rejecting every upload.
+   */
+  private maxSizeMbFor(fileType: string): number {
+    const perTypeKey: Record<string, string> = {
+      image: 'maxFileSizeImage',
+      pdf: 'maxFileSizePdf',
+      stl: 'maxFileSizeStl',
+    };
+
+    const key = perTypeKey[fileType];
+    const specific = key ? this.toPositiveMb(this.setting(key)) : null;
+    if (specific !== null) return specific;
+
+    const global = this.toPositiveMb(this.setting('maxFileSize'));
+    return global !== null ? global : Infinity;
+  }
+
+  /** A size setting coerced to a positive number of MB, or null when unset/unusable. */
+  private toPositiveMb(value: any): number | null {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? n : null;
   }
 
   detectFileType(file: File): 'image' | 'csv' | 'text' | 'pdf' | 'excel' | 'word' | 'stl' | 'other' | 'dcm' | 'htl' {
