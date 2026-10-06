@@ -41,6 +41,12 @@ export class SystemFileUploaderComponent extends FxBaseComponent implements OnIn
   /** Category pre-selected on every file row: "Past Docs". Category is still required. */
   readonly defaultCategoryId = 17;
 
+  /** Cap (MB) for file types with no per-type option, when the field carries no legacy value. */
+  private static readonly DEFAULT_MAX_FILE_SIZE_MB = 10;
+
+  /** Value of a retired 'maxFileSize' setting, read off this field once at init. */
+  private legacyMaxFileSizeMb: number | null = null;
+
   isUploaderRequired: boolean = false;
   private _prevTouched = false;
   visible: boolean = false;
@@ -57,6 +63,7 @@ export class SystemFileUploaderComponent extends FxBaseComponent implements OnIn
   ) {
     super(cdr)
     this.onInit.subscribe((fxData) => {
+      this.captureLegacyMaxFileSize();
       this._register(this.uploadFileControl);
     })
   }
@@ -512,7 +519,32 @@ ngAfterViewInit(): void {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
 
-    Array.from(input.files).forEach(file => {
+    const selected = Array.from(input.files);
+
+    // Whole-batch count check. With Multiple Uploads enabled the user can pick more files in one
+    // go than the remaining allowance, and the hidden-when-full upload button cannot prevent that.
+    // Reject the ENTIRE selection rather than silently keeping the first N — a partial accept
+    // leaves the user guessing which files landed.
+    const maxFileNo = this.toPositiveNumber(this.setting('maxFileNo'));
+    const remaining = maxFileNo === null ? Infinity : Math.max(0, maxFileNo - this.uploadedFiles.length);
+
+    if (selected.length > remaining) {
+      // Clear first, so picking the same files again after the error still fires a change event.
+      input.value = '';
+      setTimeout(() => {
+        this.messageService.add({
+          severity: 'error',
+          summary: '',
+          detail: remaining > 0
+            ? `You can add only ${remaining} more file(s). The maximum allowed is ${maxFileNo}!`
+            : `You have already reached the maximum of ${maxFileNo} file(s).`,
+          life: 4000,
+        });
+      }, 200);
+      return;
+    }
+
+    selected.forEach(file => {
       const fileType = this.detectFileType(file);
 
       const fileSizeInMB = file.size / (1024 * 1024);
@@ -681,13 +713,15 @@ ngAfterViewInit(): void {
       new FxStringSetting({ key: 'uploaderErrorMessage', $title: 'Error Message', value: 'Please upload at least one file' }),
       new FxSelectSetting({ key: 'multiple-upload', $title: 'Multiple Uploads', value: false }, [{ option: 'Enable', value: true }, { option: 'Disable', value: false }]),
       new FxStringSetting({ key: 'maxFileNo', $title: 'Maximum File Upload Allowed', value: 8 }),
-      new FxStringSetting({ key: 'maxFileSize', $title: 'Maximum File Size Allowed', value: 10 }),
-      // Per-type size caps in MB, overriding 'maxFileSize' above for those three types.
-      // Default '' = inherit the global cap, which is what every form saved before these
-      // keys existed does. DCM/HTL and anything else always use the global cap.
-      new FxStringSetting({ key: 'maxFileSizeImage', $title: 'Maximum Image Size Allowed (MB)', value: '' }),
-      new FxStringSetting({ key: 'maxFileSizePdf', $title: 'Maximum PDF Size Allowed (MB)', value: '' }),
-      new FxStringSetting({ key: 'maxFileSizeStl', $title: 'Maximum STL Size Allowed (MB)', value: '' }),
+      // Size is configured per file type. The old single 'Maximum File Size Allowed'
+      // ('maxFileSize') option is deliberately NOT declared here any more — see
+      // captureLegacyMaxFileSize(). Each cap below is independent and in MB.
+      // DCM/HTL (and any other allowed type) have no per-type option of their own and fall
+      // back to a legacy 'maxFileSize' when the field still carries one, else to
+      // DEFAULT_MAX_FILE_SIZE_MB.
+      new FxStringSetting({ key: 'maxFileSizeImage', $title: 'Maximum Image Size Allowed (MB)', value: 10 }),
+      new FxStringSetting({ key: 'maxFileSizePdf', $title: 'Maximum PDF Size Allowed (MB)', value: 10 }),
+      new FxStringSetting({ key: 'maxFileSizeStl', $title: 'Maximum STL Size Allowed (MB)', value: 10 }),
       new FxSelectSetting({ key: 'isUploaderRequired', $title: 'Required', value: 'false' }, [{ option: 'Yes', value: 'true' }, { option: 'No', value: 'false' }]),
     ];
   }
@@ -699,14 +733,38 @@ ngAfterViewInit(): void {
 
   /**
    * Max upload size in MB for a detected file type. 'maxFileSizeImage' / 'maxFileSizePdf' /
-   * 'maxFileSizeStl' override the global 'maxFileSize' for those three types; every other
-   * type (dcm, htl, other) uses the global cap. A blank or non-positive per-type value means
-   * "inherit", so forms saved before these keys existed are unaffected.
+   * 'maxFileSizeStl' each cap their own type. Types with no option of their own (dcm, htl,
+   * other) fall back to a legacy 'maxFileSize' when the field still carries one, else to
+   * DEFAULT_MAX_FILE_SIZE_MB.
    *
-   * Returns Infinity when neither value is usable, which keeps the original behaviour: the old
-   * code compared against the raw setting, and `size > undefined` is false, so a mis-typed cap
-   * let the file through rather than rejecting every upload.
+   * There is deliberately no "no cap" result any more: with the global option retired,
+   * "nothing configured" is the normal state rather than a mis-configuration, so it resolves to
+   * the default cap instead of Infinity.
    */
+  /**
+   * 'maxFileSize' — the old single global cap — is no longer offered in the settings UI, but a
+   * field saved while it existed still carries the key: FxUtils.deepMergeArrays() builds
+   * fxData.settings from the SAVED array and only pushes class entries that are missing, so it
+   * never drops a saved-only key.
+   *
+   * So the value is read once here (it stays the fallback for types with no per-type option) and
+   * the entry is then removed from fxData.settings, otherwise the stale "Maximum File Size
+   * Allowed" row keeps rendering in the builder sidebar — that sidebar iterates fxData.settings
+   * directly, and its only visibility gate is `$fxForm.$scope >= setting.scope`, which cannot
+   * hide anything here because the builder runs at FxScope.BUILDER (the highest scope).
+   *
+   * Removing the entry means it is not written back on the next save, so the legacy cap applies
+   * for this session and thereafter DEFAULT_MAX_FILE_SIZE_MB takes over.
+   */
+  private captureLegacyMaxFileSize(): void {
+    const settings: any[] = this.fxData?.settings ?? [];
+    const index = settings.findIndex(s => s?.key === 'maxFileSize');
+    if (index === -1) return;
+
+    this.legacyMaxFileSizeMb = this.toPositiveNumber(settings[index]?.value);
+    settings.splice(index, 1);
+  }
+
   private maxSizeMbFor(fileType: string): number {
     const perTypeKey: Record<string, string> = {
       image: 'maxFileSizeImage',
@@ -715,15 +773,15 @@ ngAfterViewInit(): void {
     };
 
     const key = perTypeKey[fileType];
-    const specific = key ? this.toPositiveMb(this.setting(key)) : null;
+    const specific = key ? this.toPositiveNumber(this.setting(key)) : null;
     if (specific !== null) return specific;
 
-    const global = this.toPositiveMb(this.setting('maxFileSize'));
-    return global !== null ? global : Infinity;
+    // No per-type option for this type (dcm/htl/other), or its value is unusable.
+    return this.legacyMaxFileSizeMb ?? SystemFileUploaderComponent.DEFAULT_MAX_FILE_SIZE_MB;
   }
 
-  /** A size setting coerced to a positive number of MB, or null when unset/unusable. */
-  private toPositiveMb(value: any): number | null {
+  /** A numeric setting coerced to a positive number, or null when unset/unusable. */
+  private toPositiveNumber(value: any): number | null {
     if (value === null || value === undefined || String(value).trim() === '') return null;
     const n = Number(value);
     return Number.isFinite(n) && n > 0 ? n : null;
