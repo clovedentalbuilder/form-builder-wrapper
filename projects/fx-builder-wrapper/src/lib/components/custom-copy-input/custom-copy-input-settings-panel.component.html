@@ -320,6 +320,91 @@
         </div>
       </div>
 
+      <!-- Required When -->
+      <div class="cip-section">
+        <div class="cip-section-header"><i class="pi pi-asterisk"></i><span>Required When</span></div>
+        <div class="cip-section-body">
+          <!-- Privilege -->
+          <div class="cip-subsection">
+            <div class="cip-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="cip-add-btn" (click)="addCondition(requiredPrivilegeConditions, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cip-conditions" *ngIf="requiredPrivilegeConditions.length">
+              <div class="cip-condition-row cip-condition-row--privilege" *ngFor="let cond of requiredPrivilegeConditions; let i = index">
+                <label class="cip-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cip-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="cip-input" />
+                <button type="button" class="cip-condition-remove" (click)="removeCondition(requiredPrivilegeConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cip-empty-hint" *ngIf="!requiredPrivilegeConditions.length">No privilege conditions.</small>
+          </div>
+
+          <!-- Supporting Data -->
+          <div class="cip-subsection">
+            <div class="cip-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="cip-add-btn" (click)="addCondition(requiredSupportingDataConditions, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cip-conditions" *ngIf="requiredSupportingDataConditions.length">
+              <div class="cip-condition-row cip-condition-row--triple" *ngFor="let cond of requiredSupportingDataConditions; let i = index">
+                <label class="cip-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="cip-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cip-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cip-input" />
+                <button type="button" class="cip-condition-remove" (click)="removeCondition(requiredSupportingDataConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cip-empty-hint" *ngIf="!requiredSupportingDataConditions.length">No supporting-data conditions.</small>
+          </div>
+
+          <!-- Other Field's Value -->
+          <div class="cip-subsection">
+            <div class="cip-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="cip-add-btn" (click)="addCondition(requiredFieldConditions, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="cip-conditions" *ngIf="requiredFieldConditions.length">
+              <div class="cip-condition-row cip-condition-row--triple" *ngFor="let cond of requiredFieldConditions; let i = index">
+                <label class="cip-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="checkbox" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="cip-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="cip-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="cip-input" />
+                <button type="button" class="cip-condition-remove" (click)="removeCondition(requiredFieldConditions, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="cip-empty-hint" *ngIf="!requiredFieldConditions.length">No other-field conditions.</small>
+          </div>
+
+          <small class="cip-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+        </div>
+      </div>
     </ng-container>
 
     <!-- ══════════════════════════════════════ -->

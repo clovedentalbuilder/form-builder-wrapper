@@ -36,6 +36,7 @@ import { CustomPasswordComponent } from './components/custom-password/custom-pas
 import { CustomCopyInputComponent } from './components/custom-copy-input/custom-copy-input.component';
 import { DuplicateCheckInputComponent } from './components/duplicate-check-input/duplicate-check-input.component';
 import { ImageUploaderComponent } from './components/image-uploader/image-uploader.component';
+import { DependentRadioGroupComponent } from './components/dependent-radio-group/dependent-radio-group.component';
 // import { CustomizeDropdownComponent } from './components/multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -164,6 +165,9 @@ export class FxBuilderWrapperComponent implements OnInit {
     // }
     if (!Boolean(this.fxWrapperService.getComponent('lib-custom-copy-input'))) {
       this.fxWrapperService.registerCustomComponent('Input with Copy', 'lib-custom-copy-input', CustomCopyInputComponent);
+    }
+    if (!Boolean(this.fxWrapperService.getComponent('lib-dependent-radio-group'))) {
+      this.fxWrapperService.registerCustomComponent('Dependent Radio Group', 'lib-dependent-radio-group', DependentRadioGroupComponent);
     }
     // if (!Boolean(this.fxWrapperService.getComponent('lib-duplicate-check-input'))) {
     //   this.fxWrapperService.registerCustomComponent('Duplicate Check Input', 'lib-duplicate-check-input', DuplicateCheckInputComponent);

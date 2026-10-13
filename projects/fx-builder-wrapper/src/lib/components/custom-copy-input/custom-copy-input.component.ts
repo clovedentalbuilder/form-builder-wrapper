@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AfterViewInit, ChangeDetectorRef, Component, DoCheck, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import {
   FxBaseComponent,
   FxMode,
@@ -11,7 +11,15 @@ import {
 } from '@instantsys-labs/fx';
 import { FxBuilderWrapperService } from '../../fx-builder-wrapper.service';
 import { CustomCopyInputSettingsPanelComponent } from './custom-copy-input-settings-panel.component';
-import { GateConfig, isApplicable, parseConditions } from '../shared/applicability';
+import {
+  ApplicabilityContext,
+  Condition,
+  GateConfig,
+  evaluateGate,
+  isApplicable,
+  isConditionConfigured,
+  parseConditions,
+} from '../shared/applicability';
 import { resolveSiblingControl } from '../shared/conditional-disable';
 import { isSettingOn, yesNoOptions } from '../shared/yes-no-setting';
 import { MessageService } from 'primeng/api';
@@ -76,11 +84,25 @@ import { findAdapterForValue } from '../fx-form-component/value-adapter-registry
   templateUrl: './custom-copy-input.component.html',
   styleUrl: './custom-copy-input.component.css',
 })
-export class CustomCopyInputComponent extends FxBaseComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CustomCopyInputComponent extends FxBaseComponent implements OnInit, AfterViewInit, DoCheck, OnDestroy {
   public control = new FormControl<string>('');
 
   /** View-only: true for COPIED_FEEDBACK_MS after a successful copy — flips the icon to a tick. */
   public copied = false;
+
+  /** True while `isRequired` or the Required gate demands a value. Drives the asterisk + validator. */
+  public requiredNow = false;
+
+  /** Last enable-gate result; null until the first evaluation, so disable/enable fire only on a change. */
+  private lastEnabled: boolean | null = null;
+
+  /**
+   * Reads `requiredNow` rather than recomputing the gate on every validation run, so the
+   * validator list is built once and only the flag flips. Same idiom as
+   * dependent-radio-group's required validator.
+   */
+  private readonly requiredValidator: ValidatorFn = (control): ValidationErrors | null =>
+    this.requiredNow ? Validators.required(control) : null;
 
   private static readonly COPIED_FEEDBACK_MS = 1500;
   private static readonly TOAST_LIFE_MS = 2000;
@@ -129,6 +151,30 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
       this.patchTimer = null;
       this.applyPatch();
     }, CustomCopyInputComponent.PATCH_DELAY_MS);
+  }
+
+  /**
+   * The Enable and Required gates depend on another field's live value, which changes with
+   * no event this component can subscribe to — so both are re-evaluated each change-detection
+   * pass, and each acts only on an actual transition.
+   *
+   * The Enable gate MUST disable the control itself. Binding `[disabled]` on an input that
+   * also has `[formControl]` does nothing at all: Angular's FormControlDirective declares a
+   * `disabled` input whose setter only logs a warning (see @angular/forms
+   * `disabledAttrWarning`). Disabling the model is what actually sets the DOM property, via
+   * the value accessor's setDisabledState().
+   */
+  ngDoCheck(): void {
+    if (this.isEditing) return;
+
+    const enabled = this.applicability.enabled;
+    if (enabled !== this.lastEnabled) {
+      this.lastEnabled = enabled;
+      if (enabled) this.control.enable({ emitEvent: false });
+      else this.control.disable({ emitEvent: false });
+    }
+
+    this.refreshRequiredState();
   }
 
   ngOnDestroy(): void {
@@ -216,6 +262,14 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
       new FxStringSetting({ key: 'enableCode', $title: 'Enable Code', value: '' }),
 
       // Visibility gate: same condition-list-or-code shape as enable.
+      // Required gate: same four-key shape as the other two, but an EMPTY list means
+      // "not required" rather than applicability.ts's fail-open "not gated" — see
+      // requiredByCondition().
+      new FxSelectSetting({ key: 'requiredUseCode', $title: 'Required: Use Custom Code', value: 'false' }, yesNoOptions()),
+      new FxStringSetting({ key: 'requiredConditions', $title: 'Required Conditions', value: '[]' }),
+      new FxStringSetting({ key: 'requiredConditionsMatch', $title: 'Required Conditions Match', value: 'any' }),
+      new FxStringSetting({ key: 'requiredCode', $title: 'Required Code', value: '' }),
+
       new FxSelectSetting({ key: 'visibilityUseCode', $title: 'Visibility: Use Custom Code', value: 'false' }, yesNoOptions()),
       new FxStringSetting({ key: 'visibilityConditions', $title: 'Visibility Conditions', value: '[]' }),
       new FxStringSetting({ key: 'visibilityConditionsMatch', $title: 'Visibility Conditions Match', value: 'any' }),
@@ -294,6 +348,51 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
     if (!this.destroyed) this.detectChanges();
   }
 
+  /** Privileges + supportingData + a resolver for another field's live value. */
+  private get gateContext(): ApplicabilityContext {
+    return {
+      privileges: this.wrapperService.privileges,
+      supportingData: this.wrapperService.supportingData,
+      resolveField: (name) => resolveSiblingControl(this.fxData, name)?.value,
+    };
+  }
+
+  /**
+   * The Required gate. `evaluateGate` returns true for an EMPTY gate ("not gated"), which is
+   * the right fail-open for visibility/enable but would make every field required here — so
+   * an unconfigured gate is short-circuited to false first.
+   */
+  private get requiredByCondition(): boolean {
+    const useCode = isSettingOn(this.setting('requiredUseCode'));
+    const code: string = this.setting('requiredCode');
+    const conditions: Condition[] = parseConditions(this.setting('requiredConditions'));
+    if (useCode) {
+      if (!String(code ?? '').trim()) return false;
+    } else if (!conditions.some(isConditionConfigured)) {
+      return false;
+    }
+    return evaluateGate(
+      { useCode, code, conditions, conditionsMatch: this.setting('requiredConditionsMatch') },
+      this.gateContext,
+    );
+  }
+
+  /**
+   * Re-computes `requiredNow` and re-runs validation only when it flips.
+   *
+   * A hidden field is never required — the gate can hide it while the user has no way to
+   * satisfy it, which would block submit with an invisible error. Matches
+   * dependent-radio-group. A disabled control is already skipped by Angular.
+   */
+  private refreshRequiredState(): void {
+    const required =
+      !this.isEditing && !this.fieldHidden &&
+      (isSettingOn(this.setting('isRequired')) || this.requiredByCondition);
+    if (required === this.requiredNow) return;
+    this.requiredNow = required;
+    this.control.updateValueAndValidity({ emitEvent: false });
+  }
+
   /** Computes { visible, enabled } from privileges + supportingData + another field's live value. See shared/applicability.ts. */
   private get applicability(): { visible: boolean; enabled: boolean } {
     const visibility: GateConfig = {
@@ -308,14 +407,7 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
       conditions: parseConditions(this.setting('enableConditions')),
       conditionsMatch: this.setting('enableConditionsMatch'),
     };
-    return isApplicable(
-      { visibility, enable },
-      {
-        privileges: this.wrapperService.privileges,
-        supportingData: this.wrapperService.supportingData,
-        resolveField: (name) => resolveSiblingControl(this.fxData, name)?.value,
-      },
-    );
+    return isApplicable({ visibility, enable }, this.gateContext);
   }
 
   /** Runtime-only: always visible/editable in the builder. */
@@ -342,6 +434,7 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
 
   onSettingsChanged(_config: any): void {
     this.applyValidators();
+    this.refreshRequiredState();
     this.detectChanges();
   }
 
@@ -355,8 +448,7 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
   }
 
   private applyValidators(): void {
-    const validators = [];
-    if (isSettingOn(this.setting('isRequired'))) validators.push(Validators.required);
+    const validators: ValidatorFn[] = [this.requiredValidator];
     const minLength = Number(this.setting('minLength'));
     if (minLength > 0) validators.push(Validators.minLength(minLength));
     const maxLength = Number(this.setting('maxLength'));

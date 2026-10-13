@@ -38,6 +38,7 @@ import { CustomPasswordComponent } from '../custom-password/custom-password.comp
 import { CustomCopyInputComponent } from '../custom-copy-input/custom-copy-input.component';
 import { DuplicateCheckInputComponent } from '../duplicate-check-input/duplicate-check-input.component';
 import { ImageUploaderComponent } from '../image-uploader/image-uploader.component';
+import { DependentRadioGroupComponent } from '../dependent-radio-group/dependent-radio-group.component';
 // import { CustomizeDropdownComponent } from '../multiselect-with-form-fields/customize-dropdown.component';
 
 @Component({
@@ -242,6 +243,7 @@ export class FxFormWrapperComponent implements OnChanges, OnInit {
       // { name: 'Custom Number',               key: 'lib-custom-number',         component: CustomNumberComponent },
       // { name: 'Password Field',              key: 'lib-custom-password',       component: CustomPasswordComponent },
       { name: 'Input with Copy',             key: 'lib-custom-copy-input',     component: CustomCopyInputComponent },
+      { name: 'Dependent Radio Group',    key: 'lib-dependent-radio-group', component: DependentRadioGroupComponent },
       // { name: 'Duplicate Check Input',       key: 'lib-duplicate-check-input', component: DuplicateCheckInputComponent },
       // { name: 'Image Uploader',              key: 'lib-image-uploader',        component: ImageUploaderComponent },
     ];

@@ -1,0 +1,486 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  styleClass="drp-settings-dialog"
+  (onHide)="closeDialog()"
+>
+  <ng-template pTemplate="header">
+    <div class="drp-dialog-header">
+      <i class="pi pi-cog drp-header-icon"></i>
+      <span class="drp-dialog-title">Dependent Radio Group Settings</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="settingsForm" class="drp-settings-body">
+
+    <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+    <div class="drp-tabs">
+      <button type="button" class="drp-tab" [class.drp-tab--active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="pi pi-sliders-h"></i> Basic Config
+      </button>
+      <button type="button" class="drp-tab" [class.drp-tab--active]="activeTab === 'validations'" (click)="activeTab = 'validations'">
+        <i class="pi pi-check-square"></i> Validations
+      </button>
+      <button type="button" class="drp-tab" [class.drp-tab--active]="activeTab === 'import'" (click)="activeTab = 'import'">
+        <i class="pi pi-file-import"></i> Import
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Basic Config tab                       -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'basic'">
+
+      <!-- Display Settings (ID + Name) -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-hashtag"></i><span>Display Settings</span></div>
+        <div class="drp-section-body">
+          <div class="drp-id-row" *ngIf="fxData?.id">
+            <span class="drp-id-badge"><i class="pi pi-hashtag"></i> ID:</span>
+            <span class="drp-id-value">{{ fxData!.id }}</span>
+          </div>
+
+          <div class="drp-field">
+            <label class="drp-label">
+              Name <span class="drp-required-star">*</span>
+              <span class="drp-name-hint">used to identify this component (e.g. symptoms)</span>
+            </label>
+            <input pInputText formControlName="name" placeholder="e.g. symptoms" class="drp-input" />
+            <small *ngIf="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched" class="drp-field-error">Name is required.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Basic -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-align-left"></i><span>Basic</span></div>
+        <div class="drp-section-body">
+          <div class="drp-field">
+            <label class="drp-label">Label</label>
+            <input pInputText formControlName="label" placeholder="e.g. Symptoms" class="drp-input" />
+          </div>
+          <div class="drp-field">
+            <label class="drp-label">Display Style</label>
+            <div class="drp-radio-group">
+              <label class="drp-radio-option"><input type="radio" formControlName="display" value="v" /><span>Vertical</span></label>
+              <label class="drp-radio-option"><input type="radio" formControlName="display" value="h" /><span>Horizontal</span></label>
+            </div>
+          </div>
+          <div class="drp-field">
+            <label class="drp-label">Help Text</label>
+            <input pInputText formControlName="helpText" placeholder="Shown under the radio options" class="drp-input" />
+          </div>
+          <div class="drp-field">
+            <label class="drp-label">Show In Listing</label>
+            <div class="drp-radio-group">
+              <label class="drp-radio-option"><input type="radio" formControlName="showInListing" value="true" /><span>Yes</span></label>
+              <label class="drp-radio-option"><input type="radio" formControlName="showInListing" value="false" /><span>No</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-list"></i><span>Items</span></div>
+        <div class="drp-section-body">
+          <div class="drp-options">
+            <div class="drp-option-row" *ngFor="let item of items; let i = index">
+              <input pInputText [(ngModel)]="item.option" [ngModelOptions]="{standalone: true}" placeholder="Item Label" class="drp-input" />
+              <input pInputText [(ngModel)]="item.value" [ngModelOptions]="{standalone: true}" placeholder="Item Value" class="drp-input" />
+              <button type="button" class="drp-option-remove" (click)="removeItem(i)" title="Remove item">&times;</button>
+            </div>
+            <button type="button" class="drp-option-add" (click)="addItem()">+ Add Item</button>
+          </div>
+          <small class="drp-hint">Each item's <strong>value</strong> becomes a key in this field's submitted value, so changing it after a form has been filled orphans the stored selection.</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Validations tab                        -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'validations'">
+
+      <!-- Validation -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-check-square"></i><span>Validation</span></div>
+        <div class="drp-section-body">
+          <div class="drp-field">
+            <label class="drp-label">Always Required</label>
+            <div class="drp-radio-group">
+              <label class="drp-radio-option"><input type="radio" formControlName="isRequired" value="true" /><span>Yes</span></label>
+              <label class="drp-radio-option"><input type="radio" formControlName="isRequired" value="false" /><span>No</span></label>
+            </div>
+            <small class="drp-hint">Yes = an option must always be selected. Leave as No to make it required only when the "Required When" conditions below match.</small>
+          </div>
+          <div class="drp-field">
+            <label class="drp-label">Required Message</label>
+            <input pInputText formControlName="requiredMessage" class="drp-input" />
+          </div>
+          <div class="drp-field">
+            <label class="drp-label">Clear Selection When Disabled</label>
+            <div class="drp-radio-group">
+              <label class="drp-radio-option"><input type="radio" formControlName="resetOnDisable" value="true" /><span>Yes</span></label>
+              <label class="drp-radio-option"><input type="radio" formControlName="resetOnDisable" value="false" /><span>No</span></label>
+            </div>
+            <small class="drp-hint">When the Enable/Disable gate switches this group off, clear every radio so a disabled group never submits a stale selection.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visibility gate -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-eye"></i><span>Visibility</span></div>
+        <div class="drp-section-body">
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(visibility.privilege, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="visibility.privilege.length">
+              <div class="drp-condition-row drp-condition-row--privilege" *ngFor="let cond of visibility.privilege; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(visibility.privilege, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!visibility.privilege.length">No privilege conditions.</small>
+          </div>
+
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(visibility.supportingData, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="visibility.supportingData.length">
+              <div class="drp-condition-row drp-condition-row--triple" *ngFor="let cond of visibility.supportingData; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="drp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(visibility.supportingData, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!visibility.supportingData.length">No supporting-data conditions.</small>
+          </div>
+
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(visibility.field, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="visibility.field.length">
+              <div class="drp-condition-row drp-condition-row--triple" *ngFor="let cond of visibility.field; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="drp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(visibility.field, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!visibility.field.length">No other-field conditions.</small>
+          </div>
+
+          <small class="drp-hint">Visible when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always visible.</small>
+        </div>
+      </div>
+
+      <!-- Enable / Disable gate -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-shield"></i><span>Enable / Disable</span></div>
+        <div class="drp-section-body">
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(enable.privilege, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="enable.privilege.length">
+              <div class="drp-condition-row drp-condition-row--privilege" *ngFor="let cond of enable.privilege; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(enable.privilege, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!enable.privilege.length">No privilege conditions.</small>
+          </div>
+
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(enable.supportingData, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="enable.supportingData.length">
+              <div class="drp-condition-row drp-condition-row--triple" *ngFor="let cond of enable.supportingData; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="drp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(enable.supportingData, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!enable.supportingData.length">No supporting-data conditions.</small>
+          </div>
+
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(enable.field, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="enable.field.length">
+              <div class="drp-condition-row drp-condition-row--triple" *ngFor="let cond of enable.field; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="drp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(enable.field, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!enable.field.length">No other-field conditions.</small>
+          </div>
+
+          <small class="drp-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+        </div>
+      </div>
+
+      <!-- Required gate -->
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-asterisk"></i><span>Required When</span></div>
+        <div class="drp-section-body">
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-shield"></i> Privilege</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(required.privilege, 'privilege')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="required.privilege.length">
+              <div class="drp-condition-row drp-condition-row--privilege" *ngFor="let cond of required.privilege; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="truthy">Has</option>
+                  <option value="falsy">Doesn't Have</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Privilege name(s), comma separated" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(required.privilege, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!required.privilege.length">No privilege conditions.</small>
+          </div>
+
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-database"></i> Supporting Data</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(required.supportingData, 'supportingData')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="required.supportingData.length">
+              <div class="drp-condition-row drp-condition-row--triple" *ngFor="let cond of required.supportingData; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('supportingData')" class="drp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(required.supportingData, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!required.supportingData.length">No supporting-data conditions.</small>
+          </div>
+
+          <div class="drp-subsection">
+            <div class="drp-subsection-header">
+              <span><i class="pi pi-link"></i> Other Field's Value</span>
+              <button type="button" class="drp-add-btn" (click)="addCondition(required.field, 'field')"><i class="pi pi-plus"></i> Add</button>
+            </div>
+            <div class="drp-conditions" *ngIf="required.field.length">
+              <div class="drp-condition-row drp-condition-row--triple" *ngFor="let cond of required.field; let i = index">
+                <label class="drp-condition-and" title="Check to AND this condition with the other checked conditions; uncheck to OR it in on its own">
+                  <input type="radio" [(ngModel)]="cond.grouped" [ngModelOptions]="{standalone: true}" />
+                </label>
+                <input pInputText [(ngModel)]="cond.key" [ngModelOptions]="{standalone: true}" [placeholder]="conditionKeyPlaceholder('field')" class="drp-input" />
+                <select [(ngModel)]="cond.operator" [ngModelOptions]="{standalone: true}" class="drp-input">
+                  <option value="equals">Equals</option>
+                  <option value="notEquals">Not Equals</option>
+                  <option value="in">In (comma list)</option>
+                  <option value="notIn">Not In (comma list)</option>
+                  <option value="truthy">Is Truthy / Has It</option>
+                  <option value="falsy">Is Falsy / Doesn't Have It</option>
+                </select>
+                <input pInputText [(ngModel)]="cond.value" [ngModelOptions]="{standalone: true}" placeholder="Value" class="drp-input" />
+                <button type="button" class="drp-condition-remove" (click)="removeCondition(required.field, i)" title="Remove condition">&times;</button>
+              </div>
+            </div>
+            <small class="drp-empty-hint" *ngIf="!required.field.length">No other-field conditions.</small>
+          </div>
+
+          <small class="drp-hint">Required when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = never required by condition (use Always Required above).</small>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- Import tab                              -->
+    <!-- ══════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'import'">
+      <div class="drp-section">
+        <div class="drp-section-header"><i class="pi pi-file-import"></i><span>Import Configuration</span></div>
+        <div class="drp-section-body">
+
+          <div class="drp-import-tabs">
+            <button type="button" class="drp-import-tab" [class.drp-import-tab--active]="importMode === 'upload'" (click)="importMode = 'upload'; jsonImportError = ''">
+              <i class="pi pi-upload"></i> Upload File
+            </button>
+            <button type="button" class="drp-import-tab" [class.drp-import-tab--active]="importMode === 'paste'" (click)="importMode = 'paste'; jsonImportError = ''">
+              <i class="pi pi-clipboard"></i> Paste JSON
+            </button>
+          </div>
+
+          <ng-container *ngIf="importMode === 'upload'">
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+            <div class="drp-file-drop-zone" (click)="fileInput.click()">
+              <ng-container *ngIf="!uploadedFileName">
+                <i class="pi pi-cloud-upload drp-drop-icon"></i>
+                <span class="drp-drop-label">Click to select a <strong>.json</strong> file</span>
+              </ng-container>
+              <ng-container *ngIf="uploadedFileName">
+                <i class="pi pi-file drp-drop-icon drp-drop-icon--ready"></i>
+                <span class="drp-drop-label drp-drop-label--ready">{{ uploadedFileName }}</span>
+                <small class="drp-hint">Click to change file</small>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="importMode === 'paste'">
+            <div class="drp-field">
+              <textarea
+                [(ngModel)]="jsonInput"
+                [ngModelOptions]="{standalone: true}"
+                rows="9"
+                placeholder='{ "name": "symptoms", "label": "Symptoms", "items": [ { "option": "Pain", "value": "pain" } ], ... }'
+                class="drp-input drp-code"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <small *ngIf="jsonImportError" class="drp-field-error"><i class="pi pi-exclamation-triangle"></i> {{ jsonImportError }}</small>
+
+          <div class="drp-import-apply-row">
+            <span class="drp-hint"><i class="pi pi-info-circle"></i> Applying JSON overwrites the Basic Config and Validations tabs (not saved until you click Save Settings).</span>
+            <button type="button" class="drp-import-apply-btn" (click)="importFromJson()"><i class="pi pi-check"></i> Apply JSON</button>
+          </div>
+
+          <div class="drp-how-to-card">
+            <div class="drp-how-to-title"><i class="pi pi-bolt"></i> How Import works</div>
+            <div class="drp-how-to-step"><span class="drp-step-num">1</span> Upload a <strong>.json</strong> file or paste JSON directly.</div>
+            <div class="drp-how-to-step"><span class="drp-step-num">2</span> Click <strong>Apply JSON</strong> — fields populate and you're taken to Basic Config to review.</div>
+            <div class="drp-how-to-step"><span class="drp-step-num">3</span> Click <strong>Save Settings</strong> to persist. Use <strong>Export Config</strong> below to produce a file in this same format.</div>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="drp-dialog-footer drp-dialog-footer--split">
+      <button pButton label="Export Config" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportCurrentConfig()" title="Download current settings as JSON"></button>
+      <div class="drp-footer-actions">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="closeDialog()"></button>
+        <button pButton label="Save Settings" icon="pi pi-check" class="p-button-primary" (click)="saveSettings()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Builder chrome (cog opens the dialog). Overlay is non-blocking so the field stays interactive. -->
+<div class="fx-element">
+  <ng-content></ng-content>
+
+  <ng-container *ngIf="fxData?.$fxForm?.$mode !== FxMode.VIEW">
+    <div class="fx-overlay" (dblclick)="openDialog()">
+      <div class="fx-actions flex justify-between">
+        <div class="bg-gray-700 text-gray-300 px-2 rounded-t ml-2 text-xs flex justify-center items-center">
+          #{{ fxData?.name }}
+        </div>
+        <div class="flex justify-around items-end mr-2">
+          <div class="cursor-pointer bg-secondary text-white w-8 mr-1 text-center rounded-t" title="Settings"
+               (click)="openDialog(); $event.stopPropagation()">
+            <i class="fa fa-cog text-xs"></i>
+          </div>
+          <div class="cursor-pointer bg-red-600 text-white w-8 mr-1 text-center rounded-t" title="Delete"
+               (click)="deleteElement(fxData)">
+            <i class="fa fa-times text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

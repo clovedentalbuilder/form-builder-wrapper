@@ -1,0 +1,40 @@
+<lib-dependent-radio-group-settings-panel
+  [fxData]="fxData"
+  (configuration)="onSettingsChanged($event)"
+  #base
+>
+  <div class="drg-field">
+    <label class="drg-label" *ngIf="setting('label')">
+      {{ setting('label') }}
+      <span class="drg-required" *ngIf="isOn('isRequired') || requiredNow">*</span>
+    </label>
+
+    <!-- Builder/design mode: static preview of the item list. -->
+    <ng-container *ngIf="isEditing">
+      <div class="grid drg-grid" [ngClass]="gridClass">
+        <label class="drg-item" *ngFor="let item of items">
+          <input type="radio" class="form-radio drg-radio" disabled />
+          <span class="drg-item-label">{{ item.option }}</span>
+        </label>
+      </div>
+      <div class="drg-empty" *ngIf="!items.length">No items configured — open settings to add them.</div>
+    </ng-container>
+
+    <!-- Runtime: one control for the whole group; `name` keeps two groups independent. -->
+    <div class="grid drg-grid" [ngClass]="gridClass" *ngIf="!isEditing">
+      <label class="drg-item" [class.drg-item--disabled]="fieldDisabled" *ngFor="let item of items">
+        <input
+          type="radio"
+          class="form-radio drg-radio"
+          [name]="groupName"
+          [value]="item.value"
+          [formControl]="control"
+        />
+        <span class="drg-item-label">{{ item.option }}</span>
+      </label>
+    </div>
+
+    <div class="drg-help" *ngIf="setting('helpText') && !errorMessage">{{ setting('helpText') }}</div>
+    <div class="drg-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+</lib-dependent-radio-group-settings-panel>

@@ -53,6 +53,9 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
   enablePrivilegeConditions: Condition[] = [];
   enableSupportingDataConditions: Condition[] = [];
   enableFieldConditions: Condition[] = [];
+  requiredPrivilegeConditions: Condition[] = [];
+  requiredSupportingDataConditions: Condition[] = [];
+  requiredFieldConditions: Condition[] = [];
 
   importMode: ImportMode = 'upload';
   jsonInput = '';
@@ -110,6 +113,10 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
       parseConditions(this.read('enableConditions', '[]')),
       (p, s, f) => { this.enablePrivilegeConditions = p; this.enableSupportingDataConditions = s; this.enableFieldConditions = f; },
     );
+    this.splitIntoSections(
+      parseConditions(this.read('requiredConditions', '[]')),
+      (p, s, f) => { this.requiredPrivilegeConditions = p; this.requiredSupportingDataConditions = s; this.requiredFieldConditions = f; },
+    );
 
     this.activeTab = 'basic';
     this.importMode = 'upload';
@@ -147,6 +154,11 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
     this.write('enableUseCode', 'false');
     this.write('enableCode', '');
     this.write('enableConditions', JSON.stringify(this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions)));
+
+    // Custom-code gating is not exposed for the Required gate either.
+    this.write('requiredUseCode', 'false');
+    this.write('requiredCode', '');
+    this.write('requiredConditions', JSON.stringify(this.combineSections(this.requiredPrivilegeConditions, this.requiredSupportingDataConditions, this.requiredFieldConditions)));
 
     this.write('visibilityUseCode', 'false');
     this.write('visibilityCode', '');
@@ -232,6 +244,10 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
       Array.isArray(parsed.enableConditions) ? parsed.enableConditions : [],
       (p, s, f) => { this.enablePrivilegeConditions = p; this.enableSupportingDataConditions = s; this.enableFieldConditions = f; },
     );
+    this.splitIntoSections(
+      Array.isArray(parsed.requiredConditions) ? parsed.requiredConditions : [],
+      (p, s, f) => { this.requiredPrivilegeConditions = p; this.requiredSupportingDataConditions = s; this.requiredFieldConditions = f; },
+    );
 
     this.activeTab = 'basic';
     this.jsonInput = '';
@@ -245,6 +261,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
       ...raw,
       visibilityConditions: this.combineSections(this.visibilityPrivilegeConditions, this.visibilitySupportingDataConditions, this.visibilityFieldConditions),
       enableConditions: this.combineSections(this.enablePrivilegeConditions, this.enableSupportingDataConditions, this.enableFieldConditions),
+      requiredConditions: this.combineSections(this.requiredPrivilegeConditions, this.requiredSupportingDataConditions, this.requiredFieldConditions),
     };
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

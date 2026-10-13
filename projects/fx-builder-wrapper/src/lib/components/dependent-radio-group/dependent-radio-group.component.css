@@ -1,0 +1,65 @@
+.drg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 0;
+  justify-content: flex-start;
+}
+.drg-label {
+  font-size: 11.25px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0;
+}
+.drg-required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
+/* `grid` / `grid-cols-4` mirror fx's native radio, but the layout is
+   defined here too so it does not depend on a Tailwind build being present. */
+.drg-grid {
+  display: grid;
+  gap: 0.15rem 0.85rem;
+}
+.drg-grid.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.drg-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: #111827;
+  cursor: pointer;
+}
+.drg-item--disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+.drg-radio {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: #3b82f6;
+  cursor: inherit;
+}
+.drg-radio:disabled {
+  cursor: not-allowed;
+}
+.drg-item-label {
+  line-height: 1.25;
+}
+.drg-empty {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+.drg-help {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.drg-error {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
