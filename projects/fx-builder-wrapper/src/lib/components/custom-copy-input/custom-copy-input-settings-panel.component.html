@@ -317,6 +317,14 @@
           </div>
 
           <small class="cip-hint">Editable when the checked conditions (AND-ed) or any unchecked condition (OR-ed) evaluate true. Empty = always editable.</small>
+          <div class="cip-field">
+            <label class="cip-label">Clear Value When Disabled</label>
+            <div class="cip-radio-group">
+              <label class="cip-radio-option"><input type="radio" formControlName="resetOnDisable" value="true" /><span>Yes</span></label>
+              <label class="cip-radio-option"><input type="radio" formControlName="resetOnDisable" value="false" /><span>No</span></label>
+            </div>
+            <small class="cip-hint">When the Enable/Disable gate switches this field off, clear its value so a disabled field never submits a stale one.</small>
+          </div>
         </div>
       </div>
 

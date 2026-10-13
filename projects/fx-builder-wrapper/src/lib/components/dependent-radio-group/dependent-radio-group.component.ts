@@ -154,6 +154,9 @@ export class DependentRadioGroupComponent
         // evaluation would wipe a legitimately saved selection before it is patched in.
         if (wasEnabled === true && isSettingOn(this.setting('resetOnDisable'))) {
           this.control.reset('', { emitEvent: false });
+          // The clear is final: block the pending applyPatch() (and any later variables$
+          // emission) from restoring the selection this gate just removed.
+          this.patched = true;
         }
         this.control.disable({ emitEvent: false });
       }

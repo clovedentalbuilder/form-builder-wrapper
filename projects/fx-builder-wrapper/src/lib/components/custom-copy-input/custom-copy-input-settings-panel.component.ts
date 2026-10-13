@@ -71,6 +71,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
     showInListing: new FormControl<'true' | 'false'>('false'),
 
     isRequired: new FormControl<'true' | 'false'>('false'),
+    resetOnDisable: new FormControl<'true' | 'false'>('true'),
     requiredMessage: new FormControl<string>('This field is required'),
     minLength: new FormControl<string>(''),
     minLengthMessage: new FormControl<string>('Value is too short'),
@@ -96,6 +97,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
       showInListing: this.read('showInListing', false) ? 'true' : 'false',
 
       isRequired: toYesNo(this.read('isRequired', false)),
+      resetOnDisable: toYesNo(this.read('resetOnDisable', 'true')),
       requiredMessage: this.read('requiredMessage', 'This field is required'),
       minLength: this.read('minLength', ''),
       minLengthMessage: this.read('minLengthMessage', 'Value is too short'),
@@ -141,6 +143,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
     this.write('showInListing', raw.showInListing === 'true');
 
     this.write('isRequired', raw.isRequired === 'true' ? 'true' : 'false');
+    this.write('resetOnDisable', raw.resetOnDisable === 'true' ? 'true' : 'false');
     this.write('requiredMessage', raw.requiredMessage);
     this.write('minLength', raw.minLength);
     this.write('minLengthMessage', raw.minLengthMessage);
@@ -227,6 +230,7 @@ export class CustomCopyInputSettingsPanelComponent extends FxComponent {
       showInListing: parsed.showInListing ?? 'false',
 
       isRequired: parsed.isRequired ?? 'false',
+      resetOnDisable: toYesNo(parsed.resetOnDisable ?? 'true'),
       requiredMessage: parsed.requiredMessage ?? 'This field is required',
       minLength: parsed.minLength ?? '',
       minLengthMessage: parsed.minLengthMessage ?? 'Value is too short',

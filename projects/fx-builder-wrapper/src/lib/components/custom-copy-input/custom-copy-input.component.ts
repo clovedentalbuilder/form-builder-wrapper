@@ -158,6 +158,9 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
    * no event this component can subscribe to — so both are re-evaluated each change-detection
    * pass, and each acts only on an actual transition.
    *
+   * `resetOnDisable` (default Yes) clears the value on that enabled -> disabled edge, so a
+   * gated-off field never keeps a stale value the user can no longer see or edit.
+   *
    * The Enable gate MUST disable the control itself. Binding `[disabled]` on an input that
    * also has `[formControl]` does nothing at all: Angular's FormControlDirective declares a
    * `disabled` input whose setter only logs a warning (see @angular/forms
@@ -169,9 +172,22 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
 
     const enabled = this.applicability.enabled;
     if (enabled !== this.lastEnabled) {
+      const wasEnabled = this.lastEnabled;
       this.lastEnabled = enabled;
-      if (enabled) this.control.enable({ emitEvent: false });
-      else this.control.disable({ emitEvent: false });
+      if (enabled) {
+        this.control.enable({ emitEvent: false });
+      } else {
+        // Only on a genuine enabled -> disabled edge (wasEnabled === true, not the null
+        // first evaluation): clearing on the very first pass would wipe a legitimately saved
+        // value before applyPatch() has had its 200ms to land it.
+        if (wasEnabled === true && isSettingOn(this.setting('resetOnDisable'))) {
+          this.control.reset('', { emitEvent: false });
+          // The clear is final: block the pending applyPatch() (and any later variables$
+          // emission) from restoring the value this gate just removed.
+          this.patched = true;
+        }
+        this.control.disable({ emitEvent: false });
+      }
     }
 
     this.refreshRequiredState();
@@ -246,6 +262,7 @@ export class CustomCopyInputComponent extends FxBaseComponent implements OnInit,
       new FxStringSetting({ key: 'showInListing', $title: 'Show In Listing', value: false }),
 
       new FxSelectSetting({ key: 'isRequired', $title: 'Required', value: 'false' }, yesNoOptions()),
+      new FxSelectSetting({ key: 'resetOnDisable', $title: 'Clear Value When Disabled', value: 'true' }, yesNoOptions()),
       new FxStringSetting({ key: 'requiredMessage', $title: 'Required Message', value: 'This field is required' }),
       new FxStringSetting({ key: 'minLength', $title: 'Min Length', value: '' }),
       new FxStringSetting({ key: 'minLengthMessage', $title: 'Min Length Message', value: 'Value is too short' }),
