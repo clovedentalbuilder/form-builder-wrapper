@@ -63,6 +63,30 @@ export class UploaderComponent extends FxBaseComponent implements OnInit, AfterV
   get isMobileRequest(): boolean {
     return localStorage.getItem('isMobileRequest') === 'Y';
   }
+  /**
+   * STL preview renders through app-three-viewer (three.js). It is not offered on mobile, so
+   * the expand affordance is hidden and onOpenSTLFile() refuses to open the dialog there.
+   */
+  get stlPreviewAvailable(): boolean {
+    return !this.isMobileRequest;
+  }
+
+  /**
+   * BMP is not previewable. detectFileType() classifies it as 'image' (the extension is in
+   * its image regex), so the only way to single it out is the file name — `name` for a file
+   * just picked, `originalUrl.fileName` for one restored from saved data.
+   */
+  private isBmp(file: any): boolean {
+    const name = String(file?.name || file?.originalUrl?.fileName || '');
+    return /\.bmp$/i.test(name.trim());
+  }
+
+  /** Whether the expand/preview button should be offered for a file at all. */
+  canPreviewFile(file: any): boolean {
+    if (this.isBmp(file)) return false;
+    return file?.type !== 'stl' || this.stlPreviewAvailable;
+  }
+
   private get documentListRoute(): string {
     return this.isMobileRequest ? '/document/mobile' : '/document';
   }
@@ -1070,6 +1094,10 @@ ngAfterViewInit(): void {
   openPreview(file: any, name?: any): void {
     if (!file) return;
 
+    // No BMP preview — guarded here as well as in the template so every entry point
+    // (thumbnail click, expand button) is covered.
+    if (this.isBmp(file)) return;
+
     if (file.type === 'stl') {
       this.onOpenSTLFile(file);
       return;
@@ -1140,6 +1168,10 @@ ngAfterViewInit(): void {
       console.error('Invalid file structure:', file);
       return;
     }
+
+    // No STL preview on mobile — guarded here rather than only in the template so every
+    // entry point (thumbnail click, expand button via openPreview) is covered.
+    if (!this.stlPreviewAvailable) return;
 
     const actualFile = file.file;
     if(actualFile) {

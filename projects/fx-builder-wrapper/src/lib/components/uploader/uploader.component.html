@@ -51,7 +51,7 @@
             <!-- Thumbnail on left -->
             <div class="thumbnail cursor-pointer relative">
               <ng-container *ngIf="file.type === 'image'; else nonImageThumb">
-                <img class="file-thumbnail" [src]="getThumbnailSrc(file)" alt="preview" (click)="openPreview(file)"
+                <img class="file-thumbnail" [src]="getThumbnailSrc(file)" alt="preview" (click)="canPreviewFile(file) && openPreview(file)"
                   (error)="onThumbnailError(file)" *ngIf="getThumbnailSrc(file)" />
                 <svg *ngIf="!getThumbnailSrc(file)" width="180px" height="180px" viewBox="0 0 16 16" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
@@ -126,7 +126,7 @@
                       <rect x="5" y="7" width="7" height="0.5" rx="0.25" fill="#CCCCCC" />
                     </svg>
 
-                    <svg *ngSwitchCase="'stl'" (click)="onOpenSTLFile(file)" width="180px" height="180"
+                    <svg *ngSwitchCase="'stl'" (click)="stlPreviewAvailable && onOpenSTLFile(file)" width="180px" height="180"
                       viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M11.1757 1.17574C11.0632 1.06321 10.9106 1 10.7515 1H3.6C3.26863 1 3 1.26863 3 1.6V14.4C3 14.7314 3.26863 15 3.6 15H13.4C13.7314 15 14 14.7314 14 14.4V4.24853C14 4.0894 13.9368 3.93679 13.8243 3.82426L11.1757 1.17574Z"
@@ -186,7 +186,7 @@
                   </ng-container>
                 </div>
               </ng-template>
-              <div class="expand-btn" (click)="onExpandFile(file, $event)">
+              <div class="expand-btn" *ngIf="canPreviewFile(file)" (click)="onExpandFile(file, $event)">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="0.1" y="0.1" width="15.8" height="15.8" rx="1.9" fill="white" stroke="white" stroke-width="0.2"/>
                   <path d="M2.78809 8.02246C3.07419 8.02251 3.32621 8.12211 3.52637 8.32227C3.72651 8.52245 3.82616 8.77442 3.82617 9.06055V12.1738H6.93945C7.22558 12.1738 7.47755 12.2735 7.67773 12.4736C7.87789 12.6738 7.97749 12.9258 7.97754 13.2119C7.97754 13.498 7.87785 13.75 7.67773 13.9502C7.47754 14.1504 7.22562 14.25 6.93945 14.25H3.57617C3.07601 14.25 2.64123 14.069 2.28613 13.7139C1.93104 13.3588 1.75 12.924 1.75 12.4238V9.06055C1.75001 8.77438 1.84961 8.52246 2.0498 8.32227C2.24999 8.12215 2.50196 8.02246 2.78809 8.02246ZM12.4238 1.75C12.924 1.75 13.3588 1.93104 13.7139 2.28613C14.069 2.64123 14.25 3.07601 14.25 3.57617V6.93945C14.25 7.22562 14.1504 7.47754 13.9502 7.67773C13.75 7.87785 13.498 7.97754 13.2119 7.97754C12.9258 7.97749 12.6738 7.87789 12.4736 7.67773C12.2735 7.47755 12.1738 7.22558 12.1738 6.93945V3.82617H9.06055C8.77442 3.82616 8.52245 3.72651 8.32227 3.52637C8.12211 3.32621 8.02251 3.07419 8.02246 2.78809C8.02246 2.50196 8.12215 2.24999 8.32227 2.0498C8.52246 1.84961 8.77438 1.75001 9.06055 1.75H12.4238Z" fill="#F3A041" stroke="#F3A041" stroke-width="0.5"/>
